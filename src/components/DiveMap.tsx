@@ -3,8 +3,6 @@ import React, { useEffect, useRef, useState } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { MapPin } from 'lucide-react';
-import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 
 interface Coordinates {
   lat: number;
@@ -63,6 +61,7 @@ const DiveMap = ({ sites }: DiveMapProps) => {
   const [mapboxToken, setMapboxToken] = useState<string>('');
   const [showTokenInput, setShowTokenInput] = useState<boolean>(true);
   const [hoveredSite, setHoveredSite] = useState<DiveSite | null>(null);
+  const [mapError, setMapError] = useState<string>('');
   const popupRef = useRef(new mapboxgl.Popup({ 
     closeButton: false, 
     closeOnClick: false,
@@ -71,88 +70,115 @@ const DiveMap = ({ sites }: DiveMapProps) => {
   }));
 
   const initializeMap = () => {
-    if (!mapContainer.current || !mapboxToken) return;
+    if (!mapContainer.current || !mapboxToken) {
+      console.log('Missing container or token:', { container: !!mapContainer.current, token: !!mapboxToken });
+      return;
+    }
     
-    mapboxgl.accessToken = mapboxToken;
-    
-    if (map.current) return;
-    
-    map.current = new mapboxgl.Map({
-      container: mapContainer.current,
-      style: 'mapbox://styles/mapbox/satellite-v9',
-      center: [0, 30], // Center on the ocean
-      zoom: 2
-    });
+    try {
+      mapboxgl.accessToken = mapboxToken;
+      
+      if (map.current) {
+        console.log('Map already exists, removing...');
+        map.current.remove();
+        map.current = null;
+      }
+      
+      console.log('Creating new map...');
+      map.current = new mapboxgl.Map({
+        container: mapContainer.current,
+        style: 'mapbox://styles/mapbox/satellite-v9',
+        center: [0, 30],
+        zoom: 2
+      });
 
-    // Add navigation controls
-    map.current.addControl(new mapboxgl.NavigationControl(), 'top-right');
+      map.current.addControl(new mapboxgl.NavigationControl(), 'top-right');
 
-    map.current.on('load', () => {
-      if (!map.current) return;
+      map.current.on('load', () => {
+        console.log('Map loaded successfully');
+        if (!map.current) return;
 
-      // Add dive sites as markers
-      sites.forEach(site => {
-        const markerElement = document.createElement('div');
-        markerElement.className = 'dive-site-marker';
-        markerElement.innerHTML = `<div class="marker-pin bg-ocean-500 hover:bg-ocean-400 transition-colors"></div>`;
-        markerElement.style.cursor = 'pointer';
+        sites.forEach(site => {
+          const markerElement = document.createElement('div');
+          markerElement.className = 'dive-site-marker';
+          markerElement.innerHTML = `<div class="marker-pin bg-blue-500 hover:bg-blue-400 transition-colors"></div>`;
+          markerElement.style.cursor = 'pointer';
 
-        const marker = new mapboxgl.Marker(markerElement)
-          .setLngLat([site.coordinates.lng, site.coordinates.lat])
-          .addTo(map.current!);
-        
-        const element = marker.getElement();
-        
-        element.addEventListener('mouseenter', () => {
-          setHoveredSite(site);
-          
-          const marineLife = marineLifeData[site.id as keyof typeof marineLifeData];
-          if (!marineLife) return;
-          
-          const popupContent = `
-            <div class="p-2">
-              <h3 class="font-bold text-ocean-100">${site.name}</h3>
-              <p class="text-xs text-ocean-300">${site.location} (${site.type})</p>
-              <div class="mt-2">
-                <p class="text-xs font-medium text-ocean-200">Marine Life:</p>
-                <ul class="text-xs text-ocean-300">
-                  ${marineLife.fish.slice(0, 2).map(fish => `<li>• ${fish}</li>`).join('')}
-                </ul>
-              </div>
-            </div>
-          `;
-          
-          popupRef.current
+          const marker = new mapboxgl.Marker(markerElement)
             .setLngLat([site.coordinates.lng, site.coordinates.lat])
-            .setHTML(popupContent)
             .addTo(map.current!);
-        });
-        
-        element.addEventListener('mouseleave', () => {
-          setHoveredSite(null);
-          popupRef.current.remove();
-        });
-        
-        element.addEventListener('click', () => {
-          if (!map.current) return;
-          map.current.flyTo({
-            center: [site.coordinates.lng, site.coordinates.lat],
-            zoom: 10,
-            essential: true
+          
+          const element = marker.getElement();
+          
+          element.addEventListener('mouseenter', () => {
+            setHoveredSite(site);
+            
+            const marineLife = marineLifeData[site.id as keyof typeof marineLifeData];
+            if (!marineLife) return;
+            
+            const popupContent = `
+              <div class="p-2">
+                <h3 class="font-bold text-white">${site.name}</h3>
+                <p class="text-xs text-gray-300">${site.location} (${site.type})</p>
+                <div class="mt-2">
+                  <p class="text-xs font-medium text-gray-200">Marine Life:</p>
+                  <ul class="text-xs text-gray-300">
+                    ${marineLife.fish.slice(0, 2).map(fish => `<li>• ${fish}</li>`).join('')}
+                  </ul>
+                </div>
+              </div>
+            `;
+            
+            popupRef.current
+              .setLngLat([site.coordinates.lng, site.coordinates.lat])
+              .setHTML(popupContent)
+              .addTo(map.current!);
+          });
+          
+          element.addEventListener('mouseleave', () => {
+            setHoveredSite(null);
+            popupRef.current.remove();
+          });
+          
+          element.addEventListener('click', () => {
+            if (!map.current) return;
+            map.current.flyTo({
+              center: [site.coordinates.lng, site.coordinates.lat],
+              zoom: 10,
+              essential: true
+            });
           });
         });
       });
-    });
+
+      map.current.on('error', (e) => {
+        console.error('Map error:', e);
+        setMapError('Failed to load map. Please check your token.');
+      });
+
+    } catch (error) {
+      console.error('Error initializing map:', error);
+      setMapError('Invalid Mapbox token or initialization error.');
+    }
+  };
+
+  const handleTokenSubmit = () => {
+    if (!mapboxToken.trim()) {
+      setMapError('Please enter a valid Mapbox token');
+      return;
+    }
+    
+    console.log('Token submitted:', mapboxToken.substring(0, 10) + '...');
+    setMapError('');
+    setShowTokenInput(false);
+    
+    // Small delay to ensure state updates
+    setTimeout(() => {
+      initializeMap();
+    }, 100);
   };
   
   useEffect(() => {
-    // Initialize the map if we have a token
-    if (mapboxToken) {
-      setShowTokenInput(false);
-      initializeMap();
-    }
-    
-    // Add custom CSS for markers and popups
     const style = document.createElement('style');
     style.textContent = `
       .dive-site-marker {
@@ -170,7 +196,7 @@ const DiveMap = ({ sites }: DiveMapProps) => {
         box-shadow: 0 0 8px rgba(0, 0, 0, 0.4);
       }
       .dive-site-popup {
-        background: rgba(12, 74, 110, 0.95) !important;
+        background: rgba(0, 0, 0, 0.8) !important;
         border-radius: 6px !important;
         color: white !important;
         border: 1px solid rgba(255, 255, 255, 0.1) !important;
@@ -181,20 +207,21 @@ const DiveMap = ({ sites }: DiveMapProps) => {
         box-shadow: none !important;
       }
       .dive-site-popup .mapboxgl-popup-tip {
-        border-top-color: rgba(12, 74, 110, 0.95) !important;
+        border-top-color: rgba(0, 0, 0, 0.8) !important;
       }
     `;
     document.head.appendChild(style);
 
-    // Cleanup function
     return () => {
       if (map.current) {
         map.current.remove();
         map.current = null;
       }
-      document.head.removeChild(style);
+      if (document.head.contains(style)) {
+        document.head.removeChild(style);
+      }
     };
-  }, [mapboxToken]);
+  }, []);
 
   if (showTokenInput) {
     return (
@@ -208,14 +235,21 @@ const DiveMap = ({ sites }: DiveMapProps) => {
               You can get one for free at <a href="https://mapbox.com/" target="_blank" rel="noopener noreferrer" className="text-ocean-300 hover:text-ocean-200 underline">mapbox.com</a>
             </p>
           </div>
+          {mapError && (
+            <div className="mb-4 p-3 bg-red-900/50 border border-red-700 rounded text-red-200 text-sm">
+              {mapError}
+            </div>
+          )}
           <input
             type="text"
             placeholder="Enter your Mapbox public token"
             className="w-full p-3 bg-ocean-700 border border-ocean-600 rounded text-white mb-4"
+            value={mapboxToken}
             onChange={(e) => setMapboxToken(e.target.value)}
+            onKeyPress={(e) => e.key === 'Enter' && handleTokenSubmit()}
           />
           <button 
-            onClick={() => initializeMap()}
+            onClick={handleTokenSubmit}
             className="w-full bg-ocean-500 hover:bg-ocean-400 text-white py-2 px-4 rounded transition-colors"
           >
             Initialize Map

@@ -1,8 +1,7 @@
-
-import React from 'react';
+import React, { useState } from 'react';
 import { 
-  Users, MessageSquare, Award, Calendar, User, ThumbsUp, 
-  MessageCircle, Clock, Eye, Heart 
+  Search, Filter, Plus, Heart, MessageCircle, Share2, 
+  Star, Calendar, MapPin, Camera, Award, Users 
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
