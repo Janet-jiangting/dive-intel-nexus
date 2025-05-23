@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -61,7 +62,43 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
-				}
+				},
+        ocean: {
+          50: '#e3f2fd',
+          100: '#bbdefb',
+          200: '#90caf9',
+          300: '#64b5f6',
+          400: '#42a5f5',
+          500: '#2196f3',
+          600: '#1e88e5',
+          700: '#1976d2',
+          800: '#1565c0',
+          900: '#0d47a1',
+        },
+        coral: {
+          50: '#ffebee',
+          100: '#ffcdd2',
+          200: '#ef9a9a',
+          300: '#e57373',
+          400: '#ef5350',
+          500: '#f44336',
+          600: '#e53935',
+          700: '#d32f2f',
+          800: '#c62828',
+          900: '#b71c1c',
+        },
+        seagreen: {
+          50: '#e0f2f1',
+          100: '#b2dfdb',
+          200: '#80cbc4',
+          300: '#4db6ac',
+          400: '#26a69a',
+          500: '#009688',
+          600: '#00897b',
+          700: '#00796b',
+          800: '#00695c',
+          900: '#004d40',
+        },
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
@@ -84,12 +121,32 @@ export default {
 					to: {
 						height: '0'
 					}
-				}
+				},
+        'wave': {
+          '0%': { transform: 'translateX(0)' },
+          '50%': { transform: 'translateX(-25%)' },
+          '100%': { transform: 'translateX(0)' }
+        },
+        'fade-in': {
+          '0%': { opacity: '0' },
+          '100%': { opacity: '1' }
+        },
+        'float': {
+          '0%, 100%': { transform: 'translateY(0)' },
+          '50%': { transform: 'translateY(-10px)' }
+        }
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
-			}
+				'accordion-up': 'accordion-up 0.2s ease-out',
+        'wave': 'wave 10s ease-in-out infinite',
+        'fade-in': 'fade-in 1.2s ease-in-out',
+        'float': 'float 5s ease-in-out infinite'
+			},
+      backgroundImage: {
+        'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
+        'hero-pattern': "url('/hero-bg.jpg')",
+      }
 		}
 	},
 	plugins: [require("tailwindcss-animate")],
