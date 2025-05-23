@@ -2,7 +2,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
-import { MapPin } from 'lucide-react';
 
 interface Coordinates {
   lat: number;
@@ -20,6 +19,9 @@ interface DiveSite {
 interface DiveMapProps {
   sites: DiveSite[];
 }
+
+// Store the Mapbox token
+const MAPBOX_TOKEN = 'pk.eyJ1IjoibmFueWVudW93ZWkiLCJhIjoiY21iMTYwMHFoMHd3MDJqc2N3ZGVqZHVwYiJ9.1zIehxqF8MGArJsCR3pj8w';
 
 // Sample marine life data for different dive sites
 const marineLifeData = {
@@ -58,8 +60,6 @@ const marineLifeData = {
 const DiveMap = ({ sites }: DiveMapProps) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
-  const [mapboxToken, setMapboxToken] = useState<string>('');
-  const [showTokenInput, setShowTokenInput] = useState<boolean>(true);
   const [hoveredSite, setHoveredSite] = useState<DiveSite | null>(null);
   const [mapError, setMapError] = useState<string>('');
   const popupRef = useRef(new mapboxgl.Popup({ 
@@ -70,13 +70,13 @@ const DiveMap = ({ sites }: DiveMapProps) => {
   }));
 
   const initializeMap = () => {
-    if (!mapContainer.current || !mapboxToken) {
-      console.log('Missing container or token:', { container: !!mapContainer.current, token: !!mapboxToken });
+    if (!mapContainer.current) {
+      console.log('Missing container');
       return;
     }
     
     try {
-      mapboxgl.accessToken = mapboxToken;
+      mapboxgl.accessToken = MAPBOX_TOKEN;
       
       if (map.current) {
         console.log('Map already exists, removing...');
@@ -153,29 +153,13 @@ const DiveMap = ({ sites }: DiveMapProps) => {
 
       map.current.on('error', (e) => {
         console.error('Map error:', e);
-        setMapError('Failed to load map. Please check your token.');
+        setMapError('Failed to load map. Please check your internet connection.');
       });
 
     } catch (error) {
       console.error('Error initializing map:', error);
-      setMapError('Invalid Mapbox token or initialization error.');
+      setMapError('Map initialization error.');
     }
-  };
-
-  const handleTokenSubmit = () => {
-    if (!mapboxToken.trim()) {
-      setMapError('Please enter a valid Mapbox token');
-      return;
-    }
-    
-    console.log('Token submitted:', mapboxToken.substring(0, 10) + '...');
-    setMapError('');
-    setShowTokenInput(false);
-    
-    // Small delay to ensure state updates
-    setTimeout(() => {
-      initializeMap();
-    }, 100);
   };
   
   useEffect(() => {
@@ -212,6 +196,9 @@ const DiveMap = ({ sites }: DiveMapProps) => {
     `;
     document.head.appendChild(style);
 
+    // Initialize map immediately
+    initializeMap();
+
     return () => {
       if (map.current) {
         map.current.remove();
@@ -223,37 +210,14 @@ const DiveMap = ({ sites }: DiveMapProps) => {
     };
   }, []);
 
-  if (showTokenInput) {
+  if (mapError) {
     return (
       <div className="w-full h-full bg-ocean-800 relative flex flex-col items-center justify-center p-6">
         <div className="max-w-md w-full bg-ocean-900 p-6 rounded-lg shadow-xl border border-ocean-700">
-          <div className="text-center mb-6">
-            <MapPin className="h-12 w-12 text-ocean-300 mx-auto mb-4" />
-            <h3 className="text-xl font-medium text-white mb-2">Mapbox API Token Required</h3>
-            <p className="text-ocean-200 text-sm">
-              To display an interactive map, please enter your Mapbox public token.
-              You can get one for free at <a href="https://mapbox.com/" target="_blank" rel="noopener noreferrer" className="text-ocean-300 hover:text-ocean-200 underline">mapbox.com</a>
-            </p>
+          <div className="text-center">
+            <h3 className="text-xl font-medium text-white mb-2">Map Error</h3>
+            <p className="text-red-200 text-sm">{mapError}</p>
           </div>
-          {mapError && (
-            <div className="mb-4 p-3 bg-red-900/50 border border-red-700 rounded text-red-200 text-sm">
-              {mapError}
-            </div>
-          )}
-          <input
-            type="text"
-            placeholder="Enter your Mapbox public token"
-            className="w-full p-3 bg-ocean-700 border border-ocean-600 rounded text-white mb-4"
-            value={mapboxToken}
-            onChange={(e) => setMapboxToken(e.target.value)}
-            onKeyPress={(e) => e.key === 'Enter' && handleTokenSubmit()}
-          />
-          <button 
-            onClick={handleTokenSubmit}
-            className="w-full bg-ocean-500 hover:bg-ocean-400 text-white py-2 px-4 rounded transition-colors"
-          >
-            Initialize Map
-          </button>
         </div>
       </div>
     );
