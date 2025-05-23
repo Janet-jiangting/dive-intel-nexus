@@ -224,7 +224,7 @@ const DiveMap = ({ sites }: DiveMapProps) => {
   }
 
   return (
-    <div className="w-full h-full relative">
+    <div className="w-full h-full">
       <div ref={mapContainer} className="w-full h-full" />
       
       {hoveredSite && (
