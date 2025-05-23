@@ -22,7 +22,7 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Layout><Index /></Layout>} />
-          <Route path="/dive-sites" element={<Layout><DiveSites /></Layout>} />
+          <Route path="/dive-sites" element={<Layout fullHeight={true}><DiveSites /></Layout>} />
           <Route path="/dive-sites/:id" element={<Layout><DiveSiteDetail /></Layout>} />
           <Route path="/marine-life" element={<Layout><MarineLife /></Layout>} />
           <Route path="/community" element={<Layout><Community /></Layout>} />
