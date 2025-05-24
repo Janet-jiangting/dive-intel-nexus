@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Search, Filter, ChevronDown, Fish, Database, Waves, AlertTriangle, Globe } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -19,6 +18,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import MarineLifeCard from '@/components/MarineLifeCard';
+import FishIdentifier from '@/components/FishIdentifier';
 
 // Mock data for marine life
 const marineLifeData = [
@@ -263,6 +263,11 @@ const MarineLife = () => {
       </div>
       
       <div className="container mx-auto py-8 px-4">
+        {/* Fish Identifier Section */}
+        <div className="mb-12">
+          <FishIdentifier />
+        </div>
+        
         <div className="flex justify-between items-center mb-6">
           <div>
             <span className="text-ocean-200">{filteredMarineLife.length} species found</span>

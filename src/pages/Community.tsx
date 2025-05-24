@@ -26,6 +26,7 @@ import {
 } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import CreatePost from '@/components/CreatePost';
 
 const posts = [
   {
@@ -61,6 +62,7 @@ const posts = [
 const Community = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('recent');
+  const [showCreatePost, setShowCreatePost] = useState(false);
 
   const filteredPosts = posts.filter(post =>
     post.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -96,7 +98,10 @@ const Community = () => {
               />
             </div>
 
-            <Button className="bg-ocean-500 hover:bg-ocean-400 text-white">
+            <Button
+              onClick={() => setShowCreatePost(true)}
+              className="bg-ocean-500 hover:bg-ocean-400 text-white"
+            >
               <Plus className="h-4 w-4 mr-2" />
               Create Post
             </Button>
@@ -158,6 +163,11 @@ const Community = () => {
           ))}
         </div>
       </div>
+
+      <CreatePost
+        isOpen={showCreatePost}
+        onClose={() => setShowCreatePost(false)}
+      />
     </div>
   );
 };

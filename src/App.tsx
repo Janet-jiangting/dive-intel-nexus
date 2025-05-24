@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -11,6 +10,7 @@ import DiveSiteDetail from "./pages/DiveSiteDetail";
 import MarineLife from "./pages/MarineLife";
 import Community from "./pages/Community";
 import Layout from "./components/Layout";
+import ManageData from "./pages/ManageData";
 
 const queryClient = new QueryClient();
 
@@ -26,6 +26,7 @@ const App = () => (
           <Route path="/dive-sites/:id" element={<Layout><DiveSiteDetail /></Layout>} />
           <Route path="/marine-life" element={<Layout><MarineLife /></Layout>} />
           <Route path="/community" element={<Layout><Community /></Layout>} />
+          <Route path="/manage-data" element={<Layout><ManageData /></Layout>} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
