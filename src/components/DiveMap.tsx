@@ -62,6 +62,7 @@ const DiveMap = ({ sites }: DiveMapProps) => {
   const map = useRef<mapboxgl.Map | null>(null);
   const [hoveredSite, setHoveredSite] = useState<DiveSite | null>(null);
   const [mapError, setMapError] = useState<string>('');
+  const [isMapLoaded, setIsMapLoaded] = useState(false);
   const popupRef = useRef(new mapboxgl.Popup({ 
     closeButton: false, 
     closeOnClick: false,
@@ -89,13 +90,15 @@ const DiveMap = ({ sites }: DiveMapProps) => {
         container: mapContainer.current,
         style: 'mapbox://styles/mapbox/satellite-v9',
         center: [0, 30],
-        zoom: 2
+        zoom: 2,
+        antialias: true
       });
 
       map.current.addControl(new mapboxgl.NavigationControl(), 'top-right');
 
       map.current.on('load', () => {
         console.log('Map loaded successfully');
+        setIsMapLoaded(true);
         if (!map.current) return;
 
         sites.forEach(site => {
@@ -156,6 +159,12 @@ const DiveMap = ({ sites }: DiveMapProps) => {
         setMapError('Failed to load map. Please check your internet connection.');
       });
 
+      map.current.on('sourcedata', (e) => {
+        if (e.isSourceLoaded) {
+          console.log('Map source loaded');
+        }
+      });
+
     } catch (error) {
       console.error('Error initializing map:', error);
       setMapError('Map initialization error.');
@@ -196,10 +205,13 @@ const DiveMap = ({ sites }: DiveMapProps) => {
     `;
     document.head.appendChild(style);
 
-    // Initialize map immediately
-    initializeMap();
+    // Small delay to ensure DOM is ready
+    const timer = setTimeout(() => {
+      initializeMap();
+    }, 100);
 
     return () => {
+      clearTimeout(timer);
       if (map.current) {
         map.current.remove();
         map.current = null;
@@ -224,8 +236,18 @@ const DiveMap = ({ sites }: DiveMapProps) => {
   }
 
   return (
-    <div className="w-full h-full">
-      <div ref={mapContainer} className="w-full h-full" />
+    <div className="w-full h-full relative bg-ocean-900">
+      <div 
+        ref={mapContainer} 
+        className="w-full h-full rounded-lg"
+        style={{ minHeight: '400px' }}
+      />
+      
+      {!isMapLoaded && (
+        <div className="absolute inset-0 bg-ocean-900 flex items-center justify-center">
+          <div className="text-white">Loading map...</div>
+        </div>
+      )}
       
       {hoveredSite && (
         <div className="absolute bottom-4 left-4 z-10 bg-ocean-900/90 p-4 rounded-lg border border-ocean-700 max-w-xs">
