@@ -1,17 +1,30 @@
-
 import React, { useState } from 'react';
 import { Upload, Download, Database, FileSpreadsheet, Image, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
+import UploadTracker from '@/components/UploadTracker';
+import DataPreviewDialog from '@/components/DataPreviewDialog';
+
+interface UploadRecord {
+  id: string;
+  fileName: string;
+  type: 'diveSites' | 'marineLife';
+  uploadDate: string;
+  recordCount: number;
+  status: 'success' | 'processing' | 'error';
+}
 
 const ManageData = () => {
   const [diveSiteFile, setDiveSiteFile] = useState<File | null>(null);
   const [marineLifeFile, setMarineLifeFile] = useState<File | null>(null);
   const [imageFiles, setImageFiles] = useState<FileList | null>(null);
+  const [previewData, setPreviewData] = useState<any[]>([]);
+  const [previewFileName, setPreviewFileName] = useState('');
+  const [previewType, setPreviewType] = useState<'diveSites' | 'marineLife'>('diveSites');
+  const [showPreview, setShowPreview] = useState(false);
+  const [uploads, setUploads] = useState<UploadRecord[]>([]);
   const { toast } = useToast();
 
   const downloadSampleDiveSites = () => {
@@ -48,14 +61,96 @@ const ManageData = () => {
     window.URL.revokeObjectURL(url);
   };
 
-  const handleFileUpload = (file: File, type: 'diveSites' | 'marineLife') => {
-    if (!file) return;
+  const parseCSV = (text: string): any[] => {
+    const lines = text.split('\n').filter(line => line.trim());
+    if (lines.length < 2) return [];
     
-    // Here you would process the CSV file and convert it to the appropriate format
-    toast({
-      title: "File uploaded successfully",
-      description: `${type === 'diveSites' ? 'Dive sites' : 'Marine life'} data has been imported.`,
+    const headers = lines[0].split(',').map(h => h.trim());
+    const data = lines.slice(1).map(line => {
+      const values = line.split(',').map(v => v.trim());
+      const obj: any = {};
+      headers.forEach((header, index) => {
+        obj[header] = values[index] || '';
+      });
+      return obj;
     });
+    
+    return data;
+  };
+
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>, type: 'diveSites' | 'marineLife') => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const text = e.target?.result as string;
+        const data = parseCSV(text);
+        
+        if (data.length === 0) {
+          toast({
+            title: "Error",
+            description: "No valid data found in the file.",
+            variant: "destructive",
+          });
+          return;
+        }
+
+        setPreviewData(data);
+        setPreviewFileName(file.name);
+        setPreviewType(type);
+        setShowPreview(true);
+      } catch (error) {
+        toast({
+          title: "Error",
+          description: "Failed to parse the file. Please check the format.",
+          variant: "destructive",
+        });
+      }
+    };
+    reader.readAsText(file);
+    
+    // Reset input
+    event.target.value = '';
+  };
+
+  const confirmUpload = () => {
+    const newUpload: UploadRecord = {
+      id: Date.now().toString(),
+      fileName: previewFileName,
+      type: previewType,
+      uploadDate: new Date().toLocaleDateString(),
+      recordCount: previewData.length,
+      status: 'success'
+    };
+
+    setUploads(prev => [newUpload, ...prev]);
+    setShowPreview(false);
+    setPreviewData([]);
+
+    toast({
+      title: "Upload successful",
+      description: `${previewData.length} ${previewType === 'diveSites' ? 'dive sites' : 'marine life'} records imported.`,
+    });
+  };
+
+  const deleteUpload = (id: string) => {
+    setUploads(prev => prev.filter(upload => upload.id !== id));
+    toast({
+      title: "Upload deleted",
+      description: "Upload record has been removed.",
+    });
+  };
+
+  const previewUpload = (id: string) => {
+    const upload = uploads.find(u => u.id === id);
+    if (upload) {
+      toast({
+        title: "Preview",
+        description: `Viewing ${upload.fileName} with ${upload.recordCount} records`,
+      });
+    }
   };
 
   return (
@@ -74,6 +169,7 @@ const ManageData = () => {
           <TabsList className="bg-ocean-800 border-ocean-700">
             <TabsTrigger value="import" className="data-[state=active]:bg-ocean-700">Import Data</TabsTrigger>
             <TabsTrigger value="images" className="data-[state=active]:bg-ocean-700">Upload Images</TabsTrigger>
+            <TabsTrigger value="history" className="data-[state=active]:bg-ocean-700">Upload History</TabsTrigger>
           </TabsList>
 
           <TabsContent value="import" className="space-y-6">
@@ -96,18 +192,22 @@ const ManageData = () => {
                     Download Sample Format
                   </Button>
                   
-                  <Input
-                    type="file"
-                    accept=".csv,.xlsx"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) {
-                        setDiveSiteFile(file);
-                        handleFileUpload(file, 'diveSites');
-                      }
-                    }}
-                    className="bg-ocean-700 border-ocean-600 text-white"
-                  />
+                  <div className="relative">
+                    <input
+                      type="file"
+                      accept=".csv,.xlsx"
+                      onChange={(e) => handleFileUpload(e, 'diveSites')}
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                      id="dive-sites-upload"
+                    />
+                    <Button
+                      className="w-full bg-ocean-700 border-ocean-600 text-white hover:bg-ocean-600"
+                      variant="outline"
+                    >
+                      <Upload className="h-4 w-4 mr-2" />
+                      Choose Dive Sites File
+                    </Button>
+                  </div>
                   
                   <div className="text-xs text-ocean-300">
                     <p>Supported formats: CSV, Excel (.xlsx)</p>
@@ -134,18 +234,22 @@ const ManageData = () => {
                     Download Sample Format
                   </Button>
                   
-                  <Input
-                    type="file"
-                    accept=".csv,.xlsx"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) {
-                        setMarineLifeFile(file);
-                        handleFileUpload(file, 'marineLife');
-                      }
-                    }}
-                    className="bg-ocean-700 border-ocean-600 text-white"
-                  />
+                  <div className="relative">
+                    <input
+                      type="file"
+                      accept=".csv,.xlsx"
+                      onChange={(e) => handleFileUpload(e, 'marineLife')}
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                      id="marine-life-upload"
+                    />
+                    <Button
+                      className="w-full bg-ocean-700 border-ocean-600 text-white hover:bg-ocean-600"
+                      variant="outline"
+                    >
+                      <Upload className="h-4 w-4 mr-2" />
+                      Choose Marine Life File
+                    </Button>
+                  </div>
                   
                   <div className="text-xs text-ocean-300">
                     <p>Supported formats: CSV, Excel (.xlsx)</p>
@@ -191,8 +295,25 @@ const ManageData = () => {
               </CardContent>
             </Card>
           </TabsContent>
+
+          <TabsContent value="history" className="space-y-6">
+            <UploadTracker
+              uploads={uploads}
+              onDelete={deleteUpload}
+              onPreview={previewUpload}
+            />
+          </TabsContent>
         </Tabs>
       </div>
+
+      <DataPreviewDialog
+        isOpen={showPreview}
+        onClose={() => setShowPreview(false)}
+        onConfirm={confirmUpload}
+        fileName={previewFileName}
+        data={previewData}
+        type={previewType}
+      />
     </div>
   );
 };

@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -11,6 +12,7 @@ import MarineLife from "./pages/MarineLife";
 import Community from "./pages/Community";
 import Layout from "./components/Layout";
 import ManageData from "./pages/ManageData";
+import MyOcean from "./pages/MyOcean";
 
 const queryClient = new QueryClient();
 
@@ -27,6 +29,7 @@ const App = () => (
           <Route path="/marine-life" element={<Layout><MarineLife /></Layout>} />
           <Route path="/community" element={<Layout><Community /></Layout>} />
           <Route path="/manage-data" element={<Layout><ManageData /></Layout>} />
+          <Route path="/my-ocean" element={<Layout><MyOcean /></Layout>} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

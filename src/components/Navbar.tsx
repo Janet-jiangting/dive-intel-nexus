@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { 
-  Anchor, Menu, X, Map, Fish, Users, Search 
+  Anchor, Menu, X, Map, Fish, Users, Search, Crown 
 } from 'lucide-react';
 import { 
   NavigationMenu,
@@ -109,6 +109,12 @@ const Navbar = () => {
                   <Link to="/community" className={cn(navigationMenuTriggerStyle(), "bg-transparent text-white hover:bg-ocean-800 hover:text-white focus:bg-ocean-800")}>
                     <Users className="mr-2 h-4 w-4" />
                     Community
+                  </Link>
+                </NavigationMenuItem>
+                <NavigationMenuItem>
+                  <Link to="/my-ocean" className={cn(navigationMenuTriggerStyle(), "bg-transparent text-white hover:bg-ocean-800 hover:text-white focus:bg-ocean-800")}>
+                    <Crown className="mr-2 h-4 w-4" />
+                    My Ocean
                   </Link>
                 </NavigationMenuItem>
               </NavigationMenuList>
