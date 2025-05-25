@@ -57,6 +57,7 @@ const ManageData = () => {
     const csvContent = sampleData.map(row => row.join(',')).join('\n');
     const blob = new Blob([csvContent], { type: 'text/csv' });
     const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
     a.href = url;
     a.download = 'sample_marine_life.csv';
     a.click();
