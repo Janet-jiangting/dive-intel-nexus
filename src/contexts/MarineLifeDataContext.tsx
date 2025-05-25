@@ -11,7 +11,7 @@ export interface Species {
   conservationStatus: string;
   description: string;
   regions: string[]; // Was 'distribution' from Supabase, split into array
-  imageUrl: string; // Now constructed based on species_name
+  imageUrl: string; // Now constructed based on species id
   depth: string; // Was 'depth_range'
 }
 
@@ -50,13 +50,13 @@ export const MarineLifeDataProvider = ({ children }: { children: ReactNode }) =>
 
         if (data) {
           const mappedData: Species[] = data.map((item: any) => {
-            // Construct image URL using species_name.
-            // Assumes images in the bucket are named like 'species_name.jpg' (lowercase, spaces replaced with underscores).
+            // Construct image URL using species id.
+            // Assumes images in the bucket are named like 'id.jpg'.
             let imageNameForUrl: string;
-            if (item.species_name && typeof item.species_name === 'string' && item.species_name.trim() !== '') {
-              imageNameForUrl = `${item.species_name.trim().toLowerCase().replace(/\s+/g, '_')}.jpg`;
+            if (item.id) { // Check if id exists and is not null/undefined
+              imageNameForUrl = `${item.id}.jpg`; // Using id directly. Assuming .jpg extension.
             } else {
-              imageNameForUrl = 'placeholder.svg'; // Fallback if species_name is not available
+              imageNameForUrl = 'placeholder.svg'; // Fallback if id is not available
             }
 
             const imageUrl = imageNameForUrl === 'placeholder.svg'
@@ -78,7 +78,7 @@ export const MarineLifeDataProvider = ({ children }: { children: ReactNode }) =>
               conservationStatus: item['Conservation Status'] || 'Least Concern',
               description: item.description || 'No description available.',
               regions: regionsArray,
-              imageUrl: imageUrl, // imageUrl is now derived
+              imageUrl: imageUrl, // imageUrl is now derived from id
               depth: item.depth_range || 'N/A',
             };
           });
