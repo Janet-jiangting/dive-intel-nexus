@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Upload, Download, Database, FileSpreadsheet, Image } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -50,8 +51,9 @@ const ManageData = () => {
   const downloadSampleMarineLife = () => {
     const sampleData = [
       ['Name', 'Scientific Name', 'Category', 'Habitat', 'Conservation Status', 'Description', 'Regions', 'Depth Range', 'Image Filename'],
-      ['Sample Fish', 'Fishus sampleus', 'Fish', 'Coral Reefs', 'Least Concern', 'A beautiful sample fish species', 'Indo-Pacific', '5-20m', 'sample_fish.jpg'],
-      ['Sample Turtle', 'Turtlus sampleus', 'Reptile', 'Seagrass Beds', 'Vulnerable', 'An endangered sea turtle species', 'Tropical Waters', '1-30m', 'sample_turtle.jpg']
+      ['Clownfish', 'Amphiprion ocellaris', 'Fish', 'Coral Reefs', 'Least Concern', 'Known for their bright orange coloration with white stripes', 'Indo-Pacific,Red Sea', '1-15m', 'clownfish.jpg'],
+      ['Manta Ray', 'Manta birostris', 'Ray', 'Open Ocean', 'Vulnerable', 'The largest type of ray with a wingspan reaching 7 meters', 'Tropical Waters,Pacific Ocean', '10-120m', 'manta.jpg'],
+      ['Green Sea Turtle', 'Chelonia mydas', 'Reptile', 'Coral Reefs,Seagrass Beds', 'Endangered', 'Named for the greenish color of their fat', 'Tropical Waters,Subtropical Waters', '3-40m', 'turtle.jpg']
     ];
     
     const csvContent = sampleData.map(row => row.join(',')).join('\n');
@@ -68,16 +70,40 @@ const ManageData = () => {
     const lines = text.split('\n').filter(line => line.trim());
     if (lines.length < 2) return [];
     
-    const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, '')); // Trim and remove surrounding quotes
+    const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''));
     const data = lines.slice(1).map(line => {
-      // Basic split, doesn't handle commas inside quoted fields well.
-      const values = line.split(',').map(v => v.trim().replace(/^"|"$/g, '')); // Trim and remove surrounding quotes
+      // Handle commas in quotes before splitting
+      let values = [];
+      let inQuote = false;
+      let currentVal = '';
+      
+      for (let i = 0; i < line.length; i++) {
+        const char = line[i];
+        
+        if (char === '"' && (i === 0 || line[i-1] !== '\\')) {
+          inQuote = !inQuote;
+        } else if (char === ',' && !inQuote) {
+          values.push(currentVal.trim().replace(/^"|"$/g, ''));
+          currentVal = '';
+        } else {
+          currentVal += char;
+        }
+      }
+      
+      // Push the last value
+      values.push(currentVal.trim().replace(/^"|"$/g, ''));
+      
+      // If basic split didn't work, maintain the same length as headers
+      if (values.length !== headers.length) {
+        values = line.split(',').map(v => v.trim().replace(/^"|"$/g, ''));
+      }
+      
       const obj: any = {};
       headers.forEach((header, index) => {
         obj[header] = values[index] || '';
       });
       return obj;
-    }).filter(obj => Object.values(obj).some(val => val !== '')); // Filter out potentially empty rows if all values are empty
+    }).filter(obj => Object.values(obj).some(val => val !== ''));
     
     return data;
   };
@@ -120,26 +146,76 @@ const ManageData = () => {
     event.target.value = '';
   };
 
+  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (!files || files.length === 0) return;
+    
+    setImageFiles(files);
+    
+    toast({
+      title: "Images Selected",
+      description: `${files.length} image(s) selected. They will be associated with marine life entries when uploaded.`,
+    });
+    
+    // Reset input
+    event.target.value = '';
+  };
+
   const mapPreviewDataToSpecies = (data: any[]): Species[] => {
     return data.map((item, index) => {
-      const regionsString = item.Regions || item.regions || '';
-      const regions = regionsString.split(',').map((r: string) => r.trim()).filter((r: string) => r);
+      // Create a more robust mapping that handles different case formats
+      const getName = (keys: string[]): string => {
+        for (const key of keys) {
+          if (item[key] !== undefined && item[key] !== '') return item[key];
+        }
+        return 'Unknown Species';
+      };
       
-      const imageFilename = item['Image Filename'] || item.imageFilename || '';
-      // Assuming images will be eventually uploaded to a path or use a placeholder
-      const imageUrl = imageFilename ? `/images/marine-life/${imageFilename}` : '/placeholder.svg'; 
-
+      const name = getName(['Name', 'name']);
+      const scientificName = getName(['Scientific Name', 'scientificName', 'Scientific_Name', 'scientific_name']) || 'N/A';
+      const category = getName(['Category', 'category']) || 'Fish';
+      const habitat = getName(['Habitat', 'habitat']) || 'N/A';
+      const conservationStatus = getName(['Conservation Status', 'conservationStatus', 'Conservation_Status', 'conservation_status']) || 'N/A';
+      const description = getName(['Description', 'description']) || 'No description available';
+      
+      // Handle regions as either comma-separated or array
+      let regions: string[] = [];
+      const regionsRaw = getName(['Regions', 'regions']);
+      if (regionsRaw) {
+        regions = regionsRaw.split(',').map((r: string) => r.trim()).filter((r: string) => r);
+      }
+      
+      // Handle depth range
+      const depth = getName(['Depth Range', 'depthRange', 'Depth_Range', 'depth_range', 'Depth', 'depth']) || 'N/A';
+      
+      // Handle image filename - build proper URL
+      const imageFilename = getName(['Image Filename', 'imageFilename', 'Image_Filename', 'image_filename']);
+      let imageUrl = '/placeholder.svg';
+      
+      if (imageFilename) {
+        // Check if it looks like a URL already
+        if (imageFilename.startsWith('http') || imageFilename.startsWith('/')) {
+          imageUrl = imageFilename;
+        } else {
+          // Assume it's just a filename that will be in public/images/marine-life/
+          imageUrl = `/images/marine-life/${imageFilename}`;
+        }
+      }
+      
+      // Generate a unique ID
+      const id = `ml-${Date.now()}-${index}`;
+      
       return {
-        id: `${Date.now()}-${index}`, // More unique ID
-        name: item.Name || item.name || 'Unknown Species',
-        scientificName: item['Scientific Name'] || item.scientificName || 'N/A',
-        category: item.Category || item.category || 'N/A',
-        habitat: item.Habitat || item.habitat || 'N/A',
-        conservationStatus: item['Conservation Status'] || item.conservationStatus || 'N/A',
-        description: item.Description || item.description || 'N/A',
+        id,
+        name,
+        scientificName,
+        category,
+        habitat,
+        conservationStatus,
+        description,
         regions,
         imageUrl,
-        depth: item['Depth Range'] || item.depthRange || item.depth || 'N/A',
+        depth,
       };
     });
   };
@@ -147,7 +223,25 @@ const ManageData = () => {
   const confirmUpload = () => {
     if (previewType === 'marineLife') {
       const newSpeciesEntries = mapPreviewDataToSpecies(previewData);
+      
+      // Link with uploaded images if available
+      if (imageFiles && imageFiles.length > 0) {
+        // In a real app, we'd upload these images to a server
+        // For now, we'll just simulate that the images are uploaded
+        console.log(`Would upload ${imageFiles.length} images and link them to species`);
+        
+        toast({
+          title: "Image Association Note",
+          description: "In a production environment, images would be uploaded to a server. For this demo, please ensure image files are manually placed in the public/images/marine-life/ folder.",
+        });
+      }
+      
       addMarineLifeEntries(newSpeciesEntries);
+      
+      toast({
+        title: "Marine Life Data Added",
+        description: `${newSpeciesEntries.length} species added to the database.`,
+      });
     }
     // For diveSites, you would have a similar context or handling if needed
     // For now, diveSites upload only adds to local history
@@ -323,21 +417,31 @@ const ManageData = () => {
                     type="file"
                     multiple
                     accept="image/*"
-                    onChange={(e) => setImageFiles(e.target.files)}
+                    onChange={handleImageUpload}
                     className="bg-ocean-700 border-ocean-600 text-white file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-ocean-600 file:text-ocean-100 hover:file:bg-ocean-500"
                   />
                 </div>
                 
                 <div className="text-xs text-ocean-300">
-                  <p>• Name your image files to match the "Image Filename" column in your marine life data (e.g., sample_fish.jpg)</p>
+                  <p>• Name your image files to match the "Image Filename" column in your marine life data (e.g., clownfish.jpg)</p>
                   <p>• Supported formats: JPG, PNG, WebP</p>
                   <p>• Recommended size: 800x600 pixels or higher</p>
                   <p>• For now, ensure images are placed in `public/images/marine-life/` folder manually after noting filenames.</p>
                 </div>
                 
                 {imageFiles && (
-                  <div className="text-sm text-ocean-200">
-                    {imageFiles.length} image(s) selected for tracking. Actual image hosting/linking needs manual setup or backend integration.
+                  <div className="mt-4">
+                    <h4 className="text-white font-medium mb-2">Selected Images:</h4>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 max-h-60 overflow-y-auto p-2 bg-ocean-900/50 rounded-md">
+                      {Array.from(imageFiles).map((file, index) => (
+                        <div key={index} className="text-ocean-200 text-sm flex items-center gap-1 overflow-hidden">
+                          <div className="w-8 h-8 bg-ocean-700 rounded-md flex items-center justify-center flex-shrink-0">
+                            <Image className="w-4 h-4 text-ocean-300" />
+                          </div>
+                          <span className="truncate" title={file.name}>{file.name}</span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 )}
               </CardContent>

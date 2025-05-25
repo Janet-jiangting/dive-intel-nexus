@@ -15,7 +15,7 @@ export interface Species {
   depth: string;
 }
 
-// Initial mock data (moved from MarineLife.tsx)
+// Initial mock data
 const initialMarineLifeData: Species[] = [
   {
     id: 1,
@@ -26,7 +26,7 @@ const initialMarineLifeData: Species[] = [
     conservationStatus: 'Least Concern',
     description: 'Known for their bright orange coloration with white stripes and black borders.',
     regions: ['Indo-Pacific', 'Great Barrier Reef', 'Red Sea'],
-    imageUrl: '/placeholder.svg',
+    imageUrl: '/images/marine-life/clownfish.jpg',
     depth: '1-15m',
   },
   {
@@ -38,10 +38,9 @@ const initialMarineLifeData: Species[] = [
     conservationStatus: 'Vulnerable',
     description: 'The largest type of ray, with a wingspan that can reach up to 7 meters.',
     regions: ['Tropical Waters', 'Pacific Ocean', 'Indian Ocean', 'Atlantic Ocean'],
-    imageUrl: '/placeholder.svg',
+    imageUrl: '/images/marine-life/manta.jpg',
     depth: '10-120m',
   },
-  // ... (include all other initial mock species from MarineLife.tsx)
   {
     id: 3,
     name: 'Green Sea Turtle',
@@ -51,7 +50,7 @@ const initialMarineLifeData: Species[] = [
     conservationStatus: 'Endangered',
     description: 'Named for the greenish color of their fat, these turtles are herbivores as adults.',
     regions: ['Tropical Waters', 'Subtropical Waters'],
-    imageUrl: '/placeholder.svg',
+    imageUrl: '/images/marine-life/turtle.jpg',
     depth: '3-40m',
   },
   {
@@ -63,7 +62,7 @@ const initialMarineLifeData: Species[] = [
     conservationStatus: 'Near Threatened',
     description: 'A predatory fish known for its bright red to brown coloration with blue spots.',
     regions: ['Indo-Pacific', 'Great Barrier Reef'],
-    imageUrl: '/placeholder.svg',
+    imageUrl: '/images/marine-life/grouper.jpg',
     depth: '5-50m',
   },
   {
@@ -75,7 +74,7 @@ const initialMarineLifeData: Species[] = [
     conservationStatus: 'Near Threatened',
     description: 'A unique marine fish with leaf-like appendages that provide excellent camouflage.',
     regions: ['Southern Australia'],
-    imageUrl: '/placeholder.svg',
+    imageUrl: '/images/marine-life/seadragon.jpg',
     depth: '10-30m',
   },
   {
@@ -87,7 +86,7 @@ const initialMarineLifeData: Species[] = [
     conservationStatus: 'Near Threatened',
     description: 'Distinctive ray with bright blue spots on a yellowish or greenish background.',
     regions: ['Indo-Pacific', 'Red Sea'],
-    imageUrl: '/placeholder.svg',
+    imageUrl: '/images/marine-life/stingray.jpg',
     depth: '2-30m',
   },
   {
@@ -99,7 +98,7 @@ const initialMarineLifeData: Species[] = [
     conservationStatus: 'Critically Endangered',
     description: 'Recognized by its sharp, hawk-like beak and beautiful shell pattern.',
     regions: ['Tropical Waters', 'Atlantic Ocean', 'Pacific Ocean'],
-    imageUrl: '/placeholder.svg',
+    imageUrl: '/images/marine-life/hawksbill.jpg',
     depth: '1-30m',
   },
   {
@@ -111,7 +110,7 @@ const initialMarineLifeData: Species[] = [
     conservationStatus: 'Endangered',
     description: 'The largest known fish species, with a distinctive pattern of white spots on a dark background.',
     regions: ['Tropical Waters', 'Warm Temperate Waters'],
-    imageUrl: '/placeholder.svg',
+    imageUrl: '/images/marine-life/whaleshark.jpg',
     depth: '0-700m',
   },
   {
@@ -123,7 +122,7 @@ const initialMarineLifeData: Species[] = [
     conservationStatus: 'Vulnerable',
     description: 'Small marine fish named for their horse-like head shape. Males carry the eggs in a pouch.',
     regions: ['Worldwide in Temperate and Tropical Waters'],
-    imageUrl: '/placeholder.svg',
+    imageUrl: '/images/marine-life/seahorse.jpg',
     depth: '1-15m',
   },
 ];
@@ -132,6 +131,7 @@ const initialMarineLifeData: Species[] = [
 interface MarineLifeDataContextValue {
   marineLife: Species[];
   addMarineLifeEntries: (entries: Species[]) => void;
+  getSpeciesById: (id: string | number) => Species | undefined;
 }
 
 const MarineLifeDataContext = createContext<MarineLifeDataContextValue | undefined>(undefined);
@@ -140,11 +140,25 @@ export const MarineLifeDataProvider = ({ children }: { children: ReactNode }) =>
   const [marineLife, setMarineLife] = useState<Species[]>(initialMarineLifeData);
 
   const addMarineLifeEntries = (entries: Species[]) => {
-    setMarineLife(prevEntries => [...prevEntries, ...entries]);
+    setMarineLife(prevEntries => {
+      // Filter out duplicates based on name + scientific name combo
+      const filteredNew = entries.filter(newEntry => 
+        !prevEntries.some(existing => 
+          existing.name === newEntry.name && 
+          existing.scientificName === newEntry.scientificName
+        )
+      );
+      
+      return [...prevEntries, ...filteredNew];
+    });
+  };
+  
+  const getSpeciesById = (id: string | number): Species | undefined => {
+    return marineLife.find(species => species.id.toString() === id.toString());
   };
 
   return (
-    <MarineLifeDataContext.Provider value={{ marineLife, addMarineLifeEntries }}>
+    <MarineLifeDataContext.Provider value={{ marineLife, addMarineLifeEntries, getSpeciesById }}>
       {children}
     </MarineLifeDataContext.Provider>
   );
@@ -157,4 +171,3 @@ export const useMarineLifeData = () => {
   }
   return context;
 };
-
