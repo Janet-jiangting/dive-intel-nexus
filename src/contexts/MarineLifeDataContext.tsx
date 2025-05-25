@@ -1,154 +1,109 @@
 
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client'; // Ensure this path is correct
 
 // Define the Species interface
 export interface Species {
-  id: number | string; // Allow string for potentially UUIDs or timestamp-based IDs from uploads
+  id: number | string;
   name: string;
   scientificName: string;
-  category: string;
-  habitat: string;
+  category: string; // Was 'family' from Supabase
+  // habitat: string; // Removed as per request
   conservationStatus: string;
   description: string;
-  regions: string[];
-  imageUrl: string;
-  depth: string;
+  regions: string[]; // Was 'distribution' from Supabase, split into array
+  imageUrl: string; // Constructed from image_path and bucket
+  depth: string; // Was 'depth_range'
 }
-
-// Initial mock data
-const initialMarineLifeData: Species[] = [
-  {
-    id: 1,
-    name: 'Clownfish',
-    scientificName: 'Amphiprioninae',
-    category: 'Fish',
-    habitat: 'Coral Reefs',
-    conservationStatus: 'Least Concern',
-    description: 'Known for their bright orange coloration with white stripes and black borders.',
-    regions: ['Indo-Pacific', 'Great Barrier Reef', 'Red Sea'],
-    imageUrl: '/images/marine-life/clownfish.jpg',
-    depth: '1-15m',
-  },
-  {
-    id: 2,
-    name: 'Manta Ray',
-    scientificName: 'Manta birostris',
-    category: 'Ray',
-    habitat: 'Open Ocean',
-    conservationStatus: 'Vulnerable',
-    description: 'The largest type of ray, with a wingspan that can reach up to 7 meters.',
-    regions: ['Tropical Waters', 'Pacific Ocean', 'Indian Ocean', 'Atlantic Ocean'],
-    imageUrl: '/images/marine-life/manta.jpg',
-    depth: '10-120m',
-  },
-  {
-    id: 3,
-    name: 'Green Sea Turtle',
-    scientificName: 'Chelonia mydas',
-    category: 'Reptile',
-    habitat: 'Coral Reefs, Seagrass Beds',
-    conservationStatus: 'Endangered',
-    description: 'Named for the greenish color of their fat, these turtles are herbivores as adults.',
-    regions: ['Tropical Waters', 'Subtropical Waters'],
-    imageUrl: '/images/marine-life/turtle.jpg',
-    depth: '3-40m',
-  },
-  {
-    id: 4,
-    name: 'Coral Grouper',
-    scientificName: 'Plectropomus leopardus',
-    category: 'Fish',
-    habitat: 'Coral Reefs',
-    conservationStatus: 'Near Threatened',
-    description: 'A predatory fish known for its bright red to brown coloration with blue spots.',
-    regions: ['Indo-Pacific', 'Great Barrier Reef'],
-    imageUrl: '/images/marine-life/grouper.jpg',
-    depth: '5-50m',
-  },
-  {
-    id: 5,
-    name: 'Leafy Sea Dragon',
-    scientificName: 'Phycodurus eques',
-    category: 'Fish',
-    habitat: 'Kelp Forests',
-    conservationStatus: 'Near Threatened',
-    description: 'A unique marine fish with leaf-like appendages that provide excellent camouflage.',
-    regions: ['Southern Australia'],
-    imageUrl: '/images/marine-life/seadragon.jpg',
-    depth: '10-30m',
-  },
-  {
-    id: 6,
-    name: 'Blue-Spotted Stingray',
-    scientificName: 'Taeniura lymma',
-    category: 'Ray',
-    habitat: 'Coral Reefs, Sandy Bottoms',
-    conservationStatus: 'Near Threatened',
-    description: 'Distinctive ray with bright blue spots on a yellowish or greenish background.',
-    regions: ['Indo-Pacific', 'Red Sea'],
-    imageUrl: '/images/marine-life/stingray.jpg',
-    depth: '2-30m',
-  },
-  {
-    id: 7,
-    name: 'Hawksbill Turtle',
-    scientificName: 'Eretmochelys imbricata',
-    category: 'Reptile',
-    habitat: 'Coral Reefs',
-    conservationStatus: 'Critically Endangered',
-    description: 'Recognized by its sharp, hawk-like beak and beautiful shell pattern.',
-    regions: ['Tropical Waters', 'Atlantic Ocean', 'Pacific Ocean'],
-    imageUrl: '/images/marine-life/hawksbill.jpg',
-    depth: '1-30m',
-  },
-  {
-    id: 8,
-    name: 'Whale Shark',
-    scientificName: 'Rhincodon typus',
-    category: 'Shark',
-    habitat: 'Open Ocean, Coastal Areas',
-    conservationStatus: 'Endangered',
-    description: 'The largest known fish species, with a distinctive pattern of white spots on a dark background.',
-    regions: ['Tropical Waters', 'Warm Temperate Waters'],
-    imageUrl: '/images/marine-life/whaleshark.jpg',
-    depth: '0-700m',
-  },
-  {
-    id: 9,
-    name: 'Seahorse',
-    scientificName: 'Hippocampus',
-    category: 'Fish',
-    habitat: 'Seagrass Beds, Coral Reefs',
-    conservationStatus: 'Vulnerable',
-    description: 'Small marine fish named for their horse-like head shape. Males carry the eggs in a pouch.',
-    regions: ['Worldwide in Temperate and Tropical Waters'],
-    imageUrl: '/images/marine-life/seahorse.jpg',
-    depth: '1-15m',
-  },
-];
-
 
 interface MarineLifeDataContextValue {
   marineLife: Species[];
-  addMarineLifeEntries: (entries: Species[]) => void;
+  isLoading: boolean;
+  error: Error | null;
+  addMarineLifeEntries: (entries: Species[]) => void; // Kept for now, but primary data source is Supabase
   getSpeciesById: (id: string | number) => Species | undefined;
 }
 
 const MarineLifeDataContext = createContext<MarineLifeDataContextValue | undefined>(undefined);
 
+const SUPABASE_PROJECT_REF = "ioyfxcceheflwshhaqhk";
+const IMAGE_BUCKET_NAME = "fishimages";
+
 export const MarineLifeDataProvider = ({ children }: { children: ReactNode }) => {
-  const [marineLife, setMarineLife] = useState<Species[]>(initialMarineLifeData);
+  const [marineLife, setMarineLife] = useState<Species[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [error, setError] = useState<Error | null>(null);
+
+  useEffect(() => {
+    const fetchMarineLife = async () => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        // Assuming your table is named "Marine Life". Adjust if different.
+        // Also, Supabase column names are typically snake_case.
+        // The user mentioned a 'Conservation Status' column, so I'll use 'Conservation_Status' as a placeholder,
+        // but it should match the exact column name in Supabase (likely 'conservation_status').
+        const { data, error: dbError } = await supabase
+          .from('Marine Life') // Exact table name
+          .select('id, species_name, scientific_name, family, description, "Conservation Status", distribution, depth_range, image_path'); // Select specific columns
+
+        if (dbError) {
+          console.error("Supabase error:", dbError);
+          throw dbError;
+        }
+
+        if (data) {
+          const mappedData: Species[] = data.map((item: any) => {
+            // Construct image URL
+            const imagePath = item.image_path || 'placeholder.svg'; // Use placeholder if no image_path
+            const imageUrl = imagePath === 'placeholder.svg' 
+              ? '/placeholder.svg' 
+              : `https://${SUPABASE_PROJECT_REF}.supabase.co/storage/v1/object/public/${IMAGE_BUCKET_NAME}/${item.image_path}`;
+            
+            // Handle regions (distribution)
+            let regionsArray: string[] = [];
+            if (typeof item.distribution === 'string') {
+              regionsArray = item.distribution.split(',').map(r => r.trim()).filter(r => r);
+            } else if (Array.isArray(item.distribution)) {
+              regionsArray = item.distribution;
+            }
+
+            return {
+              id: item.id,
+              name: item.species_name || 'Unknown',
+              scientificName: item.scientific_name || 'N/A',
+              category: item.family || 'Unknown', // Mapped from 'family'
+              conservationStatus: item['Conservation Status'] || 'Least Concern', // Default if null/empty
+              description: item.description || 'No description available.',
+              regions: regionsArray,
+              imageUrl: imageUrl,
+              depth: item.depth_range || 'N/A',
+            };
+          });
+          setMarineLife(mappedData);
+        }
+      } catch (err: any) {
+        console.error("Error fetching marine life data:", err);
+        setError(err);
+        setMarineLife([]); // Clear data on error
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchMarineLife();
+  }, []);
 
   const addMarineLifeEntries = (entries: Species[]) => {
+    // This function might need re-evaluation if data is solely from Supabase.
+    // For now, it adds to the client-side state.
     setMarineLife(prevEntries => {
-      // Filter out duplicates based on name + scientific name combo
       const filteredNew = entries.filter(newEntry => 
         !prevEntries.some(existing => 
           existing.name === newEntry.name && 
           existing.scientificName === newEntry.scientificName
         )
       );
-      
       return [...prevEntries, ...filteredNew];
     });
   };
@@ -158,7 +113,7 @@ export const MarineLifeDataProvider = ({ children }: { children: ReactNode }) =>
   };
 
   return (
-    <MarineLifeDataContext.Provider value={{ marineLife, addMarineLifeEntries, getSpeciesById }}>
+    <MarineLifeDataContext.Provider value={{ marineLife, isLoading, error, addMarineLifeEntries, getSpeciesById }}>
       {children}
     </MarineLifeDataContext.Provider>
   );

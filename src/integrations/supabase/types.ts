@@ -9,7 +9,42 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      "Marine Life": {
+        Row: {
+          "Conservation Status": string | null
+          depth_range: string | null
+          description: string | null
+          distribution: string | null
+          family: string | null
+          id: number
+          max_size: string | null
+          scientific_name: string | null
+          species_name: string | null
+        }
+        Insert: {
+          "Conservation Status"?: string | null
+          depth_range?: string | null
+          description?: string | null
+          distribution?: string | null
+          family?: string | null
+          id: number
+          max_size?: string | null
+          scientific_name?: string | null
+          species_name?: string | null
+        }
+        Update: {
+          "Conservation Status"?: string | null
+          depth_range?: string | null
+          description?: string | null
+          distribution?: string | null
+          family?: string | null
+          id?: number
+          max_size?: string | null
+          scientific_name?: string | null
+          species_name?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

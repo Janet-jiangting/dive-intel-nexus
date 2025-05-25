@@ -1,8 +1,9 @@
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Fish, MapPin, Ruler, AlertTriangle } from 'lucide-react';
+import { MapPin, Ruler, AlertTriangle } from 'lucide-react'; // Removed Fish icon for habitat
 import { Species } from '@/contexts/MarineLifeDataContext';
 
 interface MarineLifeCardProps {
@@ -36,6 +37,10 @@ const MarineLifeCard = ({ species }: MarineLifeCardProps) => {
             src={species.imageUrl}
             alt={species.name}
             className="w-full h-full object-cover"
+            onError={({ currentTarget }) => {
+              currentTarget.onerror = null; // prevents looping
+              currentTarget.src = '/placeholder.svg'; // fallback image
+            }}
           />
           <Badge className="absolute top-3 left-3" variant="secondary">
             {species.category}
@@ -58,27 +63,30 @@ const MarineLifeCard = ({ species }: MarineLifeCardProps) => {
             <p className="text-sm text-ocean-300 italic">{species.scientificName}</p>
           </div>
           
-          <p className="text-ocean-200 text-sm mb-4 line-clamp-2 flex-grow">
+          <p className="text-ocean-200 text-sm mb-4 line-clamp-3 flex-grow"> {/* Increased line-clamp from 2 to 3 */}
             {species.description}
           </p>
           
           <div className="space-y-2 mt-auto">
-            <div className="flex items-center text-sm">
+            {/* Habitat display removed */}
+            {/* <div className="flex items-center text-sm">
               <Fish className="h-4 w-4 mr-2 text-ocean-300 flex-shrink-0" />
               <span className="text-white truncate" title={species.habitat}>{species.habitat}</span>
-            </div>
+            </div> */}
             
             <div className="flex items-center text-sm">
               <Ruler className="h-4 w-4 mr-2 text-ocean-300 flex-shrink-0" />
               <span className="text-white">Depth: {species.depth}</span>
             </div>
             
-            <div className="flex items-start text-sm">
-              <MapPin className="h-4 w-4 mr-2 text-ocean-300 mt-0.5 flex-shrink-0" />
-              <span className="text-white">{species.regions.slice(0, 2).join(', ')}
-              {species.regions.length > 2 && '...'}
-              </span>
-            </div>
+            {species.regions && species.regions.length > 0 && (
+              <div className="flex items-start text-sm">
+                <MapPin className="h-4 w-4 mr-2 text-ocean-300 mt-0.5 flex-shrink-0" />
+                <span className="text-white">{species.regions.slice(0, 2).join(', ')}
+                {species.regions.length > 2 && '...'}
+                </span>
+              </div>
+            )}
           </div>
           
           {(species.conservationStatus === 'Critically Endangered' || 

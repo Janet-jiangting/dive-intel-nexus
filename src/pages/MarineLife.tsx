@@ -18,22 +18,18 @@ import {
 import MarineLifeCard from '@/components/MarineLifeCard';
 import FishIdentifier from '@/components/FishIdentifier';
 import { useMarineLifeData } from '@/contexts/MarineLifeDataContext';
+import { Skeleton } from '@/components/ui/skeleton'; // For loading state
 
 const MarineLife = () => {
-  const { marineLife: marineLifeData } = useMarineLifeData();
+  const { marineLife: marineLifeData, isLoading, error } = useMarineLifeData();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [showFilters, setShowFilters] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [selectedHabitat, setSelectedHabitat] = useState<string | null>(null);
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
   
   // Derive filter options from context data
   const categories = useMemo(() => [...new Set(marineLifeData.map(item => item.category))], [marineLifeData]);
-  const habitats = useMemo(() => {
-    const allHabitats = marineLifeData.flatMap(item => item.habitat.split(',').map(h => h.trim()));
-    return [...new Set(allHabitats)].filter(h => h);
-  }, [marineLifeData]);
   const conservationStatuses = useMemo(() => [...new Set(marineLifeData.map(item => item.conservationStatus))], [marineLifeData]);
 
   // Apply filters
@@ -45,14 +41,14 @@ const MarineLife = () => {
     }
     
     // Apply category filter
-    if (selectedCategory && item.category !== selectedCategory) { // Exact match for category
+    if (selectedCategory && item.category !== selectedCategory) {
       return false;
     }
     
-    // Apply habitat filter
-    if (selectedHabitat && !item.habitat.toLowerCase().includes(selectedHabitat.toLowerCase())) { // Check if habitat string includes selected
-      return false;
-    }
+    // Apply habitat filter - REMOVED
+    // if (selectedHabitat && !item.habitat.toLowerCase().includes(selectedHabitat.toLowerCase())) { 
+    //   return false;
+    // }
     
     // Apply conservation status filter
     if (selectedStatus && item.conservationStatus !== selectedStatus) {
@@ -60,7 +56,48 @@ const MarineLife = () => {
     }
     
     return true;
-  }), [marineLifeData, searchQuery, selectedCategory, selectedHabitat, selectedStatus]);
+  }), [marineLifeData, searchQuery, selectedCategory, /*selectedHabitat,*/ selectedStatus]);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-ocean-900 p-8">
+        <div className="container mx-auto">
+          <Skeleton className="h-12 w-1/2 mb-4" />
+          <Skeleton className="h-8 w-3/4 mb-8" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[...Array(6)].map((_, i) => (
+              <Card key={i} className="bg-ocean-800/50 border-ocean-700">
+                <Skeleton className="h-48 w-full" />
+                <CardContent className="pt-4">
+                  <Skeleton className="h-6 w-3/4 mb-2" />
+                  <Skeleton className="h-4 w-1/2 mb-4" />
+                  <Skeleton className="h-10 w-full mb-4" />
+                  <div className="space-y-2">
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-4 w-full" />
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-ocean-900 p-8 flex flex-col items-center justify-center text-white">
+        <AlertTriangle className="h-16 w-16 text-red-500 mb-4" />
+        <h2 className="text-2xl font-semibold mb-2">Error Loading Data</h2>
+        <p className="text-ocean-300 mb-4">Could not fetch marine life information. Please try again later.</p>
+        <pre className="text-xs bg-ocean-800 p-2 rounded whitespace-pre-wrap w-full max-w-md text-left">
+          {error.message}
+        </pre>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-ocean-900">
@@ -96,7 +133,8 @@ const MarineLife = () => {
           {showFilters && (
             <Card className="mt-4 bg-ocean-800 border-ocean-700">
               <CardContent className="pt-6">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {/* Grid columns adjusted from 3 to 2 as habitat filter is removed */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6"> 
                   <div>
                     <label htmlFor="category-select" className="text-sm font-medium text-ocean-200 mb-2 block">
                       Category
@@ -114,7 +152,8 @@ const MarineLife = () => {
                     </Select>
                   </div>
                   
-                  <div>
+                  {/* Habitat Select Removed */}
+                  {/* <div>
                     <label htmlFor="habitat-select" className="text-sm font-medium text-ocean-200 mb-2 block">
                       Habitat
                     </label>
@@ -129,7 +168,7 @@ const MarineLife = () => {
                         ))}
                       </SelectContent>
                     </Select>
-                  </div>
+                  </div> */}
                   
                   <div>
                     <label htmlFor="status-select" className="text-sm font-medium text-ocean-200 mb-2 block">
@@ -177,13 +216,14 @@ const MarineLife = () => {
         
         <Card className="bg-ocean-800/50 border-ocean-700 mb-8">
           <CardContent className="p-6">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+             {/* Adjusted grid-cols to 3 as one stat (habitat/dive regions related) might be removed or re-purposed */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               <div className="flex items-center space-x-4">
                 <div className="bg-ocean-700/80 rounded-full p-3">
                   <Fish className="h-6 w-6 text-ocean-300" />
                 </div>
                 <div>
-                  <h3 className="text-2xl font-bold text-white">{marineLifeData.length}+</h3>
+                  <h3 className="text-2xl font-bold text-white">{marineLifeData.length > 0 ? marineLifeData.length : '0'}+</h3>
                   <p className="text-ocean-300 text-sm">Species Cataloged</p>
                 </div>
               </div>
@@ -193,12 +233,13 @@ const MarineLife = () => {
                   <Database className="h-6 w-6 text-ocean-300" />
                 </div>
                 <div>
-                  <h3 className="text-2xl font-bold text-white">10,000+</h3>
-                  <p className="text-ocean-300 text-sm">Photos & Videos (Illustrative)</p>
+                  <h3 className="text-2xl font-bold text-white">Supabase</h3>
+                  <p className="text-ocean-300 text-sm">Powered Data</p>
                 </div>
               </div>
               
-              <div className="flex items-center space-x-4">
+              {/* Removed Dive Regions/Habitat Stat - Could be replaced if there's another relevant stat */}
+              {/* <div className="flex items-center space-x-4">
                 <div className="bg-ocean-700/80 rounded-full p-3">
                   <Waves className="h-6 w-6 text-ocean-300" />
                 </div>
@@ -206,7 +247,7 @@ const MarineLife = () => {
                   <h3 className="text-2xl font-bold text-white">120+</h3>
                   <p className="text-ocean-300 text-sm">Dive Regions (Illustrative)</p>
                 </div>
-              </div>
+              </div> */}
               
               <div className="flex items-center space-x-4">
                 <div className="bg-ocean-700/80 rounded-full p-3">
@@ -227,12 +268,12 @@ const MarineLife = () => {
           ))}
         </div>
         
-        {filteredMarineLife.length === 0 && (
+        {filteredMarineLife.length === 0 && !isLoading && (
           <div className="text-center py-12">
             <Fish className="h-12 w-12 text-ocean-600 mx-auto mb-4" />
             <h3 className="text-xl font-semibold text-white mb-2">No Species Found</h3>
             <p className="text-ocean-300 max-w-md mx-auto">
-              We couldn't find any marine species that match your search criteria. Try adjusting your filters or search terms.
+              We couldn't find any marine species that match your search criteria. Try adjusting your filters or search terms, or there might be no data available.
             </p>
           </div>
         )}
