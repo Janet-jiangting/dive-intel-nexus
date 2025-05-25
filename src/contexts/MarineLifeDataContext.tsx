@@ -51,10 +51,10 @@ export const MarineLifeDataProvider = ({ children }: { children: ReactNode }) =>
         if (data) {
           const mappedData: Species[] = data.map((item: any) => {
             // Construct image URL using species id.
-            // Assumes images in the bucket are named like 'id.jpg'.
+            // Assumes images in the bucket are named like 'id.png'.
             let imageNameForUrl: string;
             if (item.id) { // Check if id exists and is not null/undefined
-              imageNameForUrl = `${item.id}.jpg`; // Using id directly. Assuming .jpg extension.
+              imageNameForUrl = `${item.id}.png`; // Using id directly. Changed to .png extension.
             } else {
               imageNameForUrl = 'placeholder.svg'; // Fallback if id is not available
             }
@@ -78,7 +78,7 @@ export const MarineLifeDataProvider = ({ children }: { children: ReactNode }) =>
               conservationStatus: item['Conservation Status'] || 'Least Concern',
               description: item.description || 'No description available.',
               regions: regionsArray,
-              imageUrl: imageUrl, // imageUrl is now derived from id
+              imageUrl: imageUrl, // imageUrl is now derived from id with .png
               depth: item.depth_range || 'N/A',
             };
           });
