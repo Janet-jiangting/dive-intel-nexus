@@ -17,8 +17,20 @@ import {
 } from '@/components/ui/select';
 import MarineLifeCard from '@/components/MarineLifeCard';
 import FishIdentifier from '@/components/FishIdentifier';
-import { useMarineLifeData } from '@/contexts/MarineLifeDataContext';
-import { Skeleton } from '@/components/ui/skeleton'; // For loading state
+import { useMarineLifeData, Species } from '@/contexts/MarineLifeDataContext'; // Import Species
+import { Skeleton } from '@/components/ui/skeleton';
+import MarineLifeDetailModal from '@/components/MarineLifeDetailModal'; // Import modal
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination"; // Import pagination components
+
+const ITEMS_PER_PAGE = 9; // Number of items to display per page
 
 const MarineLife = () => {
   const { marineLife: marineLifeData, isLoading, error } = useMarineLifeData();
@@ -27,36 +39,112 @@ const MarineLife = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
+
+  // Modal State
+  const [selectedSpeciesModal, setSelectedSpeciesModal] = useState<Species | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // Pagination State
+  const [currentPage, setCurrentPage] = useState(1);
   
-  // Derive filter options from context data
+  // ... keep existing code (categories, conservationStatuses useMemo hooks)
   const categories = useMemo(() => [...new Set(marineLifeData.map(item => item.category))], [marineLifeData]);
   const conservationStatuses = useMemo(() => [...new Set(marineLifeData.map(item => item.conservationStatus))], [marineLifeData]);
 
-  // Apply filters
-  const filteredMarineLife = useMemo(() => marineLifeData.filter(item => {
-    // Apply search filter
-    if (searchQuery && !item.name.toLowerCase().includes(searchQuery.toLowerCase()) && 
-        !item.scientificName.toLowerCase().includes(searchQuery.toLowerCase())) {
-      return false;
+  const filteredMarineLife = useMemo(() => {
+    console.log("Filtering data. Search:", searchQuery, "Category:", selectedCategory, "Status:", selectedStatus);
+    const filtered = marineLifeData.filter(item => {
+      if (searchQuery && 
+          !item.name.toLowerCase().includes(searchQuery.toLowerCase()) && 
+          !item.scientificName.toLowerCase().includes(searchQuery.toLowerCase())) {
+        return false;
+      }
+      if (selectedCategory && item.category !== selectedCategory) return false;
+      if (selectedStatus && item.conservationStatus !== selectedStatus) return false;
+      return true;
+    });
+    console.log("Filtered count:", filtered.length);
+    return filtered;
+  }, [marineLifeData, searchQuery, selectedCategory, selectedStatus]);
+
+  // Paginated Data
+  const totalPages = Math.ceil(filteredMarineLife.length / ITEMS_PER_PAGE);
+  const paginatedMarineLife = useMemo(() => {
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    const endIndex = startIndex + ITEMS_PER_PAGE;
+    return filteredMarineLife.slice(startIndex, endIndex);
+  }, [filteredMarineLife, currentPage]);
+
+  const handleCardClick = (species: Species) => {
+    setSelectedSpeciesModal(species);
+    setIsModalOpen(true);
+  };
+
+  const handlePageChange = (page: number) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
     }
-    
-    // Apply category filter
-    if (selectedCategory && item.category !== selectedCategory) {
-      return false;
+  };
+  
+  const renderPaginationItems = () => {
+    const items = [];
+    const maxPagesToShow = 5; // Max number of page links to show (e.g., 1 ... 4 5 6 ... 10)
+    const halfMaxPages = Math.floor(maxPagesToShow / 2);
+
+    if (totalPages <= maxPagesToShow) {
+      for (let i = 1; i <= totalPages; i++) {
+        items.push(
+          <PaginationItem key={i}>
+            <PaginationLink href="#" isActive={currentPage === i} onClick={(e) => { e.preventDefault(); handlePageChange(i); }}>
+              {i}
+            </PaginationLink>
+          </PaginationItem>
+        );
+      }
+    } else {
+      // Show first page
+      items.push(
+        <PaginationItem key={1}>
+          <PaginationLink href="#" isActive={currentPage === 1} onClick={(e) => { e.preventDefault(); handlePageChange(1); }}>
+            1
+          </PaginationLink>
+        </PaginationItem>
+      );
+
+      let startPage = Math.max(2, currentPage - halfMaxPages + (currentPage > totalPages - halfMaxPages ? totalPages - currentPage - (halfMaxPages - (totalPages-currentPage)) +1 : 0) );
+      let endPage = Math.min(totalPages - 1, currentPage + halfMaxPages - (currentPage < halfMaxPages+1 ? halfMaxPages - currentPage +1 : 0));
+      
+      if (currentPage - 1 > halfMaxPages && totalPages > maxPagesToShow) {
+         items.push(<PaginationEllipsis key="start-ellipsis" />);
+      }
+      
+      for (let i = startPage; i <= endPage; i++) {
+          if (i === 0) continue;
+           items.push(
+             <PaginationItem key={i}>
+               <PaginationLink href="#" isActive={currentPage === i} onClick={(e) => { e.preventDefault(); handlePageChange(i); }}>
+                 {i}
+               </PaginationLink>
+             </PaginationItem>
+           );
+      }
+
+      if (totalPages - currentPage > halfMaxPages && totalPages > maxPagesToShow) {
+        items.push(<PaginationEllipsis key="end-ellipsis" />);
+      }
+
+      // Show last page
+      items.push(
+        <PaginationItem key={totalPages}>
+          <PaginationLink href="#" isActive={currentPage === totalPages} onClick={(e) => { e.preventDefault(); handlePageChange(totalPages); }}>
+            {totalPages}
+          </PaginationLink>
+        </PaginationItem>
+      );
     }
-    
-    // Apply habitat filter - REMOVED
-    // if (selectedHabitat && !item.habitat.toLowerCase().includes(selectedHabitat.toLowerCase())) { 
-    //   return false;
-    // }
-    
-    // Apply conservation status filter
-    if (selectedStatus && item.conservationStatus !== selectedStatus) {
-      return false;
-    }
-    
-    return true;
-  }), [marineLifeData, searchQuery, selectedCategory, /*selectedHabitat,*/ selectedStatus]);
+    return items;
+  };
+
 
   if (isLoading) {
     return (
@@ -65,7 +153,7 @@ const MarineLife = () => {
           <Skeleton className="h-12 w-1/2 mb-4" />
           <Skeleton className="h-8 w-3/4 mb-8" />
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[...Array(6)].map((_, i) => (
+            {[...Array(ITEMS_PER_PAGE)].map((_, i) => ( // Use ITEMS_PER_PAGE for skeleton
               <Card key={i} className="bg-ocean-800/50 border-ocean-700">
                 <Skeleton className="h-48 w-full" />
                 <CardContent className="pt-4">
@@ -115,7 +203,7 @@ const MarineLife = () => {
                 placeholder="Search for species by name or scientific name..."
                 className="pl-9 bg-ocean-700/50 border-ocean-600 text-white"
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }} // Reset to page 1 on search
               />
             </div>
             
@@ -133,13 +221,15 @@ const MarineLife = () => {
           {showFilters && (
             <Card className="mt-4 bg-ocean-800 border-ocean-700">
               <CardContent className="pt-6">
-                {/* Grid columns adjusted from 3 to 2 as habitat filter is removed */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6"> 
                   <div>
                     <label htmlFor="category-select" className="text-sm font-medium text-ocean-200 mb-2 block">
                       Category
                     </label>
-                    <Select onValueChange={(value) => setSelectedCategory(value === "Any Category" ? null : value)} value={selectedCategory || "Any Category"}>
+                    <Select 
+                        onValueChange={(value) => { setSelectedCategory(value === "Any Category" ? null : value); setCurrentPage(1);}} // Reset page
+                        value={selectedCategory || "Any Category"}
+                    >
                       <SelectTrigger id="category-select" className="bg-ocean-700/50 border-ocean-600 text-white">
                         <SelectValue placeholder="Any Category" />
                       </SelectTrigger>
@@ -152,29 +242,14 @@ const MarineLife = () => {
                     </Select>
                   </div>
                   
-                  {/* Habitat Select Removed */}
-                  {/* <div>
-                    <label htmlFor="habitat-select" className="text-sm font-medium text-ocean-200 mb-2 block">
-                      Habitat
-                    </label>
-                    <Select onValueChange={(value) => setSelectedHabitat(value === "Any Habitat" ? null : value)} value={selectedHabitat || "Any Habitat"}>
-                      <SelectTrigger id="habitat-select" className="bg-ocean-700/50 border-ocean-600 text-white">
-                        <SelectValue placeholder="Any Habitat" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Any Habitat">Any Habitat</SelectItem>
-                        {habitats.map((habitat) => (
-                          <SelectItem key={habitat} value={habitat}>{habitat}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div> */}
-                  
                   <div>
                     <label htmlFor="status-select" className="text-sm font-medium text-ocean-200 mb-2 block">
                       Conservation Status
                     </label>
-                    <Select onValueChange={(value) => setSelectedStatus(value === "Any Status" ? null : value)} value={selectedStatus || "Any Status"}>
+                    <Select 
+                        onValueChange={(value) => { setSelectedStatus(value === "Any Status" ? null : value); setCurrentPage(1);}} // Reset page
+                        value={selectedStatus || "Any Status"}
+                    >
                       <SelectTrigger id="status-select" className="bg-ocean-700/50 border-ocean-600 text-white">
                         <SelectValue placeholder="Any Status" />
                       </SelectTrigger>
@@ -202,6 +277,7 @@ const MarineLife = () => {
           <div>
             <span className="text-ocean-200">{filteredMarineLife.length} species found</span>
           </div>
+          {/* Sort by Select - functionality not implemented yet */}
           <Select defaultValue="name">
             <SelectTrigger className="w-[180px] bg-ocean-800/50 border-ocean-700 text-white">
               <SelectValue placeholder="Sort by" />
@@ -216,7 +292,6 @@ const MarineLife = () => {
         
         <Card className="bg-ocean-800/50 border-ocean-700 mb-8">
           <CardContent className="p-6">
-             {/* Adjusted grid-cols to 3 as one stat (habitat/dive regions related) might be removed or re-purposed */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               <div className="flex items-center space-x-4">
                 <div className="bg-ocean-700/80 rounded-full p-3">
@@ -238,17 +313,6 @@ const MarineLife = () => {
                 </div>
               </div>
               
-              {/* Removed Dive Regions/Habitat Stat - Could be replaced if there's another relevant stat */}
-              {/* <div className="flex items-center space-x-4">
-                <div className="bg-ocean-700/80 rounded-full p-3">
-                  <Waves className="h-6 w-6 text-ocean-300" />
-                </div>
-                <div>
-                  <h3 className="text-2xl font-bold text-white">120+</h3>
-                  <p className="text-ocean-300 text-sm">Dive Regions (Illustrative)</p>
-                </div>
-              </div> */}
-              
               <div className="flex items-center space-x-4">
                 <div className="bg-ocean-700/80 rounded-full p-3">
                   <AlertTriangle className="h-6 w-6 text-coral-500" />
@@ -263,10 +327,25 @@ const MarineLife = () => {
         </Card>
         
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredMarineLife.map((species) => (
-            <MarineLifeCard key={species.id} species={species} />
+          {paginatedMarineLife.map((species) => (
+            <MarineLifeCard key={species.id} species={species} onClick={() => handleCardClick(species)} />
           ))}
         </div>
+        
+        {/* Pagination Controls */}
+        {totalPages > 1 && (
+          <Pagination className="mt-12">
+            <PaginationContent>
+              <PaginationItem>
+                <PaginationPrevious href="#" onClick={(e) => { e.preventDefault(); handlePageChange(currentPage - 1); }} className={currentPage === 1 ? "pointer-events-none opacity-50" : ""}/>
+              </PaginationItem>
+              {renderPaginationItems()}
+              <PaginationItem>
+                <PaginationNext href="#" onClick={(e) => { e.preventDefault(); handlePageChange(currentPage + 1); }}  className={currentPage === totalPages ? "pointer-events-none opacity-50" : ""}/>
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
+        )}
         
         {filteredMarineLife.length === 0 && !isLoading && (
           <div className="text-center py-12">
@@ -320,6 +399,12 @@ const MarineLife = () => {
           </CardContent>
         </Card>
       </div>
+      
+      <MarineLifeDetailModal 
+        species={selectedSpeciesModal}
+        isOpen={isModalOpen}
+        onOpenChange={setIsModalOpen}
+      />
     </div>
   );
 };
