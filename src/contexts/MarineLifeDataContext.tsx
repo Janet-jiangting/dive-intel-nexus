@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client'; // Ensure this path is correct
 
@@ -12,7 +11,7 @@ export interface Species {
   conservationStatus: string;
   description: string;
   regions: string[]; // Was 'distribution' from Supabase, split into array
-  imageUrl: string; // Constructed from image_path and bucket
+  imageUrl: string; // Now constructed based on species_name
   depth: string; // Was 'depth_range'
 }
 
@@ -20,14 +19,14 @@ interface MarineLifeDataContextValue {
   marineLife: Species[];
   isLoading: boolean;
   error: Error | null;
-  addMarineLifeEntries: (entries: Species[]) => void; // Kept for now, but primary data source is Supabase
+  addMarineLifeEntries: (entries: Species[]) => void;
   getSpeciesById: (id: string | number) => Species | undefined;
 }
 
 const MarineLifeDataContext = createContext<MarineLifeDataContextValue | undefined>(undefined);
 
 const SUPABASE_PROJECT_REF = "ioyfxcceheflwshhaqhk";
-const IMAGE_BUCKET_NAME = "fishimages";
+const IMAGE_BUCKET_NAME = "fishimages"; // User confirmed this bucket name
 
 export const MarineLifeDataProvider = ({ children }: { children: ReactNode }) => {
   const [marineLife, setMarineLife] = useState<Species[]>([]);
@@ -39,13 +38,10 @@ export const MarineLifeDataProvider = ({ children }: { children: ReactNode }) =>
       setIsLoading(true);
       setError(null);
       try {
-        // Assuming your table is named "Marine Life". Adjust if different.
-        // Also, Supabase column names are typically snake_case.
-        // The user mentioned a 'Conservation Status' column, so I'll use 'Conservation_Status' as a placeholder,
-        // but it should match the exact column name in Supabase (likely 'conservation_status').
+        // Removed "image_path" from the select statement as it does not exist.
         const { data, error: dbError } = await supabase
-          .from('Marine Life') // Exact table name
-          .select('id, species_name, scientific_name, family, description, "Conservation Status", distribution, depth_range, image_path'); // Select specific columns
+          .from('Marine Life')
+          .select('id, species_name, scientific_name, family, description, "Conservation Status", distribution, depth_range');
 
         if (dbError) {
           console.error("Supabase error:", dbError);
@@ -54,13 +50,19 @@ export const MarineLifeDataProvider = ({ children }: { children: ReactNode }) =>
 
         if (data) {
           const mappedData: Species[] = data.map((item: any) => {
-            // Construct image URL
-            const imagePath = item.image_path || 'placeholder.svg'; // Use placeholder if no image_path
-            const imageUrl = imagePath === 'placeholder.svg' 
-              ? '/placeholder.svg' 
-              : `https://${SUPABASE_PROJECT_REF}.supabase.co/storage/v1/object/public/${IMAGE_BUCKET_NAME}/${item.image_path}`;
-            
-            // Handle regions (distribution)
+            // Construct image URL using species_name.
+            // Assumes images in the bucket are named like 'species_name.jpg' (lowercase, spaces replaced with underscores).
+            let imageNameForUrl: string;
+            if (item.species_name && typeof item.species_name === 'string' && item.species_name.trim() !== '') {
+              imageNameForUrl = `${item.species_name.trim().toLowerCase().replace(/\s+/g, '_')}.jpg`;
+            } else {
+              imageNameForUrl = 'placeholder.svg'; // Fallback if species_name is not available
+            }
+
+            const imageUrl = imageNameForUrl === 'placeholder.svg'
+              ? '/placeholder.svg'
+              : `https://${SUPABASE_PROJECT_REF}.supabase.co/storage/v1/object/public/${IMAGE_BUCKET_NAME}/${imageNameForUrl}`;
+
             let regionsArray: string[] = [];
             if (typeof item.distribution === 'string') {
               regionsArray = item.distribution.split(',').map(r => r.trim()).filter(r => r);
@@ -72,11 +74,11 @@ export const MarineLifeDataProvider = ({ children }: { children: ReactNode }) =>
               id: item.id,
               name: item.species_name || 'Unknown',
               scientificName: item.scientific_name || 'N/A',
-              category: item.family || 'Unknown', // Mapped from 'family'
-              conservationStatus: item['Conservation Status'] || 'Least Concern', // Default if null/empty
+              category: item.family || 'Unknown',
+              conservationStatus: item['Conservation Status'] || 'Least Concern',
               description: item.description || 'No description available.',
               regions: regionsArray,
-              imageUrl: imageUrl,
+              imageUrl: imageUrl, // imageUrl is now derived
               depth: item.depth_range || 'N/A',
             };
           });
@@ -85,7 +87,7 @@ export const MarineLifeDataProvider = ({ children }: { children: ReactNode }) =>
       } catch (err: any) {
         console.error("Error fetching marine life data:", err);
         setError(err);
-        setMarineLife([]); // Clear data on error
+        setMarineLife([]);
       } finally {
         setIsLoading(false);
       }
