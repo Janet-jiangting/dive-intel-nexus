@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Search, Filter, ChevronDown, Fish, Database, Waves, AlertTriangle, Globe } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -15,137 +15,29 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
 import MarineLifeCard from '@/components/MarineLifeCard';
 import FishIdentifier from '@/components/FishIdentifier';
-
-// Mock data for marine life
-const marineLifeData = [
-  {
-    id: 1,
-    name: 'Clownfish',
-    scientificName: 'Amphiprioninae',
-    category: 'Fish',
-    habitat: 'Coral Reefs',
-    conservationStatus: 'Least Concern',
-    description: 'Known for their bright orange coloration with white stripes and black borders.',
-    regions: ['Indo-Pacific', 'Great Barrier Reef', 'Red Sea'],
-    imageUrl: '/placeholder.svg',
-    depth: '1-15m',
-  },
-  {
-    id: 2,
-    name: 'Manta Ray',
-    scientificName: 'Manta birostris',
-    category: 'Ray',
-    habitat: 'Open Ocean',
-    conservationStatus: 'Vulnerable',
-    description: 'The largest type of ray, with a wingspan that can reach up to 7 meters.',
-    regions: ['Tropical Waters', 'Pacific Ocean', 'Indian Ocean', 'Atlantic Ocean'],
-    imageUrl: '/placeholder.svg',
-    depth: '10-120m',
-  },
-  {
-    id: 3,
-    name: 'Green Sea Turtle',
-    scientificName: 'Chelonia mydas',
-    category: 'Reptile',
-    habitat: 'Coral Reefs, Seagrass Beds',
-    conservationStatus: 'Endangered',
-    description: 'Named for the greenish color of their fat, these turtles are herbivores as adults.',
-    regions: ['Tropical Waters', 'Subtropical Waters'],
-    imageUrl: '/placeholder.svg',
-    depth: '3-40m',
-  },
-  {
-    id: 4,
-    name: 'Coral Grouper',
-    scientificName: 'Plectropomus leopardus',
-    category: 'Fish',
-    habitat: 'Coral Reefs',
-    conservationStatus: 'Near Threatened',
-    description: 'A predatory fish known for its bright red to brown coloration with blue spots.',
-    regions: ['Indo-Pacific', 'Great Barrier Reef'],
-    imageUrl: '/placeholder.svg',
-    depth: '5-50m',
-  },
-  {
-    id: 5,
-    name: 'Leafy Sea Dragon',
-    scientificName: 'Phycodurus eques',
-    category: 'Fish',
-    habitat: 'Kelp Forests',
-    conservationStatus: 'Near Threatened',
-    description: 'A unique marine fish with leaf-like appendages that provide excellent camouflage.',
-    regions: ['Southern Australia'],
-    imageUrl: '/placeholder.svg',
-    depth: '10-30m',
-  },
-  {
-    id: 6,
-    name: 'Blue-Spotted Stingray',
-    scientificName: 'Taeniura lymma',
-    category: 'Ray',
-    habitat: 'Coral Reefs, Sandy Bottoms',
-    conservationStatus: 'Near Threatened',
-    description: 'Distinctive ray with bright blue spots on a yellowish or greenish background.',
-    regions: ['Indo-Pacific', 'Red Sea'],
-    imageUrl: '/placeholder.svg',
-    depth: '2-30m',
-  },
-  {
-    id: 7,
-    name: 'Hawksbill Turtle',
-    scientificName: 'Eretmochelys imbricata',
-    category: 'Reptile',
-    habitat: 'Coral Reefs',
-    conservationStatus: 'Critically Endangered',
-    description: 'Recognized by its sharp, hawk-like beak and beautiful shell pattern.',
-    regions: ['Tropical Waters', 'Atlantic Ocean', 'Pacific Ocean'],
-    imageUrl: '/placeholder.svg',
-    depth: '1-30m',
-  },
-  {
-    id: 8,
-    name: 'Whale Shark',
-    scientificName: 'Rhincodon typus',
-    category: 'Shark',
-    habitat: 'Open Ocean, Coastal Areas',
-    conservationStatus: 'Endangered',
-    description: 'The largest known fish species, with a distinctive pattern of white spots on a dark background.',
-    regions: ['Tropical Waters', 'Warm Temperate Waters'],
-    imageUrl: '/placeholder.svg',
-    depth: '0-700m',
-  },
-  {
-    id: 9,
-    name: 'Seahorse',
-    scientificName: 'Hippocampus',
-    category: 'Fish',
-    habitat: 'Seagrass Beds, Coral Reefs',
-    conservationStatus: 'Vulnerable',
-    description: 'Small marine fish named for their horse-like head shape. Males carry the eggs in a pouch.',
-    regions: ['Worldwide in Temperate and Tropical Waters'],
-    imageUrl: '/placeholder.svg',
-    depth: '1-15m',
-  },
-];
-
-// Get unique values for filters
-const categories = [...new Set(marineLifeData.map(item => item.category))];
-const habitats = [...new Set(marineLifeData.map(item => item.habitat))];
-const conservationStatuses = [...new Set(marineLifeData.map(item => item.conservationStatus))];
+import { useMarineLifeData } from '@/contexts/MarineLifeDataContext';
 
 const MarineLife = () => {
+  const { marineLife: marineLifeData } = useMarineLifeData();
+
   const [searchQuery, setSearchQuery] = useState('');
   const [showFilters, setShowFilters] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedHabitat, setSelectedHabitat] = useState<string | null>(null);
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
   
+  // Derive filter options from context data
+  const categories = useMemo(() => [...new Set(marineLifeData.map(item => item.category))], [marineLifeData]);
+  const habitats = useMemo(() => {
+    const allHabitats = marineLifeData.flatMap(item => item.habitat.split(',').map(h => h.trim()));
+    return [...new Set(allHabitats)].filter(h => h);
+  }, [marineLifeData]);
+  const conservationStatuses = useMemo(() => [...new Set(marineLifeData.map(item => item.conservationStatus))], [marineLifeData]);
+
   // Apply filters
-  const filteredMarineLife = marineLifeData.filter(item => {
+  const filteredMarineLife = useMemo(() => marineLifeData.filter(item => {
     // Apply search filter
     if (searchQuery && !item.name.toLowerCase().includes(searchQuery.toLowerCase()) && 
         !item.scientificName.toLowerCase().includes(searchQuery.toLowerCase())) {
@@ -153,12 +45,12 @@ const MarineLife = () => {
     }
     
     // Apply category filter
-    if (selectedCategory && !item.category.includes(selectedCategory)) {
+    if (selectedCategory && item.category !== selectedCategory) { // Exact match for category
       return false;
     }
     
     // Apply habitat filter
-    if (selectedHabitat && !item.habitat.includes(selectedHabitat)) {
+    if (selectedHabitat && !item.habitat.toLowerCase().includes(selectedHabitat.toLowerCase())) { // Check if habitat string includes selected
       return false;
     }
     
@@ -168,7 +60,7 @@ const MarineLife = () => {
     }
     
     return true;
-  });
+  }), [marineLifeData, searchQuery, selectedCategory, selectedHabitat, selectedStatus]);
 
   return (
     <div className="min-h-screen bg-ocean-900">
@@ -206,15 +98,15 @@ const MarineLife = () => {
               <CardContent className="pt-6">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <div>
-                    <label className="text-sm font-medium text-ocean-200 mb-2 block">
+                    <label htmlFor="category-select" className="text-sm font-medium text-ocean-200 mb-2 block">
                       Category
                     </label>
-                    <Select onValueChange={(value) => setSelectedCategory(value || null)} value={selectedCategory || undefined}>
-                      <SelectTrigger className="bg-ocean-700/50 border-ocean-600 text-white">
+                    <Select onValueChange={(value) => setSelectedCategory(value === "Any Category" ? null : value)} value={selectedCategory || "Any Category"}>
+                      <SelectTrigger id="category-select" className="bg-ocean-700/50 border-ocean-600 text-white">
                         <SelectValue placeholder="Any Category" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">Any Category</SelectItem>
+                        <SelectItem value="Any Category">Any Category</SelectItem>
                         {categories.map((category) => (
                           <SelectItem key={category} value={category}>{category}</SelectItem>
                         ))}
@@ -223,15 +115,15 @@ const MarineLife = () => {
                   </div>
                   
                   <div>
-                    <label className="text-sm font-medium text-ocean-200 mb-2 block">
+                    <label htmlFor="habitat-select" className="text-sm font-medium text-ocean-200 mb-2 block">
                       Habitat
                     </label>
-                    <Select onValueChange={(value) => setSelectedHabitat(value || null)} value={selectedHabitat || undefined}>
-                      <SelectTrigger className="bg-ocean-700/50 border-ocean-600 text-white">
+                    <Select onValueChange={(value) => setSelectedHabitat(value === "Any Habitat" ? null : value)} value={selectedHabitat || "Any Habitat"}>
+                      <SelectTrigger id="habitat-select" className="bg-ocean-700/50 border-ocean-600 text-white">
                         <SelectValue placeholder="Any Habitat" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">Any Habitat</SelectItem>
+                        <SelectItem value="Any Habitat">Any Habitat</SelectItem>
                         {habitats.map((habitat) => (
                           <SelectItem key={habitat} value={habitat}>{habitat}</SelectItem>
                         ))}
@@ -240,15 +132,15 @@ const MarineLife = () => {
                   </div>
                   
                   <div>
-                    <label className="text-sm font-medium text-ocean-200 mb-2 block">
+                    <label htmlFor="status-select" className="text-sm font-medium text-ocean-200 mb-2 block">
                       Conservation Status
                     </label>
-                    <Select onValueChange={(value) => setSelectedStatus(value || null)} value={selectedStatus || undefined}>
-                      <SelectTrigger className="bg-ocean-700/50 border-ocean-600 text-white">
+                    <Select onValueChange={(value) => setSelectedStatus(value === "Any Status" ? null : value)} value={selectedStatus || "Any Status"}>
+                      <SelectTrigger id="status-select" className="bg-ocean-700/50 border-ocean-600 text-white">
                         <SelectValue placeholder="Any Status" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">Any Status</SelectItem>
+                        <SelectItem value="Any Status">Any Status</SelectItem>
                         {conservationStatuses.map((status) => (
                           <SelectItem key={status} value={status}>{status}</SelectItem>
                         ))}
@@ -263,7 +155,6 @@ const MarineLife = () => {
       </div>
       
       <div className="container mx-auto py-8 px-4">
-        {/* Fish Identifier Section */}
         <div className="mb-12">
           <FishIdentifier />
         </div>
@@ -284,7 +175,6 @@ const MarineLife = () => {
           </Select>
         </div>
         
-        {/* Marine Life Database Stats */}
         <Card className="bg-ocean-800/50 border-ocean-700 mb-8">
           <CardContent className="p-6">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -293,7 +183,7 @@ const MarineLife = () => {
                   <Fish className="h-6 w-6 text-ocean-300" />
                 </div>
                 <div>
-                  <h3 className="text-2xl font-bold text-white">500+</h3>
+                  <h3 className="text-2xl font-bold text-white">{marineLifeData.length}+</h3>
                   <p className="text-ocean-300 text-sm">Species Cataloged</p>
                 </div>
               </div>
@@ -304,7 +194,7 @@ const MarineLife = () => {
                 </div>
                 <div>
                   <h3 className="text-2xl font-bold text-white">10,000+</h3>
-                  <p className="text-ocean-300 text-sm">Photos & Videos</p>
+                  <p className="text-ocean-300 text-sm">Photos & Videos (Illustrative)</p>
                 </div>
               </div>
               
@@ -314,7 +204,7 @@ const MarineLife = () => {
                 </div>
                 <div>
                   <h3 className="text-2xl font-bold text-white">120+</h3>
-                  <p className="text-ocean-300 text-sm">Dive Regions</p>
+                  <p className="text-ocean-300 text-sm">Dive Regions (Illustrative)</p>
                 </div>
               </div>
               
@@ -323,8 +213,8 @@ const MarineLife = () => {
                   <AlertTriangle className="h-6 w-6 text-coral-500" />
                 </div>
                 <div>
-                  <h3 className="text-2xl font-bold text-white">75+</h3>
-                  <p className="text-coral-500 text-sm">Endangered Species</p>
+                  <h3 className="text-2xl font-bold text-white">{marineLifeData.filter(s => ['Endangered', 'Critically Endangered', 'Vulnerable'].includes(s.conservationStatus)).length}+</h3>
+                  <p className="text-coral-500 text-sm">At-Risk Species</p>
                 </div>
               </div>
             </div>
@@ -347,7 +237,6 @@ const MarineLife = () => {
           </div>
         )}
         
-        {/* Conservation Information */}
         <Card className="mt-12 bg-gradient-to-r from-ocean-800 to-ocean-900 border-ocean-700">
           <CardHeader>
             <CardTitle className="text-white flex items-center">

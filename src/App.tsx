@@ -13,28 +13,32 @@ import Community from "./pages/Community";
 import Layout from "./components/Layout";
 import ManageData from "./pages/ManageData";
 import MyOcean from "./pages/MyOcean";
+import { MarineLifeDataProvider } from "./contexts/MarineLifeDataContext"; // Added import
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Layout><Index /></Layout>} />
-          <Route path="/dive-sites" element={<Layout fullHeight={true}><DiveSites /></Layout>} />
-          <Route path="/dive-sites/:id" element={<Layout><DiveSiteDetail /></Layout>} />
-          <Route path="/marine-life" element={<Layout><MarineLife /></Layout>} />
-          <Route path="/community" element={<Layout><Community /></Layout>} />
-          <Route path="/manage-data" element={<Layout><ManageData /></Layout>} />
-          <Route path="/my-ocean" element={<Layout><MyOcean /></Layout>} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
+      <MarineLifeDataProvider> {/* Added Provider */}
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Layout><Index /></Layout>} />
+            <Route path="/dive-sites" element={<Layout fullHeight={true}><DiveSites /></Layout>} />
+            <Route path="/dive-sites/:id" element={<Layout><DiveSiteDetail /></Layout>} />
+            <Route path="/marine-life" element={<Layout><MarineLife /></Layout>} />
+            <Route path="/community" element={<Layout><Community /></Layout>} />
+            <Route path="/manage-data" element={<Layout><ManageData /></Layout>} />
+            <Route path="/my-ocean" element={<Layout><MyOcean /></Layout>} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </MarineLifeDataProvider> {/* Closed Provider */}
     </TooltipProvider>
   </QueryClientProvider>
 );
 
 export default App;
+
