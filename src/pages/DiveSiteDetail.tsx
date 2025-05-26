@@ -25,7 +25,7 @@ import PhotoGallery from '@/components/PhotoGallery';
 import ReviewsList from '@/components/ReviewsList';
 
 const SUPABASE_PROJECT_ID = 'ioyfxcceheflwshhaqhk';
-const SUPABASE_BUCKET_NAME = 'dive-site-images';
+const SUPABASE_BUCKET_NAME = 'divesitesimages'; // Updated bucket name
 const SUPABASE_STORAGE_BASE_URL = `https://${SUPABASE_PROJECT_ID}.supabase.co/storage/v1/object/public/${SUPABASE_BUCKET_NAME}/`;
 
 // Helper function to generate slug
@@ -37,7 +37,7 @@ const getDiveSiteDetails = (id: string) => {
   // A more robust solution would fetch this data or have a mapping.
   const siteName = 'Great Blue Hole'; 
   const siteImage = (id === '1' || id === null || id === undefined) ? 
-                    `${SUPABASE_STORAGE_BASE_URL}${slugify(siteName)}.jpg` : 
+                    `${SUPABASE_STORAGE_BASE_URL}${siteName}.jpg` : // Updated imageUrl
                     '/placeholder.svg'; // Fallback for other IDs if this function were more dynamic
 
   return {
@@ -46,7 +46,12 @@ const getDiveSiteDetails = (id: string) => {
     location: 'Lighthouse Reef, Belize',
     coordinates: { lat: 17.3157, lng: -87.5343 },
     imageUrl: siteImage,
-    gallery: ['/placeholder.svg', '/placeholder.svg', '/placeholder.svg', '/placeholder.svg'], // Gallery images remain placeholders
+    gallery: [ // Assuming gallery images might also come from Supabase with similar naming
+      `${SUPABASE_STORAGE_BASE_URL}${siteName}-gallery1.jpg`, 
+      `${SUPABASE_STORAGE_BASE_URL}${siteName}-gallery2.jpg`, 
+      `${SUPABASE_STORAGE_BASE_URL}${siteName}-gallery3.jpg`, 
+      `${SUPABASE_STORAGE_BASE_URL}${siteName}-gallery4.jpg`
+    ], 
     type: 'Cave',
     rating: 4.8,
     difficulty: 'Advanced',

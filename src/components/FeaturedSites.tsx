@@ -6,11 +6,8 @@ import { Badge } from '@/components/ui/badge';
 import { MapPin, Star, Waves } from 'lucide-react';
 
 const SUPABASE_PROJECT_ID = 'ioyfxcceheflwshhaqhk';
-const SUPABASE_BUCKET_NAME = 'dive-site-images';
+const SUPABASE_BUCKET_NAME = 'divesitesimages'; // Updated bucket name
 const SUPABASE_STORAGE_BASE_URL = `https://${SUPABASE_PROJECT_ID}.supabase.co/storage/v1/object/public/${SUPABASE_BUCKET_NAME}/`;
-
-// Helper function to generate slug
-const slugify = (name: string) => name.toLowerCase().replace(/\s+/g, '-');
 
 // Mock data for featured dive sites
 const featuredSites = [
@@ -18,7 +15,7 @@ const featuredSites = [
     id: 1,
     name: 'Great Blue Hole',
     location: 'Belize',
-    imageUrl: `${SUPABASE_STORAGE_BASE_URL}${slugify('Great Blue Hole')}.jpg`,
+    imageUrl: `${SUPABASE_STORAGE_BASE_URL}Great Blue Hole.jpg`, // Updated imageUrl
     type: 'Cave',
     rating: 4.8,
     difficulty: 'Advanced',
@@ -27,7 +24,7 @@ const featuredSites = [
     id: 2,
     name: 'SS Thistlegorm',
     location: 'Red Sea, Egypt',
-    imageUrl: `${SUPABASE_STORAGE_BASE_URL}${slugify('SS Thistlegorm')}.jpg`,
+    imageUrl: `${SUPABASE_STORAGE_BASE_URL}SS Thistlegorm.jpg`, // Updated imageUrl
     type: 'Wreck',
     rating: 4.9,
     difficulty: 'Intermediate',
@@ -36,7 +33,7 @@ const featuredSites = [
     id: 3,
     name: 'Barracuda Point',
     location: 'Sipadan, Malaysia',
-    imageUrl: `${SUPABASE_STORAGE_BASE_URL}${slugify('Barracuda Point')}.jpg`,
+    imageUrl: `${SUPABASE_STORAGE_BASE_URL}Barracuda Point.jpg`, // Updated imageUrl
     type: 'Wall',
     rating: 4.7,
     difficulty: 'Intermediate',
@@ -45,7 +42,7 @@ const featuredSites = [
     id: 4,
     name: 'Molokini Crater',
     location: 'Maui, Hawaii',
-    imageUrl: `${SUPABASE_STORAGE_BASE_URL}${slugify('Molokini Crater')}.jpg`,
+    imageUrl: `${SUPABASE_STORAGE_BASE_URL}Molokini Crater.jpg`, // Updated imageUrl
     type: 'Reef',
     rating: 4.5,
     difficulty: 'Beginner',

@@ -30,7 +30,7 @@ import DiveMap from '@/components/DiveMap';
 import DiveSiteCard from '@/components/DiveSiteCard';
 
 const SUPABASE_PROJECT_ID = 'ioyfxcceheflwshhaqhk';
-const SUPABASE_BUCKET_NAME = 'dive-site-images';
+const SUPABASE_BUCKET_NAME = 'divesitesimages'; // Updated bucket name
 const SUPABASE_STORAGE_BASE_URL = `https://${SUPABASE_PROJECT_ID}.supabase.co/storage/v1/object/public/${SUPABASE_BUCKET_NAME}/`;
 
 // Helper function to generate slug
@@ -43,7 +43,7 @@ const diveSites = [
     name: 'Great Blue Hole',
     location: 'Belize',
     coordinates: { lat: 17.3157, lng: -87.5343 },
-    imageUrl: `${SUPABASE_STORAGE_BASE_URL}${slugify('Great Blue Hole')}.jpg`,
+    imageUrl: `${SUPABASE_STORAGE_BASE_URL}Great Blue Hole.jpg`, // Updated imageUrl
     type: 'Cave',
     rating: 4.8,
     difficulty: 'Advanced',
@@ -58,7 +58,7 @@ const diveSites = [
     name: 'SS Thistlegorm',
     location: 'Red Sea, Egypt',
     coordinates: { lat: 27.8167, lng: 33.9167 },
-    imageUrl: `${SUPABASE_STORAGE_BASE_URL}${slugify('SS Thistlegorm')}.jpg`,
+    imageUrl: `${SUPABASE_STORAGE_BASE_URL}SS Thistlegorm.jpg`, // Updated imageUrl
     type: 'Wreck',
     rating: 4.9,
     difficulty: 'Intermediate',
@@ -73,7 +73,7 @@ const diveSites = [
     name: 'Barracuda Point',
     location: 'Sipadan, Malaysia',
     coordinates: { lat: 4.115, lng: 118.6283 },
-    imageUrl: `${SUPABASE_STORAGE_BASE_URL}${slugify('Barracuda Point')}.jpg`,
+    imageUrl: `${SUPABASE_STORAGE_BASE_URL}Barracuda Point.jpg`, // Updated imageUrl
     type: 'Wall',
     rating: 4.7,
     difficulty: 'Intermediate',
@@ -88,7 +88,7 @@ const diveSites = [
     name: 'Molokini Crater',
     location: 'Maui, Hawaii',
     coordinates: { lat: 20.6336, lng: -156.4975 },
-    imageUrl: `${SUPABASE_STORAGE_BASE_URL}${slugify('Molokini Crater')}.jpg`,
+    imageUrl: `${SUPABASE_STORAGE_BASE_URL}Molokini Crater.jpg`, // Updated imageUrl
     type: 'Reef',
     rating: 4.5,
     difficulty: 'Beginner',
@@ -103,7 +103,7 @@ const diveSites = [
     name: 'Blue Corner',
     location: 'Palau',
     coordinates: { lat: 7.1367, lng: 134.2214 },
-    imageUrl: `${SUPABASE_STORAGE_BASE_URL}${slugify('Blue Corner')}.jpg`,
+    imageUrl: `${SUPABASE_STORAGE_BASE_URL}Blue Corner.jpg`, // Updated imageUrl
     type: 'Wall',
     rating: 4.9,
     difficulty: 'Advanced',
@@ -118,7 +118,7 @@ const diveSites = [
     name: 'Richelieu Rock',
     location: 'Surin Islands, Thailand',
     coordinates: { lat: 9.3598, lng: 98.0236 },
-    imageUrl: `${SUPABASE_STORAGE_BASE_URL}${slugify('Richelieu Rock')}.jpg`,
+    imageUrl: `${SUPABASE_STORAGE_BASE_URL}Richelieu Rock.jpg`, // Updated imageUrl
     type: 'Pinnacle',
     rating: 4.8,
     difficulty: 'Intermediate',
