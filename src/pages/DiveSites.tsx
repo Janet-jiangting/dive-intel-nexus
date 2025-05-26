@@ -1,12 +1,15 @@
 import React, { useState } from 'react';
 import { 
-  Search, MapPin, Filter 
+  Search, Filter, MapPin, Waves, User, Clock, ChevronDown, 
+  Star, Thermometer, Compass, Mountain, Eye 
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
   Card,
   CardContent,
+  CardHeader,
+  CardTitle,
 } from '@/components/ui/card';
 import {
   Select,
@@ -120,16 +123,17 @@ const diveSitesData = [
 
 const diveSites = diveSitesData.map(site => ({
   ...site,
-  imageUrl: `${SUPABASE_STORAGE_PUBLIC_URL}${SUPABASE_BUCKET_NAME}//${encodeURIComponent(site.name.replace(/\s/g, '_'))}.jpg`,
+  imageUrl: `${SUPABASE_STORAGE_PUBLIC_URL}${SUPABASE_BUCKET_NAME}//${encodeURIComponent(site.name)}.jpg`,
 }));
 
 const DiveSites = () => {
+  const [view, setView] = useState<'list' | 'map'>('list');
   const [searchQuery, setSearchQuery] = useState('');
+  const [showFilters, setShowFilters] = useState(false);
   const [selectedDifficulty, setSelectedDifficulty] = useState<string | null>(null);
   const [selectedType, setSelectedType] = useState<string | null>(null);
   const [depthRange, setDepthRange] = useState([0, 130]);
   const [temperatureRange, setTemperatureRange] = useState([20, 30]);
-  const [activeView, setActiveView] = useState<'list' | 'map'>('list');
 
   const filteredSites = diveSites.filter(site => {
     // Apply search filter
@@ -163,14 +167,14 @@ const DiveSites = () => {
 
   return (
     <div className="min-h-screen bg-ocean-900">
-      <div className="bg-ocean-800 py-8 px-4">
+      <div className="bg-ocean-800 py-12 px-4">
         <div className="container mx-auto">
           <h1 className="text-3xl font-bold text-white mb-2">Dive Sites</h1>
-          <p className="text-ocean-200 mb-6">
+          <p className="text-ocean-200 mb-8">
             Explore and discover dive sites around the world
           </p>
           
-          <div className="flex flex-col md:flex-row gap-4 mb-6">
+          <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1 relative">
               <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
               <Input
@@ -181,11 +185,20 @@ const DiveSites = () => {
               />
             </div>
             
+            <Button 
+              variant="outline" 
+              className="border-ocean-600 text-white hover:bg-ocean-700 flex items-center gap-2"
+              onClick={() => setShowFilters(!showFilters)}
+            >
+              <Filter className="h-4 w-4" />
+              Filters
+              <ChevronDown className={`h-4 w-4 transition-transform ${showFilters ? 'rotate-180' : ''}`} />
+            </Button>
+            
             <Tabs 
               defaultValue="list" 
-              value={activeView}
-              onValueChange={(value) => setActiveView(value as 'list' | 'map')}
               className="w-fit"
+              onValueChange={(value) => setView(value as 'list' | 'map')}
             >
               <TabsList className="bg-ocean-700">
                 <TabsTrigger value="list">List</TabsTrigger>
@@ -194,85 +207,86 @@ const DiveSites = () => {
             </Tabs>
           </div>
           
-          {/* Always visible filters */}
-          <Card className="bg-ocean-800 border-ocean-700">
-            <CardContent className="pt-6">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                <div>
-                  <label className="text-sm font-medium text-ocean-200 mb-2 block">
-                    Difficulty Level
-                  </label>
-                  <Select onValueChange={setSelectedDifficulty} value={selectedDifficulty || undefined}>
-                    <SelectTrigger className="bg-ocean-700/50 border-ocean-600 text-white">
-                      <SelectValue placeholder="Any Difficulty" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Beginner">Beginner</SelectItem>
-                      <SelectItem value="Intermediate">Intermediate</SelectItem>
-                      <SelectItem value="Advanced">Advanced</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <div>
-                  <label className="text-sm font-medium text-ocean-200 mb-2 block">
-                    Site Type
-                  </label>
-                  <Select onValueChange={setSelectedType} value={selectedType || undefined}>
-                    <SelectTrigger className="bg-ocean-700/50 border-ocean-600 text-white">
-                      <SelectValue placeholder="Any Type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Reef">Reef</SelectItem>
-                      <SelectItem value="Wreck">Wreck</SelectItem>
-                      <SelectItem value="Wall">Wall</SelectItem>
-                      <SelectItem value="Cave">Cave</SelectItem>
-                      <SelectItem value="Pinnacle">Pinnacle</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <div>
-                  <label className="text-sm font-medium text-ocean-200 mb-2 block">
-                    Depth Range (m)
-                  </label>
-                  <div className="px-2">
-                    <Slider
-                      value={depthRange}
-                      max={130}
-                      step={1}
-                      onValueChange={setDepthRange}
-                      className="[&>span:first-child]:h-1 [&>span:first-child]:bg-ocean-400 [&_[role=slider]]:bg-ocean-300 [&_[role=slider]]:border-ocean-300"
-                    />
-                    <div className="flex justify-between mt-1 text-xs text-ocean-300">
-                      <span>{depthRange[0]}m</span>
-                      <span>{depthRange[1]}m</span>
+          {showFilters && (
+            <Card className="mt-4 bg-ocean-800 border-ocean-700">
+              <CardContent className="pt-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                  <div>
+                    <label className="text-sm font-medium text-ocean-200 mb-2 block">
+                      Difficulty Level
+                    </label>
+                    <Select onValueChange={setSelectedDifficulty}>
+                      <SelectTrigger className="bg-ocean-700/50 border-ocean-600 text-white">
+                        <SelectValue placeholder="Any Difficulty" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Beginner">Beginner</SelectItem>
+                        <SelectItem value="Intermediate">Intermediate</SelectItem>
+                        <SelectItem value="Advanced">Advanced</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div>
+                    <label className="text-sm font-medium text-ocean-200 mb-2 block">
+                      Site Type
+                    </label>
+                    <Select onValueChange={setSelectedType}>
+                      <SelectTrigger className="bg-ocean-700/50 border-ocean-600 text-white">
+                        <SelectValue placeholder="Any Type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Reef">Reef</SelectItem>
+                        <SelectItem value="Wreck">Wreck</SelectItem>
+                        <SelectItem value="Wall">Wall</SelectItem>
+                        <SelectItem value="Cave">Cave</SelectItem>
+                        <SelectItem value="Pinnacle">Pinnacle</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div>
+                    <label className="text-sm font-medium text-ocean-200 mb-2 block">
+                      Depth Range (m)
+                    </label>
+                    <div className="px-2">
+                      <Slider
+                        defaultValue={[0, 130]}
+                        max={130}
+                        step={1}
+                        onValueChange={setDepthRange}
+                        className="[&>span:first-child]:h-1 [&>span:first-child]:bg-ocean-400 [&_[role=slider]]:bg-ocean-300 [&_[role=slider]]:border-ocean-300"
+                      />
+                      <div className="flex justify-between mt-1 text-xs text-ocean-300">
+                        <span>{depthRange[0]}m</span>
+                        <span>{depthRange[1]}m</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <label className="text-sm font-medium text-ocean-200 mb-2 block">
+                      Water Temperature (°C)
+                    </label>
+                    <div className="px-2">
+                      <Slider
+                        defaultValue={[20, 30]}
+                        min={10}
+                        max={35}
+                        step={1}
+                        onValueChange={setTemperatureRange}
+                        className="[&>span:first-child]:h-1 [&>span:first-child]:bg-ocean-400 [&_[role=slider]]:bg-ocean-300 [&_[role=slider]]:border-ocean-300"
+                      />
+                      <div className="flex justify-between mt-1 text-xs text-ocean-300">
+                        <span>{temperatureRange[0]}°C</span>
+                        <span>{temperatureRange[1]}°C</span>
+                      </div>
                     </div>
                   </div>
                 </div>
-                
-                <div>
-                  <label className="text-sm font-medium text-ocean-200 mb-2 block">
-                    Water Temperature (°C)
-                  </label>
-                  <div className="px-2">
-                    <Slider
-                      value={temperatureRange}
-                      min={10}
-                      max={35}
-                      step={1}
-                      onValueChange={setTemperatureRange}
-                      className="[&>span:first-child]:h-1 [&>span:first-child]:bg-ocean-400 [&_[role=slider]]:bg-ocean-300 [&_[role=slider]]:border-ocean-300"
-                    />
-                    <div className="flex justify-between mt-1 text-xs text-ocean-300">
-                      <span>{temperatureRange[0]}°C</span>
-                      <span>{temperatureRange[1]}°C</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          )}
         </div>
       </div>
       
@@ -293,23 +307,14 @@ const DiveSites = () => {
           </Select>
         </div>
         
-        {/* Content display based on activeView */}
-        {activeView === 'list' ? (
+        {view === 'list' ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredSites.length > 0 ? (
-              filteredSites.map((site) => (
-                <DiveSiteCard key={site.id} site={site} />
-              ))
-            ) : (
-              <div className="col-span-full text-center py-10">
-                <MapPin className="mx-auto h-12 w-12 text-ocean-400 mb-4" />
-                <p className="text-xl text-ocean-200">No dive sites found matching your criteria.</p>
-                <p className="text-ocean-300">Try adjusting your filters or search terms.</p>
-              </div>
-            )}
+            {filteredSites.map((site) => (
+              <DiveSiteCard key={site.id} site={site} />
+            ))}
           </div>
-        ) : ( // activeView === 'map'
-          <div className="h-[70vh] w-full rounded-lg overflow-hidden border border-ocean-700 shadow-xl">
+        ) : (
+          <div className="h-[600px] rounded-lg overflow-hidden border border-ocean-700">
             <DiveMap sites={filteredSites} />
           </div>
         )}
