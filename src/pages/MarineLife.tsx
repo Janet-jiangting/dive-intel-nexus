@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Search, Filter, ChevronDown, Fish, Database, Waves, AlertTriangle, Globe } from 'lucide-react';
+import { Fish, Database, AlertTriangle, Globe } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import {
@@ -17,9 +17,9 @@ import {
 } from '@/components/ui/select';
 import MarineLifeCard from '@/components/MarineLifeCard';
 import FishIdentifier from '@/components/FishIdentifier';
-import { useMarineLifeData, Species } from '@/contexts/MarineLifeDataContext'; // Import Species
+import { useMarineLifeData, Species } from '@/contexts/MarineLifeDataContext';
 import { Skeleton } from '@/components/ui/skeleton';
-import MarineLifeDetailModal from '@/components/MarineLifeDetailModal'; // Import modal
+import MarineLifeDetailModal from '@/components/MarineLifeDetailModal';
 import {
   Pagination,
   PaginationContent,
@@ -28,17 +28,22 @@ import {
   PaginationLink,
   PaginationNext,
   PaginationPrevious,
-} from "@/components/ui/pagination"; // Import pagination components
+} from "@/components/ui/pagination";
+import MarineLifeFilters, { MarineFilters } from '@/components/MarineLifeFilters';
 
-const ITEMS_PER_PAGE = 9; // Number of items to display per page
+const ITEMS_PER_PAGE = 9;
 
 const MarineLife = () => {
   const { marineLife: marineLifeData, isLoading, error } = useMarineLifeData();
 
-  const [searchQuery, setSearchQuery] = useState('');
-  const [showFilters, setShowFilters] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
+  const initialFiltersState: MarineFilters = {
+    searchQuery: '',
+    category: null,
+    status: null,
+    depthRange: null,
+    distribution: null,
+  };
+  const [appliedFilters, setAppliedFilters] = useState<MarineFilters>(initialFiltersState);
 
   // Modal State
   const [selectedSpeciesModal, setSelectedSpeciesModal] = useState<Species | null>(null);
@@ -47,25 +52,23 @@ const MarineLife = () => {
   // Pagination State
   const [currentPage, setCurrentPage] = useState(1);
   
-  // ... keep existing code (categories, conservationStatuses useMemo hooks)
-  const categories = useMemo(() => [...new Set(marineLifeData.map(item => item.category))], [marineLifeData]);
-  const conservationStatuses = useMemo(() => [...new Set(marineLifeData.map(item => item.conservationStatus))], [marineLifeData]);
-
   const filteredMarineLife = useMemo(() => {
-    console.log("Filtering data. Search:", searchQuery, "Category:", selectedCategory, "Status:", selectedStatus);
+    console.log("Filtering data with applied filters:", appliedFilters);
     const filtered = marineLifeData.filter(item => {
-      if (searchQuery && 
-          !item.name.toLowerCase().includes(searchQuery.toLowerCase()) && 
-          !item.scientificName.toLowerCase().includes(searchQuery.toLowerCase())) {
+      if (appliedFilters.searchQuery && 
+          !item.name.toLowerCase().includes(appliedFilters.searchQuery.toLowerCase()) && 
+          !item.scientificName.toLowerCase().includes(appliedFilters.searchQuery.toLowerCase())) {
         return false;
       }
-      if (selectedCategory && item.category !== selectedCategory) return false;
-      if (selectedStatus && item.conservationStatus !== selectedStatus) return false;
+      if (appliedFilters.category && item.category !== appliedFilters.category) return false;
+      if (appliedFilters.status && item.conservationStatus !== appliedFilters.status) return false;
+      if (appliedFilters.depthRange && item.depth_range !== appliedFilters.depthRange) return false;
+      if (appliedFilters.distribution && item.distribution !== appliedFilters.distribution) return false;
       return true;
     });
     console.log("Filtered count:", filtered.length);
     return filtered;
-  }, [marineLifeData, searchQuery, selectedCategory, selectedStatus]);
+  }, [marineLifeData, appliedFilters]);
 
   // Paginated Data
   const totalPages = Math.ceil(filteredMarineLife.length / ITEMS_PER_PAGE);
@@ -85,7 +88,12 @@ const MarineLife = () => {
       setCurrentPage(page);
     }
   };
-  
+
+  const handleApplyFiltersInPage = (filters: MarineFilters) => {
+    setAppliedFilters(filters);
+    setCurrentPage(1); // Reset to page 1 when filters are applied
+  };
+
   const renderPaginationItems = () => {
     const items = [];
     const maxPagesToShow = 5; // Max number of page links to show (e.g., 1 ... 4 5 6 ... 10)
@@ -119,7 +127,7 @@ const MarineLife = () => {
       }
       
       for (let i = startPage; i <= endPage; i++) {
-          if (i === 0) continue;
+          if (i === 0) continue; // Should not happen with Math.max(2, ...)
            items.push(
              <PaginationItem key={i}>
                <PaginationLink href="#" isActive={currentPage === i} onClick={(e) => { e.preventDefault(); handlePageChange(i); }}>
@@ -145,15 +153,26 @@ const MarineLife = () => {
     return items;
   };
 
-
   if (isLoading) {
     return (
       <div className="min-h-screen bg-ocean-900 p-8">
         <div className="container mx-auto">
           <Skeleton className="h-12 w-1/2 mb-4" />
           <Skeleton className="h-8 w-3/4 mb-8" />
+          {/* Skeleton for filters */}
+          <Card className="bg-ocean-800 border-ocean-700 mb-8">
+            <CardContent className="pt-6">
+                <Skeleton className="h-10 w-full mb-4" /> {/* Search bar skeleton */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                    {[...Array(4)].map((_, i) => <Skeleton key={i} className="h-10 w-full" />)} {/* Filter selects skeleton */}
+                </div>
+                <div className="flex justify-end">
+                    <Skeleton className="h-10 w-24" /> {/* Apply button skeleton */}
+                </div>
+            </CardContent>
+          </Card>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[...Array(ITEMS_PER_PAGE)].map((_, i) => ( // Use ITEMS_PER_PAGE for skeleton
+            {[...Array(ITEMS_PER_PAGE)].map((_, i) => (
               <Card key={i} className="bg-ocean-800/50 border-ocean-700">
                 <Skeleton className="h-48 w-full" />
                 <CardContent className="pt-4">
@@ -161,7 +180,6 @@ const MarineLife = () => {
                   <Skeleton className="h-4 w-1/2 mb-4" />
                   <Skeleton className="h-10 w-full mb-4" />
                   <div className="space-y-2">
-                    <Skeleton className="h-4 w-full" />
                     <Skeleton className="h-4 w-full" />
                     <Skeleton className="h-4 w-full" />
                   </div>
@@ -196,75 +214,11 @@ const MarineLife = () => {
             Explore and learn about diverse marine species around the world
           </p>
           
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="flex-1 relative">
-              <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search for species by name or scientific name..."
-                className="pl-9 bg-ocean-700/50 border-ocean-600 text-white"
-                value={searchQuery}
-                onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }} // Reset to page 1 on search
-              />
-            </div>
-            
-            <Button 
-              variant="outline" 
-              className="border-ocean-600 text-white hover:bg-ocean-700 flex items-center gap-2"
-              onClick={() => setShowFilters(!showFilters)}
-            >
-              <Filter className="h-4 w-4" />
-              Filters
-              <ChevronDown className={`h-4 w-4 transition-transform ${showFilters ? 'rotate-180' : ''}`} />
-            </Button>
-          </div>
-          
-          {showFilters && (
-            <Card className="mt-4 bg-ocean-800 border-ocean-700">
-              <CardContent className="pt-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6"> 
-                  <div>
-                    <label htmlFor="category-select" className="text-sm font-medium text-ocean-200 mb-2 block">
-                      Category
-                    </label>
-                    <Select 
-                        onValueChange={(value) => { setSelectedCategory(value === "Any Category" ? null : value); setCurrentPage(1);}} // Reset page
-                        value={selectedCategory || "Any Category"}
-                    >
-                      <SelectTrigger id="category-select" className="bg-ocean-700/50 border-ocean-600 text-white">
-                        <SelectValue placeholder="Any Category" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Any Category">Any Category</SelectItem>
-                        {categories.map((category) => (
-                          <SelectItem key={category} value={category}>{category}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  
-                  <div>
-                    <label htmlFor="status-select" className="text-sm font-medium text-ocean-200 mb-2 block">
-                      Conservation Status
-                    </label>
-                    <Select 
-                        onValueChange={(value) => { setSelectedStatus(value === "Any Status" ? null : value); setCurrentPage(1);}} // Reset page
-                        value={selectedStatus || "Any Status"}
-                    >
-                      <SelectTrigger id="status-select" className="bg-ocean-700/50 border-ocean-600 text-white">
-                        <SelectValue placeholder="Any Status" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Any Status">Any Status</SelectItem>
-                        {conservationStatuses.map((status) => (
-                          <SelectItem key={status} value={status}>{status}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          )}
+          <MarineLifeFilters 
+            marineLifeData={marineLifeData} 
+            onApplyFilters={handleApplyFiltersInPage}
+            initialFilters={appliedFilters}
+          />
         </div>
       </div>
       
@@ -284,8 +238,10 @@ const MarineLife = () => {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="name">Name A-Z</SelectItem>
+              <SelectItem value="name_desc">Name Z-A</SelectItem>
               <SelectItem value="status">Conservation Status</SelectItem>
               <SelectItem value="category">Category</SelectItem>
+              {/* Add more sort options if needed */}
             </SelectContent>
           </Select>
         </div>
@@ -332,7 +288,6 @@ const MarineLife = () => {
           ))}
         </div>
         
-        {/* Pagination Controls */}
         {totalPages > 1 && (
           <Pagination className="mt-12">
             <PaginationContent>
@@ -352,7 +307,7 @@ const MarineLife = () => {
             <Fish className="h-12 w-12 text-ocean-600 mx-auto mb-4" />
             <h3 className="text-xl font-semibold text-white mb-2">No Species Found</h3>
             <p className="text-ocean-300 max-w-md mx-auto">
-              We couldn't find any marine species that match your search criteria. Try adjusting your filters or search terms, or there might be no data available.
+              We couldn't find any marine species that match your search criteria. Try adjusting your filters or search terms.
             </p>
           </div>
         )}
@@ -371,7 +326,8 @@ const MarineLife = () => {
             </p>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-              <div className="bg-ocean-700/50 rounded-lg p-4 border-l-4 border-l-red-600">
+               {/* ... existing conservation status info boxes ... */}
+                <div className="bg-ocean-700/50 rounded-lg p-4 border-l-4 border-l-red-600">
                 <h4 className="font-semibold text-white mb-2">Critically Endangered</h4>
                 <p className="text-sm text-ocean-200">
                   Facing an extremely high risk of extinction in the wild.
