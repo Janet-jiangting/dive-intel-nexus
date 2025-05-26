@@ -25,8 +25,8 @@ import PhotoGallery from '@/components/PhotoGallery';
 import ReviewsList from '@/components/ReviewsList';
 
 const SUPABASE_PROJECT_ID = 'ioyfxcceheflwshhaqhk';
-const SUPABASE_BUCKET_NAME = 'divesitesimages'; // Updated bucket name
-const SUPABASE_STORAGE_BASE_URL = `https://${SUPABASE_PROJECT_ID}.supabase.co/storage/v1/object/public/${SUPABASE_BUCKET_NAME}/`;
+const SUPABASE_BUCKET_NAME = 'divesiteimages'; // Corrected bucket name
+const SUPABASE_STORAGE_PUBLIC_URL = `https://${SUPABASE_PROJECT_ID}.supabase.co/storage/v1/object/public/`;
 
 // Helper function to generate slug
 const slugify = (name: string) => name.toLowerCase().replace(/\s+/g, '-');
@@ -35,10 +35,9 @@ const slugify = (name: string) => name.toLowerCase().replace(/\s+/g, '-');
 const getDiveSiteDetails = (id: string) => {
   // For now, we only update the Great Blue Hole image as it's hardcoded.
   // A more robust solution would fetch this data or have a mapping.
+  // Or better, fetch from the diveSites array in DiveSites.tsx if id matches
   const siteName = 'Great Blue Hole'; 
-  const siteImage = (id === '1' || id === null || id === undefined) ? 
-                    `${SUPABASE_STORAGE_BASE_URL}${siteName}.jpg` : // Updated imageUrl
-                    '/placeholder.svg'; // Fallback for other IDs if this function were more dynamic
+  const siteImage = `${SUPABASE_STORAGE_PUBLIC_URL}${SUPABASE_BUCKET_NAME}//${encodeURIComponent(siteName)}.jpg`;
 
   return {
     id: parseInt(id ?? '1'),
@@ -46,11 +45,11 @@ const getDiveSiteDetails = (id: string) => {
     location: 'Lighthouse Reef, Belize',
     coordinates: { lat: 17.3157, lng: -87.5343 },
     imageUrl: siteImage,
-    gallery: [ // Assuming gallery images might also come from Supabase with similar naming
-      `${SUPABASE_STORAGE_BASE_URL}${siteName}-gallery1.jpg`, 
-      `${SUPABASE_STORAGE_BASE_URL}${siteName}-gallery2.jpg`, 
-      `${SUPABASE_STORAGE_BASE_URL}${siteName}-gallery3.jpg`, 
-      `${SUPABASE_STORAGE_BASE_URL}${siteName}-gallery4.jpg`
+    gallery: [ 
+      `${SUPABASE_STORAGE_PUBLIC_URL}${SUPABASE_BUCKET_NAME}//${encodeURIComponent(siteName + '-gallery1')}.jpg`, 
+      `${SUPABASE_STORAGE_PUBLIC_URL}${SUPABASE_BUCKET_NAME}//${encodeURIComponent(siteName + '-gallery2')}.jpg`, 
+      `${SUPABASE_STORAGE_PUBLIC_URL}${SUPABASE_BUCKET_NAME}//${encodeURIComponent(siteName + '-gallery3')}.jpg`, 
+      `${SUPABASE_STORAGE_PUBLIC_URL}${SUPABASE_BUCKET_NAME}//${encodeURIComponent(siteName + '-gallery4')}.jpg`
     ], 
     type: 'Cave',
     rating: 4.8,
@@ -103,6 +102,10 @@ const getDiveSiteDetails = (id: string) => {
 
 const DiveSiteDetail = () => {
   const { id } = useParams<{ id: string }>();
+  // For now, we'll use the hardcoded getDiveSiteDetails. 
+  // Ideally, this would fetch dynamic data based on 'id'
+  // For the sake of image URL correction, we assume `id` might map to a name used in image construction.
+  // However, getDiveSiteDetails always returns "Great Blue Hole" details.
   const site = getDiveSiteDetails(id ?? '1');
 
   return (
