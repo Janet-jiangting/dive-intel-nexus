@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { 
@@ -26,7 +25,6 @@ const ChatAssistant = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const scrollAreaRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -47,7 +45,7 @@ const ChatAssistant = () => {
     try {
       console.log('Invoking chat-assistant function with prompt:', currentInput);
       const { data, error } = await supabase.functions.invoke('chat-assistant', {
-        body: { prompt: currentInput }, // Use currentInput instead of userMessage.text to ensure it's the value before clearing
+        body: { prompt: currentInput },
       });
       console.log('Function response data:', data);
       console.log('Function response error:', error);
@@ -80,8 +78,7 @@ const ChatAssistant = () => {
     if (isOpen && messages.length === 0) {
       setMessages([{ id: 'initial_greeting', sender: 'ai', text: "Hello! I'm DiveAtlas assistant. How can I help you explore the underwater world today?" }]);
     }
-  }, [isOpen]);
-
+  }, [isOpen, messages.length]);
 
   return (
     <>
@@ -110,7 +107,7 @@ const ChatAssistant = () => {
                 </Button>
               </DrawerClose>
             </DrawerHeader>
-            <ScrollArea className="flex-grow p-4" viewportRef={scrollAreaRef}>
+            <ScrollArea className="flex-grow p-4">
               <div className="space-y-4">
                 {messages.map((msg) => (
                   <div
