@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
+import { Button } from '@/components/ui/button';
 
 interface Coordinates {
   lat: number;
@@ -245,7 +246,6 @@ const DiveMap = ({ sites }: DiveMapProps) => {
     };
   }, [sites]); // Re-initialize map if sites array changes
 
-  // ... keep existing code (mapError display, loading indicator)
   if (mapError) {
     return (
       <div className="w-full h-full bg-ocean-800 relative flex flex-col items-center justify-center p-6 text-white">
@@ -253,7 +253,7 @@ const DiveMap = ({ sites }: DiveMapProps) => {
           <div className="text-center">
             <h3 className="text-xl font-medium text-white mb-2">Map Error</h3>
             <p className="text-red-200 text-sm">{mapError}</p>
-            <Button onClick={initializeMap} className="mt-4">Try Reload Map</Button>
+            <Button onClick={initializeMap} className="mt-4 bg-blue-500 hover:bg-blue-600">Try Reload Map</Button>
           </div>
         </div>
       </div>

@@ -62,8 +62,8 @@ const MarineLife = () => {
       }
       if (appliedFilters.category && item.category !== appliedFilters.category) return false;
       if (appliedFilters.status && item.conservationStatus !== appliedFilters.status) return false;
-      if (appliedFilters.depthRange && item.depth_range !== appliedFilters.depthRange) return false;
-      if (appliedFilters.distribution && item.distribution !== appliedFilters.distribution) return false;
+      if (appliedFilters.depthRange && item.depth !== appliedFilters.depthRange) return false;
+      if (appliedFilters.distribution && !item.regions.includes(appliedFilters.distribution)) return false;
       return true;
     });
     console.log("Filtered count:", filtered.length);

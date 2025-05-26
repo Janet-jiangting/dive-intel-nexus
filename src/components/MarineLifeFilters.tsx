@@ -16,7 +16,7 @@ export interface MarineFilters {
   searchQuery: string;
   category: string | null;
   status: string | null;
-  depthRange: string | null;
+  depthRange: string | null; // This refers to a single depth string, not a range array
   distribution: string | null;
 }
 
@@ -36,10 +36,10 @@ const MarineLifeFilters = ({ marineLifeData, onApplyFilters, initialFilters }: M
   const categories = useMemo(() => [...new Set(marineLifeData.map(item => item.category))].sort(), [marineLifeData]);
   const conservationStatuses = useMemo(() => [...new Set(marineLifeData.map(item => item.conservationStatus))].sort(), [marineLifeData]);
   
-  // WORKAROUND for build error: Cast to 'any' to access properties potentially missing from Species type definition.
-  // Ideally, the Species type in MarineLifeDataContext.tsx should be updated.
-  const depthRanges = useMemo(() => [...new Set(marineLifeData.map(item => (item as any).depth_range).filter(Boolean) as string[])].sort(), [marineLifeData]);
-  const distributions = useMemo(() => [...new Set(marineLifeData.map(item => (item as any).distribution).filter(Boolean) as string[])].sort(), [marineLifeData]);
+  // Use item.depth for depthRanges
+  const depthRanges = useMemo(() => [...new Set(marineLifeData.map(item => item.depth).filter(Boolean) as string[])].sort(), [marineLifeData]);
+  // Use item.regions (array of strings) and flatten to get unique distribution strings
+  const distributions = useMemo(() => [...new Set(marineLifeData.flatMap(item => item.regions).filter(Boolean) as string[])].sort(), [marineLifeData]);
 
 
   const handleApplyFilters = () => {
