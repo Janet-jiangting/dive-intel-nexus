@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
@@ -11,7 +10,7 @@ const featuredSites = [
     id: 1,
     name: 'Great Blue Hole',
     location: 'Belize',
-    imageUrl: '/placeholder.svg',
+    imageUrl: 'https://images.unsplash.com/photo-1433086966358-54859d0ed716',
     type: 'Cave',
     rating: 4.8,
     difficulty: 'Advanced',
@@ -20,7 +19,7 @@ const featuredSites = [
     id: 2,
     name: 'SS Thistlegorm',
     location: 'Red Sea, Egypt',
-    imageUrl: '/placeholder.svg',
+    imageUrl: 'https://images.unsplash.com/photo-1500375592092-40eb2168fd21',
     type: 'Wreck',
     rating: 4.9,
     difficulty: 'Intermediate',
@@ -29,7 +28,7 @@ const featuredSites = [
     id: 3,
     name: 'Barracuda Point',
     location: 'Sipadan, Malaysia',
-    imageUrl: '/placeholder.svg',
+    imageUrl: 'https://images.unsplash.com/photo-1469474968028-56623f02e42e',
     type: 'Wall',
     rating: 4.7,
     difficulty: 'Intermediate',
@@ -38,7 +37,7 @@ const featuredSites = [
     id: 4,
     name: 'Molokini Crater',
     location: 'Maui, Hawaii',
-    imageUrl: '/placeholder.svg',
+    imageUrl: 'https://images.unsplash.com/photo-1482938289607-e9573fc25ebb',
     type: 'Reef',
     rating: 4.5,
     difficulty: 'Beginner',
