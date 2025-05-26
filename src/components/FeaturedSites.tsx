@@ -7,7 +7,6 @@ import { MapPin, Star, Waves } from 'lucide-react';
 
 const SUPABASE_PROJECT_ID = 'ioyfxcceheflwshhaqhk';
 const SUPABASE_BUCKET_NAME = 'divesiteimages'; // Corrected bucket name
-const SUPABASE_STORAGE_BASE_URL = `https://${SUPABASE_PROJECT_ID}.supabase.co/storage/v1/object/public/${SUPABASE_BUCKET_NAME}/`;
 
 // Mock data for featured dive sites
 const featuredSitesData = [
@@ -45,33 +44,8 @@ const featuredSitesData = [
   }
 ];
 
-const featuredSites = featuredSitesData.map(site => ({
-  ...site,
-  // Construct imageUrl according to the specified format
-  imageUrl: `${SUPABASE_STORAGE_BASE_URL}/${encodeURIComponent(site.name)}.jpg`, 
-  // The user's example has // after the bucket name.
-  // My previous interpretation was BASE_URL already includes the bucket name.
-  // Let's adjust based on the example: SUPABASE_STORAGE_BASE_URL (ending in /public/) + BUCKET_NAME + // + FILENAME
-  // No, the user's example `https://.../public/divesiteimages//Great%20Blue%20Hole.jpg` implies
-  // SUPABASE_STORAGE_BASE_URL should be `https://.../public/`
-  // then add `divesiteimages` (bucket) then `//` then encoded name.
-  // The constant `SUPABASE_STORAGE_BASE_URL` in the original code ALREADY INCLUDED the bucket name.
-  // Let's redefine it for clarity or adjust the construction.
-  // Given the current definition of SUPABASE_STORAGE_BASE_URL includes the bucket name, it should be:
-  // `${SUPABASE_STORAGE_BASE_URL}/${encodeURIComponent(site.name)}.jpg` if SUPABASE_STORAGE_BASE_URL = `.../public/divesiteimages/`
-  // If the user example means `.../public/divesiteimages//Filename.jpg`, then the current SUPABASE_STORAGE_BASE_URL is fine
-  // and we just need to add `/` (one slash) before the encoded name, because SUPABASE_STORAGE_BASE_URL already ends with a slash.
-  // The example URL is: `https://ioyfxcceheflwshhaqhk.supabase.co/storage/v1/object/public/divesiteimages//Great%20Blue%20Hole.jpg`
-  // `SUPABASE_STORAGE_BASE_URL` is `https://${SUPABASE_PROJECT_ID}.supabase.co/storage/v1/object/public/${SUPABASE_BUCKET_NAME}/`
-  // So it becomes `SUPABASE_STORAGE_BASE_URL` + `/` + `encodeURIComponent(site.name)}.jpg`
-  // This results in `.../divesiteimages//Great%20Blue%20Hole.jpg` if there are no trailing slashes issues.
-  // Let's ensure SUPABASE_STORAGE_BASE_URL ends with a `/` which it does.
-  // So, imageUrl: `${SUPABASE_STORAGE_BASE_URL}/${encodeURIComponent(site.name)}.jpg` will create one extra slash.
-  // imageUrl: `${SUPABASE_STORAGE_BASE_URL}${encodeURIComponent(site.name)}.jpg` if SUPABASE_STORAGE_BASE_URL already ends with `/`.
-  // Let's use the user's exact structure: base + bucket + // + filename.
-  // So, SUPABASE_STORAGE_BASE_URL should be just up to /public/
-  // And then manually construct the rest.
-}));
+// The first declaration of featuredSites was here and has been removed.
+// The comments explaining the image URL construction were also part of that removed block.
 
 // Re-evaluating the base URL constant to match the user's explicit structure
 const CORRECT_SUPABASE_STORAGE_PUBLIC_URL = `https://${SUPABASE_PROJECT_ID}.supabase.co/storage/v1/object/public/`;
