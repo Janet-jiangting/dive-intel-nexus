@@ -3,21 +3,23 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { MapPin, Star, Waves, Thermometer, Mountain, Eye, MessageSquare } from 'lucide-react';
+import { MapPin, Waves, Thermometer, Mountain, Eye } from 'lucide-react'; // Removed Star, MessageSquare
 
+// Updated DiveSite interface to match fetched data
 interface DiveSite {
   id: number;
   name: string;
   location: string;
   imageUrl: string;
   type: string;
-  rating: number;
+  // rating: number; // Removed
   difficulty: string;
   depth: number;
   visibility: number;
   temperature: number;
   description: string;
-  reviews: number;
+  // reviews: number; // Removed
+  country?: string; // Optional, as it might not always be present
 }
 
 interface DiveSiteCardProps {
@@ -27,65 +29,67 @@ interface DiveSiteCardProps {
 const DiveSiteCard = ({ site }: DiveSiteCardProps) => {
   return (
     <Link to={`/dive-sites/${site.id}`}>
-      <Card className="overflow-hidden bg-ocean-800/50 border-ocean-700 hover:shadow-lg hover:shadow-ocean-500/20 transition-all hover:-translate-y-1">
+      <Card className="overflow-hidden bg-ocean-800/50 border-ocean-700 hover:shadow-lg hover:shadow-ocean-500/20 transition-all hover:-translate-y-1 flex flex-col h-full">
         <div className="relative h-56">
           <img
             src={site.imageUrl}
             alt={site.name}
             className="w-full h-full object-cover"
+            onError={(e) => {
+              // Fallback image or style if specific image fails to load
+              (e.target as HTMLImageElement).src = '/placeholder.svg'; 
+            }}
           />
-          <Badge className="absolute top-3 right-3 bg-ocean-900/80" variant="secondary">
+          <Badge className="absolute top-3 right-3 bg-ocean-900/80 text-white" variant="secondary">
             {site.type}
           </Badge>
           
-          <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-ocean-900 to-transparent">
+          <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-ocean-900/90 via-ocean-900/70 to-transparent">
             <div className="flex justify-between items-start">
-              <h3 className="font-bold text-xl text-white">{site.name}</h3>
-              <div className="flex items-center">
-                <Star className="h-4 w-4 text-yellow-400 mr-1 fill-yellow-400" />
-                <span className="text-white">{site.rating}</span>
-              </div>
+              <h3 className="font-bold text-xl text-white line-clamp-2">{site.name}</h3>
+              {/* Rating removed */}
             </div>
             
-            <div className="flex items-center text-ocean-100">
-              <MapPin className="h-3 w-3 mr-1" />
-              <span className="text-sm">{site.location}</span>
+            <div className="flex items-center text-ocean-100 mt-1">
+              <MapPin className="h-3 w-3 mr-1 flex-shrink-0" />
+              <span className="text-sm line-clamp-1">{site.location}{site.country ? `, ${site.country}` : ''}</span>
             </div>
           </div>
         </div>
         
-        <CardContent className="pt-4">
-          <p className="text-ocean-200 text-sm mb-4 line-clamp-2">
-            {site.description}
-          </p>
-          
-          <div className="grid grid-cols-3 gap-2 mb-2">
-            <div className="flex items-center text-sm">
-              <Mountain className="h-3 w-3 mr-1 text-ocean-300" />
-              <span className="text-white">{site.depth}m</span>
-            </div>
+        <CardContent className="pt-4 flex-grow flex flex-col justify-between">
+          <div>
+            <p className="text-ocean-200 text-sm mb-4 line-clamp-3">
+              {site.description}
+            </p>
             
-            <div className="flex items-center text-sm">
-              <Thermometer className="h-3 w-3 mr-1 text-ocean-300" />
-              <span className="text-white">{site.temperature}°C</span>
-            </div>
-            
-            <div className="flex items-center text-sm">
-              <Eye className="h-3 w-3 mr-1 text-ocean-300" />
-              <span className="text-white">{site.visibility}m</span>
+            <div className="grid grid-cols-3 gap-2 mb-4">
+              <div className="flex flex-col items-center text-center p-1 bg-ocean-700/30 rounded-md">
+                <Mountain className="h-4 w-4 mb-1 text-ocean-300" />
+                <span className="text-xs text-ocean-300">Depth</span>
+                <span className="text-white text-sm font-medium">{site.depth}m</span>
+              </div>
+              
+              <div className="flex flex-col items-center text-center p-1 bg-ocean-700/30 rounded-md">
+                <Thermometer className="h-4 w-4 mb-1 text-ocean-300" />
+                <span className="text-xs text-ocean-300">Temp</span>
+                <span className="text-white text-sm font-medium">{site.temperature}°C</span>
+              </div>
+              
+              <div className="flex flex-col items-center text-center p-1 bg-ocean-700/30 rounded-md">
+                <Eye className="h-4 w-4 mb-1 text-ocean-300" />
+                <span className="text-xs text-ocean-300">Visibility</span>
+                <span className="text-white text-sm font-medium">{site.visibility}m</span>
+              </div>
             </div>
           </div>
           
-          <div className="flex justify-between items-center mt-3 pt-3 border-t border-ocean-700">
+          <div className="mt-auto pt-3 border-t border-ocean-700">
             <div className="flex items-center text-ocean-300 text-sm">
-              <Waves className="h-3 w-3 mr-1" />
-              {site.difficulty}
+              <Waves className="h-4 w-4 mr-1.5 text-blue-400" />
+              <span className="font-medium">{site.difficulty}</span>
             </div>
-            
-            <div className="flex items-center text-ocean-300 text-sm">
-              <MessageSquare className="h-3 w-3 mr-1" />
-              {site.reviews} reviews
-            </div>
+            {/* Reviews count removed */}
           </div>
         </CardContent>
       </Card>

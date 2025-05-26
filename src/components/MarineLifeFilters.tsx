@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useMemo } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -11,7 +10,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Search, Filter } from 'lucide-react';
-import { Species } from '@/contexts/MarineLifeDataContext'; // Assuming Species type is needed or available
+import { Species } from '@/contexts/MarineLifeDataContext';
 
 export interface MarineFilters {
   searchQuery: string;
@@ -22,7 +21,7 @@ export interface MarineFilters {
 }
 
 interface MarineLifeFiltersProps {
-  marineLifeData: Species[]; // To extract unique values for filters
+  marineLifeData: Species[];
   onApplyFilters: (filters: MarineFilters) => void;
   initialFilters: MarineFilters;
 }
@@ -36,8 +35,11 @@ const MarineLifeFilters = ({ marineLifeData, onApplyFilters, initialFilters }: M
 
   const categories = useMemo(() => [...new Set(marineLifeData.map(item => item.category))].sort(), [marineLifeData]);
   const conservationStatuses = useMemo(() => [...new Set(marineLifeData.map(item => item.conservationStatus))].sort(), [marineLifeData]);
-  const depthRanges = useMemo(() => [...new Set(marineLifeData.map(item => item.depth_range).filter(Boolean) as string[])].sort(), [marineLifeData]);
-  const distributions = useMemo(() => [...new Set(marineLifeData.map(item => item.distribution).filter(Boolean) as string[])].sort(), [marineLifeData]);
+  
+  // WORKAROUND for build error: Cast to 'any' to access properties potentially missing from Species type definition.
+  // Ideally, the Species type in MarineLifeDataContext.tsx should be updated.
+  const depthRanges = useMemo(() => [...new Set(marineLifeData.map(item => (item as any).depth_range).filter(Boolean) as string[])].sort(), [marineLifeData]);
+  const distributions = useMemo(() => [...new Set(marineLifeData.map(item => (item as any).distribution).filter(Boolean) as string[])].sort(), [marineLifeData]);
 
 
   const handleApplyFilters = () => {
