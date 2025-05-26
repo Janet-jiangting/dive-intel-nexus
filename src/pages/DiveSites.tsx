@@ -1,8 +1,6 @@
-
 import React, { useState } from 'react';
 import { 
-  Search, Filter, MapPin, Waves, User, Clock, 
-  Star, Thermometer, Compass, Mountain, Eye 
+  Search, MapPin, Filter 
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -122,7 +120,7 @@ const diveSitesData = [
 
 const diveSites = diveSitesData.map(site => ({
   ...site,
-  imageUrl: `${SUPABASE_STORAGE_PUBLIC_URL}${SUPABASE_BUCKET_NAME}//${encodeURIComponent(site.name)}.jpg`,
+  imageUrl: `${SUPABASE_STORAGE_PUBLIC_URL}${SUPABASE_BUCKET_NAME}//${encodeURIComponent(site.name.replace(/\s/g, '_'))}.jpg`,
 }));
 
 const DiveSites = () => {
@@ -204,7 +202,7 @@ const DiveSites = () => {
                   <label className="text-sm font-medium text-ocean-200 mb-2 block">
                     Difficulty Level
                   </label>
-                  <Select onValueChange={setSelectedDifficulty}>
+                  <Select onValueChange={setSelectedDifficulty} value={selectedDifficulty || undefined}>
                     <SelectTrigger className="bg-ocean-700/50 border-ocean-600 text-white">
                       <SelectValue placeholder="Any Difficulty" />
                     </SelectTrigger>
@@ -220,7 +218,7 @@ const DiveSites = () => {
                   <label className="text-sm font-medium text-ocean-200 mb-2 block">
                     Site Type
                   </label>
-                  <Select onValueChange={setSelectedType}>
+                  <Select onValueChange={setSelectedType} value={selectedType || undefined}>
                     <SelectTrigger className="bg-ocean-700/50 border-ocean-600 text-white">
                       <SelectValue placeholder="Any Type" />
                     </SelectTrigger>
@@ -240,7 +238,7 @@ const DiveSites = () => {
                   </label>
                   <div className="px-2">
                     <Slider
-                      defaultValue={[0, 130]}
+                      value={depthRange}
                       max={130}
                       step={1}
                       onValueChange={setDepthRange}
@@ -259,7 +257,7 @@ const DiveSites = () => {
                   </label>
                   <div className="px-2">
                     <Slider
-                      defaultValue={[20, 30]}
+                      value={temperatureRange}
                       min={10}
                       max={35}
                       step={1}
@@ -295,27 +293,23 @@ const DiveSites = () => {
           </Select>
         </div>
         
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Left content - either list of sites or empty if map view */}
-          <div className={activeView === 'map' ? 'hidden lg:block' : ''}>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-              {filteredSites.map((site) => (
+        {/* Content display based on activeView */}
+        {activeView === 'list' ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredSites.length > 0 ? (
+              filteredSites.map((site) => (
                 <DiveSiteCard key={site.id} site={site} />
-              ))}
-            </div>
+              ))
+            ) : (
+              <div className="col-span-full text-center py-10">
+                <MapPin className="mx-auto h-12 w-12 text-ocean-400 mb-4" />
+                <p className="text-xl text-ocean-200">No dive sites found matching your criteria.</p>
+                <p className="text-ocean-300">Try adjusting your filters or search terms.</p>
+              </div>
+            )}
           </div>
-          
-          {/* Right content - map, always visible on desktop */}
-          <div className={activeView === 'list' ? 'hidden lg:block' : ''}>
-            <div className="h-[600px] rounded-lg overflow-hidden border border-ocean-700 sticky top-4">
-              <DiveMap sites={filteredSites} />
-            </div>
-          </div>
-        </div>
-        
-        {/* Mobile/tablet single column view when map is selected */}
-        {activeView === 'map' && (
-          <div className="lg:hidden h-[500px] mt-6 rounded-lg overflow-hidden border border-ocean-700">
+        ) : ( // activeView === 'map'
+          <div className="h-[70vh] w-full rounded-lg overflow-hidden border border-ocean-700 shadow-xl">
             <DiveMap sites={filteredSites} />
           </div>
         )}
