@@ -1,8 +1,16 @@
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { MapPin, Star, Waves } from 'lucide-react';
+
+const SUPABASE_PROJECT_ID = 'ioyfxcceheflwshhaqhk';
+const SUPABASE_BUCKET_NAME = 'dive-site-images';
+const SUPABASE_STORAGE_BASE_URL = `https://${SUPABASE_PROJECT_ID}.supabase.co/storage/v1/object/public/${SUPABASE_BUCKET_NAME}/`;
+
+// Helper function to generate slug
+const slugify = (name: string) => name.toLowerCase().replace(/\s+/g, '-');
 
 // Mock data for featured dive sites
 const featuredSites = [
@@ -10,7 +18,7 @@ const featuredSites = [
     id: 1,
     name: 'Great Blue Hole',
     location: 'Belize',
-    imageUrl: 'https://images.unsplash.com/photo-1433086966358-54859d0ed716',
+    imageUrl: `${SUPABASE_STORAGE_BASE_URL}${slugify('Great Blue Hole')}.jpg`,
     type: 'Cave',
     rating: 4.8,
     difficulty: 'Advanced',
@@ -19,7 +27,7 @@ const featuredSites = [
     id: 2,
     name: 'SS Thistlegorm',
     location: 'Red Sea, Egypt',
-    imageUrl: 'https://images.unsplash.com/photo-1500375592092-40eb2168fd21',
+    imageUrl: `${SUPABASE_STORAGE_BASE_URL}${slugify('SS Thistlegorm')}.jpg`,
     type: 'Wreck',
     rating: 4.9,
     difficulty: 'Intermediate',
@@ -28,7 +36,7 @@ const featuredSites = [
     id: 3,
     name: 'Barracuda Point',
     location: 'Sipadan, Malaysia',
-    imageUrl: 'https://images.unsplash.com/photo-1469474968028-56623f02e42e',
+    imageUrl: `${SUPABASE_STORAGE_BASE_URL}${slugify('Barracuda Point')}.jpg`,
     type: 'Wall',
     rating: 4.7,
     difficulty: 'Intermediate',
@@ -37,7 +45,7 @@ const featuredSites = [
     id: 4,
     name: 'Molokini Crater',
     location: 'Maui, Hawaii',
-    imageUrl: 'https://images.unsplash.com/photo-1482938289607-e9573fc25ebb',
+    imageUrl: `${SUPABASE_STORAGE_BASE_URL}${slugify('Molokini Crater')}.jpg`,
     type: 'Reef',
     rating: 4.5,
     difficulty: 'Beginner',

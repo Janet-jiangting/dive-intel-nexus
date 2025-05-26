@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -25,15 +24,29 @@ import {
 import PhotoGallery from '@/components/PhotoGallery';
 import ReviewsList from '@/components/ReviewsList';
 
+const SUPABASE_PROJECT_ID = 'ioyfxcceheflwshhaqhk';
+const SUPABASE_BUCKET_NAME = 'dive-site-images';
+const SUPABASE_STORAGE_BASE_URL = `https://${SUPABASE_PROJECT_ID}.supabase.co/storage/v1/object/public/${SUPABASE_BUCKET_NAME}/`;
+
+// Helper function to generate slug
+const slugify = (name: string) => name.toLowerCase().replace(/\s+/g, '-');
+
 // This would typically come from an API call using the ID parameter
 const getDiveSiteDetails = (id: string) => {
+  // For now, we only update the Great Blue Hole image as it's hardcoded.
+  // A more robust solution would fetch this data or have a mapping.
+  const siteName = 'Great Blue Hole'; 
+  const siteImage = (id === '1' || id === null || id === undefined) ? 
+                    `${SUPABASE_STORAGE_BASE_URL}${slugify(siteName)}.jpg` : 
+                    '/placeholder.svg'; // Fallback for other IDs if this function were more dynamic
+
   return {
-    id: parseInt(id),
-    name: 'Great Blue Hole',
+    id: parseInt(id ?? '1'),
+    name: siteName,
     location: 'Lighthouse Reef, Belize',
     coordinates: { lat: 17.3157, lng: -87.5343 },
-    imageUrl: '/placeholder.svg',
-    gallery: ['/placeholder.svg', '/placeholder.svg', '/placeholder.svg', '/placeholder.svg'],
+    imageUrl: siteImage,
+    gallery: ['/placeholder.svg', '/placeholder.svg', '/placeholder.svg', '/placeholder.svg'], // Gallery images remain placeholders
     type: 'Cave',
     rating: 4.8,
     difficulty: 'Advanced',
