@@ -9,63 +9,6 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      Divesites: {
-        Row: {
-          "Common Marine Life": string | null
-          Country: string | null
-          Current: string | null
-          "Depth (m)": Json | null
-          Description: Json | null
-          Difficulty: string | null
-          "Dive Site Name": string | null
-          divesiteID: number
-          Flag: Json | null
-          Latitude: string | null
-          Location: string | null
-          Longitude: string | null
-          "Temperature (°C)": Json | null
-          Type: string | null
-          "Visibility (m)": Json | null
-          "Wave Height": string | null
-        }
-        Insert: {
-          "Common Marine Life"?: string | null
-          Country?: string | null
-          Current?: string | null
-          "Depth (m)"?: Json | null
-          Description?: Json | null
-          Difficulty?: string | null
-          "Dive Site Name"?: string | null
-          divesiteID: number
-          Flag?: Json | null
-          Latitude?: string | null
-          Location?: string | null
-          Longitude?: string | null
-          "Temperature (°C)"?: Json | null
-          Type?: string | null
-          "Visibility (m)"?: Json | null
-          "Wave Height"?: string | null
-        }
-        Update: {
-          "Common Marine Life"?: string | null
-          Country?: string | null
-          Current?: string | null
-          "Depth (m)"?: Json | null
-          Description?: Json | null
-          Difficulty?: string | null
-          "Dive Site Name"?: string | null
-          divesiteID?: number
-          Flag?: Json | null
-          Latitude?: string | null
-          Location?: string | null
-          Longitude?: string | null
-          "Temperature (°C)"?: Json | null
-          Type?: string | null
-          "Visibility (m)"?: Json | null
-          "Wave Height"?: string | null
-        }
-        Relationships: []
-      }
       "Marine Life": {
         Row: {
           "Conservation Status": string | null

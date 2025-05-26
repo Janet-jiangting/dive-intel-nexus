@@ -1,10 +1,8 @@
 
 import React, { useState } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { useQuery } from '@tanstack/react-query';
 import { 
   Search, Filter, MapPin, Waves, User, Clock, ChevronDown, 
-  Star, Thermometer, Compass, Mountain, Eye, MessageSquare
+  Star, Thermometer, Compass, Mountain 
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -31,130 +29,100 @@ import { Badge } from '@/components/ui/badge';
 import { Slider } from '@/components/ui/slider';
 import DiveMap from '@/components/DiveMap';
 import DiveSiteCard from '@/components/DiveSiteCard';
-import { Skeleton } from "@/components/ui/skeleton";
 
-// Define DiveSite interface based on expected transformed data
-export interface DiveSite {
-  id: number; // from divesiteID
-  name: string;
-  location: string;
-  coordinates: { lat: number; lng: number };
-  imageUrl: string; // Constructed
-  type: string;
-  difficulty: string;
-  depth: number;
-  visibility: number;
-  temperature: number;
-  description: string;
-  country?: string;
-  commonMarineLife?: string;
-  // rating and reviews are removed as they are not in the Divesites table
-}
-
-// Raw data structure from Supabase Divesites table
-interface DiveSiteSupabaseData {
-  divesiteID: number;
-  "Dive Site Name": string | null;
-  Location: string | null;
-  Country: string | null;
-  Latitude: string | null;
-  Longitude: string | null;
-  Type: string | null;
-  Difficulty: string | null;
-  "Depth (m)": any | null; // Changed from Json to any for flexibility
-  "Visibility (m)": any | null; // Changed from Json to any
-  "Temperature (°C)": any | null; // Changed from Json to any
-  Description: any | null; // Changed from Json to any
-  "Common Marine Life": string | null;
-  // Add other fields if selected
-  [key: string]: any; // Allow other properties
-}
-
-const parseJsonOrNumber = (value: any, propertyForObject?: string): number => {
-  if (value === null || typeof value === 'undefined') return 0;
-  if (typeof value === 'number') return value;
-  if (typeof value === 'string') {
-    try {
-      const parsed = JSON.parse(value);
-      if (typeof parsed === 'number') return parsed;
-      if (typeof parsed === 'object' && parsed !== null && propertyForObject && propertyForObject in parsed) {
-        return Number(parsed[propertyForObject]);
-      }
-      const num = parseFloat(value);
-      return isNaN(num) ? 0 : num;
-    } catch (e) {
-      const num = parseFloat(value);
-      return isNaN(num) ? 0 : num;
-    }
-  }
-  if (typeof value === 'object' && value !== null && propertyForObject && propertyForObject in value) {
-     return Number(value[propertyForObject]);
-  }
-  return 0;
-};
-
-const parseJsonOrString = (value: any, propertyForObject?: string): string => {
-  if (value === null || typeof value === 'undefined') return '';
-  if (typeof value === 'string') {
-     try {
-        const parsed = JSON.parse(value);
-        if (typeof parsed === 'string') return parsed;
-        if (typeof parsed === 'object' && parsed !== null && propertyForObject && propertyForObject in parsed) {
-          return String(parsed[propertyForObject]);
-        }
-        return value; // Return original string if parsing leads to non-string or no property
-     } catch (e) {
-        return value; // Return original string if not valid JSON
-     }
-  }
-  if (typeof value === 'object' && value !== null && propertyForObject && propertyForObject in value) {
-    return String(value[propertyForObject]);
-  }
-  return String(value);
-};
-
-
-const fetchDiveSites = async (): Promise<DiveSite[]> => {
-  const { data, error } = await supabase
-    .from('Divesites')
-    .select('*');
-
-  if (error) {
-    console.error('Error fetching dive sites:', error);
-    throw new Error(error.message);
-  }
-
-  if (!data) return [];
-
-  return data.map((site: DiveSiteSupabaseData) => {
-    const lat = parseFloat(site.Latitude || '0');
-    const lng = parseFloat(site.Longitude || '0');
-    
-    const depth = parseJsonOrNumber(site['Depth (m)'], 'max'); // Assuming 'max' or direct number
-    const visibility = parseJsonOrNumber(site['Visibility (m)'], 'value'); // Assuming 'value' or direct number
-    const temperature = parseJsonOrNumber(site['Temperature (°C)'], 'value'); // Assuming 'value' or direct number
-    const description = parseJsonOrString(site.Description, 'text'); // Assuming 'text' or direct string
-
-    return {
-      id: site.divesiteID,
-      name: site['Dive Site Name'] || 'Unknown Site',
-      location: site.Location || 'Unknown Location',
-      coordinates: {
-        lat: !isNaN(lat) ? lat : 0,
-        lng: !isNaN(lng) ? lng : 0,
-      },
-      imageUrl: `https://ioyfxcceheflwshhaqhk.supabase.co/storage/v1/object/public/divesites images/${site.divesiteID}.png`,
-      type: site.Type || 'Unknown',
-      difficulty: site.Difficulty || 'Unknown',
-      depth: depth,
-      visibility: visibility,
-      temperature: temperature,
-      description: description || 'No description available.',
-      country: site.Country || undefined,
-      commonMarineLife: site['Common Marine Life'] || undefined,
-    };
-  });
-};
+// Mock data for dive sites
+const diveSites = [
+  {
+    id: 1,
+    name: 'Great Blue Hole',
+    location: 'Belize',
+    coordinates: { lat: 17.3157, lng: -87.5343 },
+    imageUrl: '/placeholder.svg',
+    type: 'Cave',
+    rating: 4.8,
+    difficulty: 'Advanced',
+    depth: 124,
+    visibility: 30,
+    temperature: 26,
+    description: 'A massive underwater sinkhole and world-class diving site.',
+    reviews: 382,
+  },
+  {
+    id: 2,
+    name: 'SS Thistlegorm',
+    location: 'Red Sea, Egypt',
+    coordinates: { lat: 27.8167, lng: 33.9167 },
+    imageUrl: '/placeholder.svg',
+    type: 'Wreck',
+    rating: 4.9,
+    difficulty: 'Intermediate',
+    depth: 30,
+    visibility: 25,
+    temperature: 27,
+    description: 'A famous WWII shipwreck with cargo including motorcycles and trucks.',
+    reviews: 529,
+  },
+  {
+    id: 3,
+    name: 'Barracuda Point',
+    location: 'Sipadan, Malaysia',
+    coordinates: { lat: 4.115, lng: 118.6283 },
+    imageUrl: '/placeholder.svg',
+    type: 'Wall',
+    rating: 4.7,
+    difficulty: 'Intermediate',
+    depth: 40,
+    visibility: 20,
+    temperature: 29,
+    description: 'Known for its swirling tornadoes of barracudas and passing pelagics.',
+    reviews: 421,
+  },
+  {
+    id: 4,
+    name: 'Molokini Crater',
+    location: 'Maui, Hawaii',
+    coordinates: { lat: 20.6336, lng: -156.4975 },
+    imageUrl: '/placeholder.svg',
+    type: 'Reef',
+    rating: 4.5,
+    difficulty: 'Beginner',
+    depth: 18,
+    visibility: 35,
+    temperature: 25,
+    description: 'A crescent-shaped, partially submerged volcanic crater.',
+    reviews: 625,
+  },
+  {
+    id: 5,
+    name: 'Blue Corner',
+    location: 'Palau',
+    coordinates: { lat: 7.1367, lng: 134.2214 },
+    imageUrl: '/placeholder.svg',
+    type: 'Wall',
+    rating: 4.9,
+    difficulty: 'Advanced',
+    depth: 30,
+    visibility: 25,
+    temperature: 28,
+    description: 'Famous for strong currents and large pelagic fish encounters.',
+    reviews: 387,
+  },
+  {
+    id: 6,
+    name: 'Richelieu Rock',
+    location: 'Surin Islands, Thailand',
+    coordinates: { lat: 9.3598, lng: 98.0236 },
+    imageUrl: '/placeholder.svg',
+    type: 'Pinnacle',
+    rating: 4.8,
+    difficulty: 'Intermediate',
+    depth: 35,
+    visibility: 20,
+    temperature: 28,
+    description: 'A horseshoe-shaped reef known for whale sharks and macro life.',
+    reviews: 312,
+  },
+];
 
 const DiveSites = () => {
   const [view, setView] = useState<'list' | 'map'>('list');
@@ -162,15 +130,8 @@ const DiveSites = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [selectedDifficulty, setSelectedDifficulty] = useState<string | null>(null);
   const [selectedType, setSelectedType] = useState<string | null>(null);
-  const [depthRange, setDepthRange] = useState([0, 150]); // Max depth increased slightly
-  const [temperatureRange, setTemperatureRange] = useState([10, 35]); // Temp range adjusted
-
-  const { data: diveSitesData, isLoading, error: queryError } = useQuery<DiveSite[], Error>({
-    queryKey: ['diveSites'],
-    queryFn: fetchDiveSites,
-  });
-
-  const diveSites = diveSitesData || [];
+  const [depthRange, setDepthRange] = useState([0, 130]);
+  const [temperatureRange, setTemperatureRange] = useState([20, 30]);
 
   const filteredSites = diveSites.filter(site => {
     // Apply search filter
@@ -201,14 +162,6 @@ const DiveSites = () => {
     
     return true;
   });
-
-  if (queryError) {
-    return (
-      <div className="min-h-screen bg-ocean-900 flex items-center justify-center text-white p-4">
-        Error loading dive sites: {queryError.message}
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-ocean-900">
@@ -260,12 +213,11 @@ const DiveSites = () => {
                     <label className="text-sm font-medium text-ocean-200 mb-2 block">
                       Difficulty Level
                     </label>
-                    <Select onValueChange={(value) => setSelectedDifficulty(value === "any" ? null : value)} value={selectedDifficulty || "any"}>
+                    <Select onValueChange={setSelectedDifficulty}>
                       <SelectTrigger className="bg-ocean-700/50 border-ocean-600 text-white">
                         <SelectValue placeholder="Any Difficulty" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="any">Any Difficulty</SelectItem>
                         <SelectItem value="Beginner">Beginner</SelectItem>
                         <SelectItem value="Intermediate">Intermediate</SelectItem>
                         <SelectItem value="Advanced">Advanced</SelectItem>
@@ -277,19 +229,16 @@ const DiveSites = () => {
                     <label className="text-sm font-medium text-ocean-200 mb-2 block">
                       Site Type
                     </label>
-                    <Select onValueChange={(value) => setSelectedType(value === "any" ? null : value)} value={selectedType || "any"}>
+                    <Select onValueChange={setSelectedType}>
                       <SelectTrigger className="bg-ocean-700/50 border-ocean-600 text-white">
                         <SelectValue placeholder="Any Type" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="any">Any Type</SelectItem>
                         <SelectItem value="Reef">Reef</SelectItem>
                         <SelectItem value="Wreck">Wreck</SelectItem>
                         <SelectItem value="Wall">Wall</SelectItem>
                         <SelectItem value="Cave">Cave</SelectItem>
                         <SelectItem value="Pinnacle">Pinnacle</SelectItem>
-                        <SelectItem value="Drift">Drift</SelectItem>
-                        <SelectItem value="Night">Night</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -300,11 +249,10 @@ const DiveSites = () => {
                     </label>
                     <div className="px-2">
                       <Slider
-                        value={depthRange}
-                        max={150} // Max depth for slider
-                        step={5}
+                        defaultValue={[0, 130]}
+                        max={130}
+                        step={1}
                         onValueChange={setDepthRange}
-                        className="[&>span:first-child]:h-1 [&>span:first-child]:bg-ocean-500"
                       />
                       <div className="flex justify-between mt-1 text-xs text-ocean-300">
                         <span>{depthRange[0]}m</span>
@@ -319,12 +267,11 @@ const DiveSites = () => {
                     </label>
                     <div className="px-2">
                       <Slider
-                        value={temperatureRange}
-                        min={0} // Min temp
-                        max={40} // Max temp
+                        defaultValue={[20, 30]}
+                        min={10}
+                        max={35}
                         step={1}
                         onValueChange={setTemperatureRange}
-                        className="[&>span:first-child]:h-1 [&>span:first-child]:bg-ocean-500"
                       />
                       <div className="flex justify-between mt-1 text-xs text-ocean-300">
                         <span>{temperatureRange[0]}°C</span>
@@ -340,60 +287,32 @@ const DiveSites = () => {
       </div>
       
       <div className="container mx-auto py-8 px-4">
-        {isLoading ? (
+        <div className="flex justify-between items-center mb-6">
           <div>
-            <div className="flex justify-between items-center mb-6">
-              <Skeleton className="h-6 w-32" />
-              <Skeleton className="h-10 w-[180px]" />
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {[...Array(6)].map((_, i) => (
-                <Card key={i} className="overflow-hidden bg-ocean-800/50 border-ocean-700">
-                  <Skeleton className="h-56 w-full" />
-                  <CardContent className="pt-4">
-                    <Skeleton className="h-6 w-3/4 mb-2" />
-                    <Skeleton className="h-4 w-1/2 mb-4" />
-                    <Skeleton className="h-10 w-full mb-2" />
-                    <div className="flex justify-between items-center mt-3 pt-3 border-t border-ocean-700">
-                      <Skeleton className="h-5 w-20" />
-                      <Skeleton className="h-5 w-24" />
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+            <span className="text-ocean-200">{filteredSites.length} dive sites found</span>
+          </div>
+          <Select defaultValue="rating">
+            <SelectTrigger className="w-[180px] bg-ocean-800/50 border-ocean-700 text-white">
+              <SelectValue placeholder="Sort by" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="rating">Highest Rated</SelectItem>
+              <SelectItem value="popularity">Most Popular</SelectItem>
+              <SelectItem value="name">Name A-Z</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        
+        {view === 'list' ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredSites.map((site) => (
+              <DiveSiteCard key={site.id} site={site} />
+            ))}
           </div>
         ) : (
-          <>
-            <div className="flex justify-between items-center mb-6">
-              <div>
-                <span className="text-ocean-200">{filteredSites.length} dive sites found</span>
-              </div>
-              {/* Sort functionality can be implemented later */}
-              <Select defaultValue="name">
-                <SelectTrigger className="w-[180px] bg-ocean-800/50 border-ocean-700 text-white">
-                  <SelectValue placeholder="Sort by" />
-                </SelectTrigger>
-                <SelectContent>
-                  {/* <SelectItem value="rating">Highest Rated</SelectItem> */}
-                  {/* <SelectItem value="popularity">Most Popular</SelectItem> */}
-                  <SelectItem value="name">Name A-Z</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            
-            {view === 'list' ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredSites.map((site) => (
-                  <DiveSiteCard key={site.id} site={site} />
-                ))}
-              </div>
-            ) : (
-              <div className="h-[600px] rounded-lg overflow-hidden border border-ocean-700">
-                {diveSites.length > 0 ? <DiveMap sites={filteredSites} /> : <div className="text-white p-4">No sites to display on map.</div>}
-              </div>
-            )}
-          </>
+          <div className="h-[600px] rounded-lg overflow-hidden border border-ocean-700">
+            <DiveMap sites={filteredSites} />
+          </div>
         )}
       </div>
     </div>
