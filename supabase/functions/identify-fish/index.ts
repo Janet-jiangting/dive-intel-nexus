@@ -1,10 +1,13 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.43.4'; // Use a specific version
-import "https://deno.land/x/xhr@0.1.0/mod.ts"; // Required for OpenAI library
 
-const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
-const supabaseUrl = Deno.env.get('SUPABASE_URL');
-const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY'); // Use service role key for db access in edge function
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+// createClient and xhr are not needed for this simplified version
+// import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.43.4';
+// import "https://deno.land/x/xhr@0.1.0/mod.ts"; 
+
+// API keys and Supabase URL/Key are not strictly needed for this hardcoded version's core logic
+// const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
+// const supabaseUrl = Deno.env.get('SUPABASE_URL');
+// const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -24,6 +27,19 @@ interface IdentifiedFish {
   depth: string;
 }
 
+const sampleFish: IdentifiedFish = {
+  id: 101,
+  name: "Clownfish (Prototype)",
+  scientificName: "Amphiprioninae prototypus",
+  category: "Damselfish",
+  conservationStatus: "Least Concern",
+  description: "This is a sample clownfish description for the prototype. It's bright orange with white stripes, often found living in symbiosis with sea anemones.",
+  confidence: 95,
+  imageUrl: "https://ioyfxcceheflwshhaqhk.supabase.co/storage/v1/object/public/fishimages/7.png", // Using an existing image or placeholder
+  regions: ["Indo-Pacific", "Red Sea", "Great Barrier Reef"],
+  depth: "1-15 meters",
+};
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -31,168 +47,26 @@ serve(async (req) => {
   }
 
   try {
-    const { imageBase64 } = await req.json();
-    if (!imageBase64) {
-      throw new Error("Missing imageBase64 in request body");
-    }
-
-    if (!openAIApiKey || !supabaseUrl || !supabaseServiceKey) {
-      console.error("Missing environment variables: OPENAI_API_KEY, SUPABASE_URL, or SUPABASE_SERVICE_ROLE_KEY");
-      throw new Error("Server configuration error.");
-    }
+    // We are not processing the image in this simplified version
+    // const { imageBase64 } = await req.json();
+    // if (!imageBase64) {
+    //   throw new Error("Missing imageBase64 in request body");
+    // }
     
-    console.log("Received image for analysis.");
+    console.log("Request received. Returning hardcoded sample fish data for prototype.");
 
-    // 1. Call OpenAI to identify fish
-    const openAIResponse = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${openAIApiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'gpt-4o-mini', // Using vision capable model
-        messages: [
-          {
-            role: 'user',
-            content: [
-              { type: 'text', text: "Identify the fish in this image. Provide its common name. If multiple fish are present, identify the most prominent one. If it's not a fish, say 'Not a fish'. Only provide the common name." },
-              {
-                type: 'image_url',
-                image_url: {
-                  url: imageBase64,
-                },
-              },
-            ],
-          },
-        ],
-        max_tokens: 50,
-      }),
-    });
-
-    if (!openAIResponse.ok) {
-      const errorData = await openAIResponse.json();
-      console.error('OpenAI API error:', errorData);
-      throw new Error(`OpenAI API error: ${errorData.error?.message || 'Unknown error'}`);
-    }
-
-    const openAIResult = await openAIResponse.json();
-    const fishNameFromAI = openAIResult.choices[0]?.message?.content?.trim();
-
-    console.log("Raw fish name from AI:", fishNameFromAI);
-
-    if (!fishNameFromAI || fishNameFromAI.toLowerCase() === 'not a fish' || fishNameFromAI.toLowerCase().includes("i cannot identify")) {
-      return new Response(JSON.stringify({ error: "Could not identify a fish in the image or it's not a fish." }), {
-        status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
-    
-    const escapedFishNameFromAI = fishNameFromAI.replace(/'/g, "''");
-    console.log("Escaped fish name for similarity:", escapedFishNameFromAI);
-
-    // 2. Query Supabase database using pg_trgm for the best match
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
-
-    const ilikePattern = fishNameFromAI.split(" ").join("%");
-    const orFilter = `species_name.ilike.%${ilikePattern}%,scientific_name.ilike.%${ilikePattern}%`;
-    console.log("Using OR filter for Supabase query:", orFilter);
-
-    const selectColumns = [
-      'id',
-      'species_name',
-      'scientific_name',
-      'family',
-      '"Conservation Status"', // Quoted because of the space
-      'description',
-      'distribution',
-      'depth_range',
-      `similarity(species_name, '${escapedFishNameFromAI}') AS "s_name_similarity"`, // Quoted alias
-      `similarity(scientific_name, '${escapedFishNameFromAI}') AS "sc_name_similarity"` // Quoted alias
-    ];
-    const selectString = selectColumns.join(',');
-    console.log("Using select string for Supabase query:", selectString);
-
-    const { data: matchedFishData, error: dbError } = await supabase
-      .from('Marine Life')
-      .select(selectString)
-      .or(orFilter) 
-      .order('s_name_similarity', { ascending: false, nullsFirst: false }) // Use the unquoted alias name here for ordering
-      .limit(5); 
-
-    if (dbError) {
-      console.error('Supabase DB error:', dbError);
-      throw new Error(`Database error: ${dbError.message}`);
-    }
-
-    if (!matchedFishData || matchedFishData.length === 0) {
-      console.log("No matching fish found in the database for:", fishNameFromAI);
-      return new Response(JSON.stringify({ error: `No match found in our database for '${fishNameFromAI}'.` }), {
-        status: 404,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
-    
-    let bestMatch = matchedFishData[0];
-    // When accessing properties of bestMatch, use the alias as defined (quoted or unquoted based on DB behavior)
-    // PostgreSQL typically returns unquoted column names unless they were quoted and contain caps/spaces.
-    // Since we order by 's_name_similarity' (unquoted), it's likely the JS object property will also be unquoted.
-    let highestSimilarity = Math.max(bestMatch.s_name_similarity || 0, bestMatch.sc_name_similarity || 0);
-
-    for (let i = 1; i < matchedFishData.length; i++) {
-        const currentSimilarity = Math.max(matchedFishData[i].s_name_similarity || 0, matchedFishData[i].sc_name_similarity || 0);
-        if (currentSimilarity > highestSimilarity) {
-            bestMatch = matchedFishData[i];
-            highestSimilarity = currentSimilarity;
-        }
-    }
-    
-    const SIMILARITY_THRESHOLD = 0.2; 
-    if (highestSimilarity < SIMILARITY_THRESHOLD) {
-       console.log(`Best match similarity (${highestSimilarity}) for '${fishNameFromAI}' is below threshold.`);
-       return new Response(JSON.stringify({ error: `Identified as '${fishNameFromAI}', but no confident match found in our database.` }), {
-        status: 404,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
-
-    const SUPABASE_PROJECT_REF = supabaseUrl.split('.')[0].split('//')[1];
-    const IMAGE_BUCKET_NAME = "fishimages"; 
-    const imageNameForUrl = `${bestMatch.id}.png`;
-    const imageUrl = `https://${SUPABASE_PROJECT_REF}.supabase.co/storage/v1/object/public/${IMAGE_BUCKET_NAME}/${imageNameForUrl}`;
-
-    let regionsArray: string[] = [];
-    if (typeof bestMatch.distribution === 'string') {
-        regionsArray = bestMatch.distribution.split(',').map(r => r.trim()).filter(r => r);
-    } else if (Array.isArray(bestMatch.distribution)) {
-        regionsArray = bestMatch.distribution;
-    }
-
-
-    const result: IdentifiedFish = {
-      id: bestMatch.id,
-      name: bestMatch.species_name,
-      scientificName: bestMatch.scientific_name,
-      category: bestMatch.family,
-      conservationStatus: bestMatch['Conservation Status'],
-      description: bestMatch.description,
-      confidence: Math.round(highestSimilarity * 100), 
-      imageUrl: imageUrl,
-      regions: regionsArray,
-      depth: bestMatch.depth_range,
-    };
-    
-    console.log("Match found:", result.name, "with confidence:", result.confidence);
-
-    return new Response(JSON.stringify(result), {
+    // Directly return the sample fish data
+    return new Response(JSON.stringify(sampleFish), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      status: 200,
     });
 
   } catch (error) {
-    console.error('Error in identify-fish function:', error);
-    return new Response(JSON.stringify({ error: error.message }), {
+    console.error('Error in simplified identify-fish function:', error);
+    return new Response(JSON.stringify({ error: error.message || "An unexpected error occurred" }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
 });
+
