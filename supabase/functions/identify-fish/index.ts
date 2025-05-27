@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.43.4'; // Use a specific version
 import "https://deno.land/x/xhr@0.1.0/mod.ts"; // Required for OpenAI library
@@ -17,7 +16,6 @@ interface IdentifiedFish {
   name: string;
   scientificName: string;
   category: string;
-  // habitat: string; // Habitat is not in our Marine Life table
   conservationStatus: string;
   description: string;
   confidence: number;
@@ -81,7 +79,7 @@ serve(async (req) => {
     const openAIResult = await openAIResponse.json();
     const fishNameFromAI = openAIResult.choices[0]?.message?.content?.trim();
 
-    console.log("Fish name from AI:", fishNameFromAI);
+    console.log("Raw fish name from AI:", fishNameFromAI);
 
     if (!fishNameFromAI || fishNameFromAI.toLowerCase() === 'not a fish' || fishNameFromAI.toLowerCase().includes("i cannot identify")) {
       return new Response(JSON.stringify({ error: "Could not identify a fish in the image or it's not a fish." }), {
@@ -89,9 +87,19 @@ serve(async (req) => {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
+    
+    // Escape single quotes for SQL compatibility in similarity() function
+    const escapedFishNameFromAI = fishNameFromAI.replace(/'/g, "''");
+    console.log("Escaped fish name for similarity:", escapedFishNameFromAI);
 
     // 2. Query Supabase database using pg_trgm for the best match
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+    // Construct the .or() filter string
+    // The pattern for ilike uses '%' to join words if fishNameFromAI has multiple words.
+    const ilikePattern = fishNameFromAI.split(" ").join("%");
+    const orFilter = `species_name.ilike.%${ilikePattern}%,scientific_name.ilike.%${ilikePattern}%`;
+    console.log("Using OR filter for Supabase query:", orFilter);
 
     // Use `similarity` function from pg_trgm. Ensure it's enabled in your DB.
     // We search by species_name and scientific_name
@@ -106,10 +114,10 @@ serve(async (req) => {
         description,
         distribution,
         depth_range,
-        similarity(species_name, '${fishNameFromAI}') AS s_name_similarity,
-        similarity(scientific_name, '${fishNameFromAI}') AS sc_name_similarity
+        similarity(species_name, '${escapedFishNameFromAI}') AS s_name_similarity,
+        similarity(scientific_name, '${escapedFishNameFromAI}') AS sc_name_similarity
       `)
-      .or(`species_name.ILIKE.%${fishNameFromAI.split(" ").join("%")}%,scientific_name.ILIKE.%${fishNameFromAI.split(" ").join("%")}%`) // Broad ILIKE for initial filtering
+      .or(orFilter) // Use lowercase 'ilike' and corrected orFilter string
       .order('s_name_similarity', { ascending: false, nullsFirst: false }) // Order by similarity
       .limit(5); // Get top 5 matches to evaluate
 
