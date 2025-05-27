@@ -1,7 +1,8 @@
-
 import React, { useEffect, useRef, useState } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
+import { useMarineLifeData, Species } from '../contexts/MarineLifeDataContext';
+import { Image as ImageIcon, MapPin } from 'lucide-react';
 
 interface Coordinates {
   lat: number;
@@ -26,34 +27,34 @@ const MAPBOX_TOKEN = 'pk.eyJ1IjoibmFueWVudW93ZWkiLCJhIjoiY21iMTYwMHFoMHd3MDJqc2N
 // Sample marine life data for different dive sites
 const marineLifeData = {
   1: { // Great Blue Hole
-    fish: ['Midnight Parrotfish', 'Caribbean Reef Shark', 'Atlantic Goliath Grouper'],
-    coral: ['Brain Coral', 'Elkhorn Coral'],
+    fish: ['Midnight Parrotfish', 'Caribbean Reef Shark', 'Atlantic Goliath Grouper', 'Black Grouper'],
+    coral: ['Brain Coral', 'Elkhorn Coral', 'Staghorn Coral'],
     other: ['Caribbean Spiny Lobster', 'Green Sea Turtle']
   },
   2: { // SS Thistlegorm
-    fish: ['Batfish', 'Barracuda', 'Lionfish', 'Moray Eel'],
-    coral: ['Soft Coral', 'Table Coral'],
+    fish: ['Batfish', 'Barracuda', 'Lionfish', 'Moray Eel', 'Giant Trevally'],
+    coral: ['Soft Coral', 'Table Coral', 'Black Coral'],
     other: ['Octopus', 'Nudibranch']
   },
   3: { // Barracuda Point
-    fish: ['Barracuda Schools', 'Hammerhead Shark', 'Trevally'],
-    coral: ['Staghorn Coral', 'Fire Coral'],
+    fish: ['Barracuda Schools', 'Hammerhead Shark', 'Trevally', 'Reef Manta Ray'],
+    coral: ['Staghorn Coral', 'Fire Coral', 'Brain Coral'],
     other: ['Sea Turtle', 'Sea Snake']
   },
   4: { // Molokini Crater
-    fish: ['Hawaiian Triggerfish', 'Butterflyfish', 'Yellow Tang'],
-    coral: ['Rice Coral', 'Cauliflower Coral'],
-    other: ['Hawaiian Monk Seal', 'Green Sea Turtle']
+    fish: ['Hawaiian Triggerfish', 'Butterflyfish', 'Yellow Tang', 'Moorish Idol'],
+    coral: ['Rice Coral', 'Cauliflower Coral', 'Lobe Coral'],
+    other: ['Hawaiian Monk Seal', 'Green Sea Turtle', 'Spinner Dolphin']
   },
   5: { // Blue Corner
-    fish: ['Grey Reef Shark', 'Napoleon Wrasse', 'Manta Ray'],
-    coral: ['Plate Coral', 'Bubble Coral'],
+    fish: ['Grey Reef Shark', 'Napoleon Wrasse', 'Manta Ray', 'Dogtooth Tuna'],
+    coral: ['Plate Coral', 'Bubble Coral', 'Soft Coral'],
     other: ['Sea Turtle', 'Sea Fan']
   },
   6: { // Richelieu Rock
-    fish: ['Whale Shark', 'Ghost Pipefish', 'Frogfish'],
-    coral: ['Soft Coral', 'Gorgonian Fan'],
-    other: ['Harlequin Shrimp', 'Seahorse']
+    fish: ['Whale Shark', 'Ghost Pipefish', 'Frogfish', 'Seahorse'],
+    coral: ['Soft Coral', 'Gorgonian Fan', 'Anemone'],
+    other: ['Harlequin Shrimp', 'Ornate Ghost Pipefish']
   }
 };
 
@@ -61,6 +62,7 @@ const DiveMap = ({ sites }: DiveMapProps) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const [hoveredSite, setHoveredSite] = useState<DiveSite | null>(null);
+  const [clickedSite, setClickedSite] = useState<DiveSite | null>(null);
   const [mapError, setMapError] = useState<string>('');
   const [isMapLoaded, setIsMapLoaded] = useState(false);
   const popupRef = useRef(new mapboxgl.Popup({ 
@@ -69,6 +71,8 @@ const DiveMap = ({ sites }: DiveMapProps) => {
     offset: 25,
     className: 'dive-site-popup'
   }));
+
+  const { marineLife: contextMarineLife, isLoading: marineLifeLoading } = useMarineLifeData();
 
   const initializeMap = () => {
     if (!mapContainer.current) {
@@ -116,8 +120,8 @@ const DiveMap = ({ sites }: DiveMapProps) => {
           element.addEventListener('mouseenter', () => {
             setHoveredSite(site);
             
-            const marineLife = marineLifeData[site.id as keyof typeof marineLifeData];
-            if (!marineLife) return;
+            const siteMarineLife = marineLifeData[site.id as keyof typeof marineLifeData];
+            if (!siteMarineLife) return;
             
             const popupContent = `
               <div class="p-2">
@@ -126,7 +130,7 @@ const DiveMap = ({ sites }: DiveMapProps) => {
                 <div class="mt-2">
                   <p class="text-xs font-medium text-gray-200">Marine Life:</p>
                   <ul class="text-xs text-gray-300">
-                    ${marineLife.fish.slice(0, 2).map(fish => `<li>• ${fish}</li>`).join('')}
+                    ${siteMarineLife.fish.slice(0, 2).map(fish => `<li>• ${fish}</li>`).join('')}
                   </ul>
                 </div>
               </div>
@@ -150,6 +154,7 @@ const DiveMap = ({ sites }: DiveMapProps) => {
               zoom: 10,
               essential: true
             });
+            setClickedSite(site);
           });
         });
       });
@@ -222,6 +227,12 @@ const DiveMap = ({ sites }: DiveMapProps) => {
     };
   }, []);
 
+  // Helper function to get species details from context
+  const getSpeciesImage = (name: string): string | undefined => {
+    const species = contextMarineLife.find(s => s.name.toLowerCase() === name.toLowerCase());
+    return species?.imageUrl;
+  };
+
   if (mapError) {
     return (
       <div className="w-full h-full bg-ocean-800 relative flex flex-col items-center justify-center p-6">
@@ -249,28 +260,66 @@ const DiveMap = ({ sites }: DiveMapProps) => {
         </div>
       )}
       
-      {hoveredSite && (
-        <div className="absolute bottom-4 left-4 z-10 bg-ocean-900/90 p-4 rounded-lg border border-ocean-700 max-w-xs">
-          <h3 className="font-bold text-white text-lg">{hoveredSite.name}</h3>
-          <p className="text-ocean-200 mb-2">{hoveredSite.location} • {hoveredSite.type}</p>
-          
-          {marineLifeData[hoveredSite.id as keyof typeof marineLifeData] && (
+      {clickedSite && (
+        <div className="absolute bottom-4 left-4 z-10 bg-ocean-900/90 p-4 rounded-lg border border-ocean-700 max-w-md w-full md:max-w-sm animate-fade-in">
+          <div className="flex justify-between items-start">
             <div>
-              <h4 className="font-medium text-ocean-300 mb-1 mt-2">Common Marine Life</h4>
-              <div className="grid grid-cols-2 gap-x-2 gap-y-1">
-                {marineLifeData[hoveredSite.id as keyof typeof marineLifeData].fish.map((fish, idx) => (
-                  <p key={idx} className="text-sm text-ocean-100">• {fish}</p>
-                ))}
-              </div>
-              
-              <h4 className="font-medium text-ocean-300 mb-1 mt-2">Coral</h4>
-              <div>
-                {marineLifeData[hoveredSite.id as keyof typeof marineLifeData].coral.map((coral, idx) => (
-                  <p key={idx} className="text-sm text-ocean-100">• {coral}</p>
-                ))}
-              </div>
+              <h3 className="font-bold text-white text-xl">{clickedSite.name}</h3>
+              <p className="text-ocean-200 mb-2 text-sm">{clickedSite.location} • {clickedSite.type}</p>
+            </div>
+            <button 
+              onClick={() => setClickedSite(null)} 
+              className="text-ocean-300 hover:text-white transition-colors"
+              aria-label="Close panel"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+          </div>
+          
+          {marineLifeData[clickedSite.id as keyof typeof marineLifeData] && (
+            <div className="mt-3">
+              <h4 className="font-semibold text-ocean-100 mb-2 text-md">Featured Marine Life</h4>
+              {marineLifeLoading ? <p className="text-sm text-ocean-300">Loading images...</p> : (
+                <>
+                  {(['fish', 'coral', 'other'] as const).map(category => {
+                    const items = marineLifeData[clickedSite.id as keyof typeof marineLifeData][category]?.slice(0, category === 'fish' ? 4 : 3);
+                    if (!items || items.length === 0) return null;
+                    
+                    return (
+                      <div key={category} className="mb-3">
+                        <h5 className="font-medium text-ocean-200 text-sm capitalize mb-1">{category}</h5>
+                        <div className="flex flex-wrap gap-2">
+                          {items.map((itemName, idx) => {
+                            const imageUrl = getSpeciesImage(itemName);
+                            return (
+                              <div key={idx} className="flex flex-col items-center w-16">
+                                {imageUrl ? (
+                                  <img src={imageUrl} alt={itemName} className="w-12 h-12 object-cover rounded bg-ocean-800 border border-ocean-700" />
+                                ) : (
+                                  <div className="w-12 h-12 bg-ocean-800 border border-ocean-700 rounded flex items-center justify-center">
+                                    <ImageIcon size={24} className="text-ocean-400" />
+                                  </div>
+                                )}
+                                <p className="text-xs text-ocean-300 mt-1 text-center truncate w-full" title={itemName}>{itemName}</p>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </>
+              )}
             </div>
           )}
+
+          <div className="mt-4 pt-3 border-t border-ocean-700">
+            <h4 className="font-semibold text-ocean-100 mb-2 text-md">Recommended Dive Shops</h4>
+            <div className="flex items-center text-sm text-ocean-300 bg-ocean-800/50 p-3 rounded">
+              <MapPin size={18} className="mr-2 text-ocean-400" />
+              <span>Dive shop information coming soon.</span>
+            </div>
+          </div>
         </div>
       )}
     </div>
