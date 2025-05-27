@@ -107,8 +107,8 @@ serve(async (req) => {
       'description',
       'distribution',
       'depth_range',
-      `similarity(species_name, '${escapedFishNameFromAI}') AS s_name_similarity`, // Ensure space after AS
-      `similarity(scientific_name, '${escapedFishNameFromAI}') AS sc_name_similarity` // Ensure space after AS
+      `similarity(species_name, '${escapedFishNameFromAI}') AS "s_name_similarity"`, // Quoted alias
+      `similarity(scientific_name, '${escapedFishNameFromAI}') AS "sc_name_similarity"` // Quoted alias
     ];
     const selectString = selectColumns.join(',');
     console.log("Using select string for Supabase query:", selectString);
@@ -117,7 +117,7 @@ serve(async (req) => {
       .from('Marine Life')
       .select(selectString)
       .or(orFilter) 
-      .order('s_name_similarity', { ascending: false, nullsFirst: false }) 
+      .order('s_name_similarity', { ascending: false, nullsFirst: false }) // Use the unquoted alias name here for ordering
       .limit(5); 
 
     if (dbError) {
@@ -133,9 +133,10 @@ serve(async (req) => {
       });
     }
     
-    // Determine best match from the results based on similarity scores
-    // We consider both name and scientific name similarity, prioritizing species_name
     let bestMatch = matchedFishData[0];
+    // When accessing properties of bestMatch, use the alias as defined (quoted or unquoted based on DB behavior)
+    // PostgreSQL typically returns unquoted column names unless they were quoted and contain caps/spaces.
+    // Since we order by 's_name_similarity' (unquoted), it's likely the JS object property will also be unquoted.
     let highestSimilarity = Math.max(bestMatch.s_name_similarity || 0, bestMatch.sc_name_similarity || 0);
 
     for (let i = 1; i < matchedFishData.length; i++) {
@@ -146,8 +147,6 @@ serve(async (req) => {
         }
     }
     
-    // If similarity is too low, consider it not a confident match.
-    // pg_trgm similarity is between 0 and 1. Threshold can be adjusted.
     const SIMILARITY_THRESHOLD = 0.2; 
     if (highestSimilarity < SIMILARITY_THRESHOLD) {
        console.log(`Best match similarity (${highestSimilarity}) for '${fishNameFromAI}' is below threshold.`);
@@ -157,9 +156,8 @@ serve(async (req) => {
       });
     }
 
-    // Construct image URL (consistent with MarineLifeDataContext)
     const SUPABASE_PROJECT_REF = supabaseUrl.split('.')[0].split('//')[1];
-    const IMAGE_BUCKET_NAME = "fishimages"; // As defined in MarineLifeDataContext
+    const IMAGE_BUCKET_NAME = "fishimages"; 
     const imageNameForUrl = `${bestMatch.id}.png`;
     const imageUrl = `https://${SUPABASE_PROJECT_REF}.supabase.co/storage/v1/object/public/${IMAGE_BUCKET_NAME}/${imageNameForUrl}`;
 
@@ -178,7 +176,7 @@ serve(async (req) => {
       category: bestMatch.family,
       conservationStatus: bestMatch['Conservation Status'],
       description: bestMatch.description,
-      confidence: Math.round(highestSimilarity * 100), // Convert similarity to percentage
+      confidence: Math.round(highestSimilarity * 100), 
       imageUrl: imageUrl,
       regions: regionsArray,
       depth: bestMatch.depth_range,
