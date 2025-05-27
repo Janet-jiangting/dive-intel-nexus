@@ -88,38 +88,37 @@ serve(async (req) => {
       });
     }
     
-    // Escape single quotes for SQL compatibility in similarity() function
     const escapedFishNameFromAI = fishNameFromAI.replace(/'/g, "''");
     console.log("Escaped fish name for similarity:", escapedFishNameFromAI);
 
     // 2. Query Supabase database using pg_trgm for the best match
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Construct the .or() filter string
-    // The pattern for ilike uses '%' to join words if fishNameFromAI has multiple words.
     const ilikePattern = fishNameFromAI.split(" ").join("%");
     const orFilter = `species_name.ilike.%${ilikePattern}%,scientific_name.ilike.%${ilikePattern}%`;
     console.log("Using OR filter for Supabase query:", orFilter);
 
-    // Use `similarity` function from pg_trgm. Ensure it's enabled in your DB.
-    // We search by species_name and scientific_name
+    const selectColumns = [
+      'id',
+      'species_name',
+      'scientific_name',
+      'family',
+      '"Conservation Status"', // Quoted because of the space
+      'description',
+      'distribution',
+      'depth_range',
+      `similarity(species_name, '${escapedFishNameFromAI}') AS s_name_similarity`, // Ensure space after AS
+      `similarity(scientific_name, '${escapedFishNameFromAI}') AS sc_name_similarity` // Ensure space after AS
+    ];
+    const selectString = selectColumns.join(',');
+    console.log("Using select string for Supabase query:", selectString);
+
     const { data: matchedFishData, error: dbError } = await supabase
       .from('Marine Life')
-      .select(`
-        id, 
-        species_name, 
-        scientific_name, 
-        family, 
-        "Conservation Status", 
-        description,
-        distribution,
-        depth_range,
-        similarity(species_name, '${escapedFishNameFromAI}') AS s_name_similarity,
-        similarity(scientific_name, '${escapedFishNameFromAI}') AS sc_name_similarity
-      `)
-      .or(orFilter) // Use lowercase 'ilike' and corrected orFilter string
-      .order('s_name_similarity', { ascending: false, nullsFirst: false }) // Order by similarity
-      .limit(5); // Get top 5 matches to evaluate
+      .select(selectString)
+      .or(orFilter) 
+      .order('s_name_similarity', { ascending: false, nullsFirst: false }) 
+      .limit(5); 
 
     if (dbError) {
       console.error('Supabase DB error:', dbError);
