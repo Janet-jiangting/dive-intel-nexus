@@ -1,3 +1,4 @@
+
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 // createClient and xhr are not needed for this simplified version
 // import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.43.4';
@@ -28,11 +29,11 @@ interface IdentifiedFish {
 
 const sampleFish: IdentifiedFish = {
   id: 101,
-  name: "Clownfish (Prototype)",
-  scientificName: "Amphiprioninae prototypus",
+  name: "Clownfish", // Removed (Prototype)
+  scientificName: "Amphiprioninae prototypus", // Keeping scientific name as is, assuming it's a placeholder
   category: "Damselfish",
   conservationStatus: "Least Concern",
-  description: "It's bright orange with white stripes, often found living in symbiosis with sea anemones.", // Updated description
+  description: "It's bright orange with white stripes, often found living in symbiosis with sea anemones.",
   confidence: 95,
   imageUrl: "https://ioyfxcceheflwshhaqhk.supabase.co/storage/v1/object/public/fishimages/7.png", 
   regions: ["Indo-Pacific", "Red Sea", "Great Barrier Reef"],
@@ -52,7 +53,7 @@ serve(async (req) => {
     //   throw new Error("Missing imageBase64 in request body");
     // }
     
-    console.log("Request received. Returning hardcoded sample fish data for prototype.");
+    console.log("Request received. Returning hardcoded sample fish data."); // Updated log message
 
     // Directly return the sample fish data
     return new Response(JSON.stringify(sampleFish), {
@@ -68,3 +69,4 @@ serve(async (req) => {
     });
   }
 });
+
