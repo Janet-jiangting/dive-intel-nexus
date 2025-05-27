@@ -1,4 +1,3 @@
-
 import { Link } from 'react-router-dom';
 import { Anchor, Mail, MapPin, Phone, Facebook, Twitter, Instagram, Youtube } from 'lucide-react';
 
@@ -10,7 +9,7 @@ const Footer = () => {
           <div>
             <div className="flex items-center space-x-2 mb-6">
               <Anchor className="h-6 w-6 text-ocean-300" />
-              <span className="font-bold text-2xl">DiveAtlas</span>
+              <span className="font-bold text-2xl">INTO the BLUE</span>
             </div>
             <p className="text-ocean-100 mb-6">
               Your comprehensive guide to the underwater world. Explore dive sites, discover marine life, and connect with the global diving community.
@@ -110,7 +109,7 @@ const Footer = () => {
               </li>
               <li className="flex items-center">
                 <Mail className="h-5 w-5 text-ocean-400 mr-3" />
-                <span>info@diveatlas.com</span>
+                <span>info@intotheblue.com</span>
               </li>
             </ul>
           </div>
@@ -118,7 +117,7 @@ const Footer = () => {
         
         <div className="mt-12 pt-8 border-t border-ocean-800 text-sm text-ocean-400">
           <div className="flex flex-col md:flex-row justify-between items-center">
-            <p>&copy; {new Date().getFullYear()} DiveAtlas. All rights reserved.</p>
+            <p>&copy; {new Date().getFullYear()} INTO the BLUE. All rights reserved.</p>
             <div className="mt-4 md:mt-0 flex space-x-6">
               <Link to="#" className="hover:text-white transition">Privacy Policy</Link>
               <Link to="#" className="hover:text-white transition">Terms of Service</Link>

@@ -1,4 +1,3 @@
-
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { X, Map, Fish, Users, LogIn, UserPlus, Search } from 'lucide-react';
@@ -15,7 +14,7 @@ const MobileMenu = ({ isOpen, onClose }: MobileMenuProps) => {
     <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm md:hidden">
       <div className="fixed inset-y-0 right-0 w-full max-w-xs bg-ocean-900 p-6 shadow-lg">
         <div className="flex items-center justify-between">
-          <Link to="/" className="text-xl font-bold text-white" onClick={onClose}>DiveAtlas</Link>
+          <Link to="/" className="text-xl font-bold text-white" onClick={onClose}>INTO the BLUE</Link>
           <Button
             variant="ghost"
             className="text-white hover:bg-ocean-800"

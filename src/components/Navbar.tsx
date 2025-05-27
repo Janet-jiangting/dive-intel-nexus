@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -29,7 +28,7 @@ const Navbar = () => {
             className="flex items-center space-x-2"
           >
             <Anchor className="h-6 w-6 text-ocean-300" />
-            <span className="font-bold text-xl text-white">DiveAtlas</span>
+            <span className="font-bold text-xl text-white">INTO the BLUE</span>
           </Link>
           
           <div className="hidden md:flex">
