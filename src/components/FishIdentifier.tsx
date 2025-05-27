@@ -4,21 +4,21 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { useToast } from '@/components/ui/use-toast'; // Updated import path
-import { supabase } from '@/integrations/supabase/client'; // Import supabase client
+import { useToast } from '@/components/ui/use-toast'; 
+import { supabase } from '@/integrations/supabase/client'; 
 
 interface IdentifiedFish {
   id: number;
   name: string;
   scientificName: string;
   category: string;
-  habitat?: string; // Habitat might not come from DB, make it optional
+  habitat?: string; 
   conservationStatus: string;
   description: string;
   confidence: number;
   imageUrl: string;
-  regions?: string[]; // Added from edge function
-  depth?: string; // Added from edge function
+  regions?: string[]; 
+  depth?: string; 
 }
 
 const FishIdentifier = () => {
@@ -43,7 +43,6 @@ const FishIdentifier = () => {
       return;
     }
     
-    // Limit file size (e.g., 5MB)
     const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
     if (file.size > MAX_FILE_SIZE) {
       toast({
@@ -55,7 +54,7 @@ const FishIdentifier = () => {
     }
 
     setSelectedImage(file);
-    setAnalysisError(null); // Clear previous errors
+    setAnalysisError(null); 
     const url = URL.createObjectURL(file);
     setPreviewUrl(url);
   };
@@ -69,7 +68,6 @@ const FishIdentifier = () => {
     setShowResult(false);
 
     try {
-      // Convert image to base64
       const reader = new FileReader();
       reader.readAsDataURL(selectedImage);
       reader.onloadend = async () => {
@@ -96,7 +94,6 @@ const FishIdentifier = () => {
           return;
         }
         
-        // The edge function now returns the error in data.error if it's a handled error
         if (data && data.error) {
           console.error('Analysis error from function:', data.error);
           setAnalysisError(data.error);
@@ -110,9 +107,7 @@ const FishIdentifier = () => {
 
         if (data) {
           console.log("Fish identified data:", data);
-          // Ensure the data matches IdentifiedFish interface
           const fishData = data as IdentifiedFish; 
-          // The habitat field might not be present, which is fine as it's optional.
           setIdentifiedFish(fishData);
           setShowResult(true);
           toast({
@@ -120,7 +115,6 @@ const FishIdentifier = () => {
             description: `${fishData.name} found with ${fishData.confidence}% confidence.`,
           });
         } else {
-            // This case should ideally be handled by data.error from the function
             setAnalysisError("No data returned from analysis.");
             toast({
                 title: "Analysis Incomplete",
@@ -169,7 +163,7 @@ const FishIdentifier = () => {
       case 'Endangered':
         return 'bg-amber-500 text-white';
       case 'Vulnerable':
-        return 'bg-yellow-500 text-ocean-900'; // Corrected color based on previous UI, if any
+        return 'bg-yellow-500 text-ocean-900';
       case 'Near Threatened':
         return 'bg-yellow-300 text-ocean-900';
       case 'Least Concern':
@@ -197,7 +191,7 @@ const FishIdentifier = () => {
                 type="file"
                 accept="image/*"
                 onChange={handleImageUpload}
-                className="bg-ocean-700 border-ocean-600 text-white file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-seagreen-600 file:text-white hover:file:bg-seagreen-700"
+                className="bg-ocean-700 border-ocean-600 text-transparent file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-seagreen-600 file:text-white hover:file:bg-seagreen-700"
               />
             </div>
           ) : (
@@ -270,7 +264,7 @@ const FishIdentifier = () => {
                   src={identifiedFish.imageUrl || '/placeholder.svg'}
                   alt={identifiedFish.name}
                   className="w-full h-48 object-cover rounded-lg mb-4 border border-ocean-700"
-                  onError={(e) => (e.currentTarget.src = '/placeholder.svg')} // Fallback for broken image links
+                  onError={(e) => (e.currentTarget.src = '/placeholder.svg')}
                 />
               </div>
               

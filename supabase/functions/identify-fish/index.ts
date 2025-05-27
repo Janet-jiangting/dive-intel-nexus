@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 // createClient and xhr are not needed for this simplified version
 // import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.43.4';
@@ -33,9 +32,9 @@ const sampleFish: IdentifiedFish = {
   scientificName: "Amphiprioninae prototypus",
   category: "Damselfish",
   conservationStatus: "Least Concern",
-  description: "This is a sample clownfish description for the prototype. It's bright orange with white stripes, often found living in symbiosis with sea anemones.",
+  description: "It's bright orange with white stripes, often found living in symbiosis with sea anemones.", // Updated description
   confidence: 95,
-  imageUrl: "https://ioyfxcceheflwshhaqhk.supabase.co/storage/v1/object/public/fishimages/7.png", // Using an existing image or placeholder
+  imageUrl: "https://ioyfxcceheflwshhaqhk.supabase.co/storage/v1/object/public/fishimages/7.png", 
   regions: ["Indo-Pacific", "Red Sea", "Great Barrier Reef"],
   depth: "1-15 meters",
 };
@@ -69,4 +68,3 @@ serve(async (req) => {
     });
   }
 });
-

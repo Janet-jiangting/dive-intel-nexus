@@ -17,9 +17,9 @@ import {
 } from '@/components/ui/select';
 import MarineLifeCard from '@/components/MarineLifeCard';
 import FishIdentifier from '@/components/FishIdentifier';
-import { useMarineLifeData, Species } from '@/contexts/MarineLifeDataContext'; // Import Species
+import { useMarineLifeData, Species } from '@/contexts/MarineLifeDataContext';
 import { Skeleton } from '@/components/ui/skeleton';
-import MarineLifeDetailModal from '@/components/MarineLifeDetailModal'; // Import modal
+import MarineLifeDetailModal from '@/components/MarineLifeDetailModal';
 import {
   Pagination,
   PaginationContent,
@@ -28,9 +28,9 @@ import {
   PaginationLink,
   PaginationNext,
   PaginationPrevious,
-} from "@/components/ui/pagination"; // Import pagination components
+} from "@/components/ui/pagination";
 
-const ITEMS_PER_PAGE = 9; // Number of items to display per page
+const ITEMS_PER_PAGE = 9;
 
 const MarineLife = () => {
   const { marineLife: marineLifeData, isLoading, error } = useMarineLifeData();
@@ -88,24 +88,33 @@ const MarineLife = () => {
   
   const renderPaginationItems = () => {
     const items = [];
-    const maxPagesToShow = 5; // Max number of page links to show (e.g., 1 ... 4 5 6 ... 10)
+    const maxPagesToShow = 5; 
     const halfMaxPages = Math.floor(maxPagesToShow / 2);
 
     if (totalPages <= maxPagesToShow) {
       for (let i = 1; i <= totalPages; i++) {
         items.push(
           <PaginationItem key={i}>
-            <PaginationLink href="#" isActive={currentPage === i} onClick={(e) => { e.preventDefault(); handlePageChange(i); }}>
+            <PaginationLink 
+              href="#" 
+              isActive={currentPage === i} 
+              onClick={(e) => { e.preventDefault(); handlePageChange(i); }}
+              className="text-white" // Added text-white
+            >
               {i}
             </PaginationLink>
           </PaginationItem>
         );
       }
     } else {
-      // Show first page
       items.push(
         <PaginationItem key={1}>
-          <PaginationLink href="#" isActive={currentPage === 1} onClick={(e) => { e.preventDefault(); handlePageChange(1); }}>
+          <PaginationLink 
+            href="#" 
+            isActive={currentPage === 1} 
+            onClick={(e) => { e.preventDefault(); handlePageChange(1); }}
+            className="text-white" // Added text-white
+          >
             1
           </PaginationLink>
         </PaginationItem>
@@ -115,14 +124,19 @@ const MarineLife = () => {
       let endPage = Math.min(totalPages - 1, currentPage + halfMaxPages - (currentPage < halfMaxPages+1 ? halfMaxPages - currentPage +1 : 0));
       
       if (currentPage - 1 > halfMaxPages && totalPages > maxPagesToShow) {
-         items.push(<PaginationEllipsis key="start-ellipsis" />);
+         items.push(<PaginationEllipsis key="start-ellipsis" className="text-white" />); // Added text-white to ellipsis as well
       }
       
       for (let i = startPage; i <= endPage; i++) {
           if (i === 0) continue;
            items.push(
              <PaginationItem key={i}>
-               <PaginationLink href="#" isActive={currentPage === i} onClick={(e) => { e.preventDefault(); handlePageChange(i); }}>
+               <PaginationLink 
+                href="#" 
+                isActive={currentPage === i} 
+                onClick={(e) => { e.preventDefault(); handlePageChange(i); }}
+                className="text-white" // Added text-white
+               >
                  {i}
                </PaginationLink>
              </PaginationItem>
@@ -130,13 +144,17 @@ const MarineLife = () => {
       }
 
       if (totalPages - currentPage > halfMaxPages && totalPages > maxPagesToShow) {
-        items.push(<PaginationEllipsis key="end-ellipsis" />);
+        items.push(<PaginationEllipsis key="end-ellipsis" className="text-white" />); // Added text-white to ellipsis as well
       }
 
-      // Show last page
       items.push(
         <PaginationItem key={totalPages}>
-          <PaginationLink href="#" isActive={currentPage === totalPages} onClick={(e) => { e.preventDefault(); handlePageChange(totalPages); }}>
+          <PaginationLink 
+            href="#" 
+            isActive={currentPage === totalPages} 
+            onClick={(e) => { e.preventDefault(); handlePageChange(totalPages); }}
+            className="text-white" // Added text-white
+          >
             {totalPages}
           </PaginationLink>
         </PaginationItem>
@@ -145,7 +163,6 @@ const MarineLife = () => {
     return items;
   };
 
-
   if (isLoading) {
     return (
       <div className="min-h-screen bg-ocean-900 p-8">
@@ -153,7 +170,7 @@ const MarineLife = () => {
           <Skeleton className="h-12 w-1/2 mb-4" />
           <Skeleton className="h-8 w-3/4 mb-8" />
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[...Array(ITEMS_PER_PAGE)].map((_, i) => ( // Use ITEMS_PER_PAGE for skeleton
+            {[...Array(ITEMS_PER_PAGE)].map((_, i) => ( 
               <Card key={i} className="bg-ocean-800/50 border-ocean-700">
                 <Skeleton className="h-48 w-full" />
                 <CardContent className="pt-4">
@@ -203,7 +220,7 @@ const MarineLife = () => {
                 placeholder="Search for species by name or scientific name..."
                 className="pl-9 bg-ocean-700/50 border-ocean-600 text-white"
                 value={searchQuery}
-                onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }} // Reset to page 1 on search
+                onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }}
               />
             </div>
             
@@ -227,7 +244,7 @@ const MarineLife = () => {
                       Category
                     </label>
                     <Select 
-                        onValueChange={(value) => { setSelectedCategory(value === "Any Category" ? null : value); setCurrentPage(1);}} // Reset page
+                        onValueChange={(value) => { setSelectedCategory(value === "Any Category" ? null : value); setCurrentPage(1);}}
                         value={selectedCategory || "Any Category"}
                     >
                       <SelectTrigger id="category-select" className="bg-ocean-700/50 border-ocean-600 text-white">
@@ -247,7 +264,7 @@ const MarineLife = () => {
                       Conservation Status
                     </label>
                     <Select 
-                        onValueChange={(value) => { setSelectedStatus(value === "Any Status" ? null : value); setCurrentPage(1);}} // Reset page
+                        onValueChange={(value) => { setSelectedStatus(value === "Any Status" ? null : value); setCurrentPage(1);}}
                         value={selectedStatus || "Any Status"}
                     >
                       <SelectTrigger id="status-select" className="bg-ocean-700/50 border-ocean-600 text-white">
@@ -277,7 +294,6 @@ const MarineLife = () => {
           <div>
             <span className="text-ocean-200">{filteredMarineLife.length} species found</span>
           </div>
-          {/* Sort by Select - functionality not implemented yet */}
           <Select defaultValue="name">
             <SelectTrigger className="w-[180px] bg-ocean-800/50 border-ocean-700 text-white">
               <SelectValue placeholder="Sort by" />
@@ -332,16 +348,23 @@ const MarineLife = () => {
           ))}
         </div>
         
-        {/* Pagination Controls */}
         {totalPages > 1 && (
           <Pagination className="mt-12">
             <PaginationContent>
               <PaginationItem>
-                <PaginationPrevious href="#" onClick={(e) => { e.preventDefault(); handlePageChange(currentPage - 1); }} className={currentPage === 1 ? "pointer-events-none opacity-50" : ""}/>
+                <PaginationPrevious 
+                  href="#" 
+                  onClick={(e) => { e.preventDefault(); handlePageChange(currentPage - 1); }} 
+                  className={`${currentPage === 1 ? "pointer-events-none opacity-50" : ""} text-white`} // Added text-white
+                />
               </PaginationItem>
               {renderPaginationItems()}
               <PaginationItem>
-                <PaginationNext href="#" onClick={(e) => { e.preventDefault(); handlePageChange(currentPage + 1); }}  className={currentPage === totalPages ? "pointer-events-none opacity-50" : ""}/>
+                <PaginationNext 
+                  href="#" 
+                  onClick={(e) => { e.preventDefault(); handlePageChange(currentPage + 1); }}  
+                  className={`${currentPage === totalPages ? "pointer-events-none opacity-50" : ""} text-white`} // Added text-white
+                />
               </PaginationItem>
             </PaginationContent>
           </Pagination>
