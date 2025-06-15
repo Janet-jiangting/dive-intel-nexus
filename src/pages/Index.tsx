@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
@@ -16,19 +15,21 @@ const Index = () => {
   return (
     <div className="flex flex-col w-full">
       {/* Hero Section */}
-      <section className="relative h-[80vh] min-h-[600px] bg-ocean-900 overflow-hidden">
+      <section className="relative h-auto min-h-[580px] bg-ocean-900 overflow-hidden py-10 md:py-0 flex items-center">
         <div className="absolute inset-0 bg-hero-pattern bg-cover bg-center opacity-50 pointer-events-none" />
         <div className="absolute inset-0 bg-gradient-to-r from-ocean-900/90 to-ocean-900/50 pointer-events-none" />
-          
-        <div className="relative container mx-auto flex flex-col justify-center h-full px-4 space-y-8 z-10">
-          <div className="max-w-3xl">
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4 animate-fade-in">
-              Explore the Depths of Our <span className="text-ocean-300">Underwater World</span>
+
+        <div className="relative container mx-auto flex flex-col md:flex-row justify-between items-center h-full px-4 z-10 gap-12 md:gap-8">
+          {/* Left: Title, Subtitle, CTA */}
+          <div className="flex-1 max-w-3xl md:pr-8">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4 animate-fade-in leading-tight">
+              Explore the Depths of Our{" "}
+              <span className="text-ocean-300">Underwater World</span>
             </h1>
             <p className="text-xl text-ocean-100 mb-8 max-w-2xl">
               Discover incredible dive sites, learn about marine species, and connect with the global diving community through our comprehensive platform.
             </p>
-            
+
             <div className="flex flex-col sm:flex-row gap-4 relative z-20">
               <Button 
                 asChild 
@@ -55,8 +56,29 @@ const Index = () => {
               </Button>
             </div>
           </div>
+
+          {/* Right: Suggestion Box */}
+          <div className="w-full md:w-[390px] flex-shrink-0">
+            <div className="bg-blue-800 bg-opacity-90 rounded-xl shadow-lg p-8 border border-cyan-600 ring-1 ring-cyan-600/25 relative"
+                 style={{ boxShadow: '0px 0px 25px 0px #22d3ee33' }}>
+              <h2 className="text-2xl font-bold text-white mb-3 text-center">Can't Decide? Let Us Help!</h2>
+              <p className="text-base text-blue-100 mb-6 text-center">
+                Use our AI-powered trip planner to customize your next underwater adventure. Tell us your preferences, and we'll craft the perfect itinerary for you.
+              </p>
+              <Button
+                asChild
+                size="lg"
+                className="w-full bg-gradient-to-r from-cyan-500 to-emerald-500 hover:from-cyan-600 hover:to-emerald-600 text-white font-semibold shadow-md"
+              >
+                <Link to="/customize-trip" className="flex items-center justify-center">
+                  <Wand2 className="mr-2 h-5 w-5" />
+                  Customize Your Dive Trip
+                </Link>
+              </Button>
+            </div>
+          </div>
         </div>
-          
+
         <div className="absolute bottom-0 left-0 right-0 pointer-events-none">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320" className="w-full h-auto">
             <path fill="#0c4a6e" fillOpacity="1" d="M0,288L48,272C96,256,192,224,288,229.3C384,235,480,277,576,277.3C672,277,768,235,864,224C960,213,1056,235,1152,229.3C1248,224,1344,192,1392,176L1440,160L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
