@@ -31,11 +31,9 @@ const ChatAssistant = () => {
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const [defaultPosition, setDefaultPosition] = useState<{x: number; y: number}>({x: 0, y: 64}); // move up a bit by default
+  const [defaultPosition, setDefaultPosition] = useState<{x: number; y: number}>({x: 0, y: 64});
   const [minimized, setMinimized] = useState(false);
   const [dragPos, setDragPos] = useState<{x: number, y: number} | null>(null);
-  const RETRY_LIMIT = 8; // number of times to retry finding the title
-  const RETRY_DELAY = 150; // ms between tries
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -43,46 +41,13 @@ const ChatAssistant = () => {
 
   useEffect(scrollToBottom, [messages]);
 
+  // Set chat position to top-right consistently
   useEffect(() => {
-    let tries = 0;
-    let timeoutId: ReturnType<typeof setTimeout>;
-
-    function setChatPosition() {
-      const titleEl = document.querySelector('.animate-fade-in');
-      let x = 0;
-      let y = 120; // fallback Y
-
-      if (titleEl) {
-        const rect = titleEl.getBoundingClientRect();
-        const visualGap = 48;
-        x = rect.right + visualGap;
-        if (x + CHAT_W > window.innerWidth - 32) {
-          x = window.innerWidth - CHAT_W - 32;
-        }
-        y = rect.top + window.scrollY;
-        y = Math.max(24, Math.min(y, window.innerHeight - 340));
-        x = Math.max(16, x);
-        y = Math.max(16, y);
-        setDefaultPosition({ x, y });
-      } else {
-        if (tries < RETRY_LIMIT) {
-          tries++;
-          timeoutId = setTimeout(setChatPosition, RETRY_DELAY);
-        } else {
-          // fallback, align bottom right
-          x = window.innerWidth - CHAT_W - 32;
-          y = 120;
-          x = Math.max(16, x);
-          y = Math.max(16, y);
-          setDefaultPosition({ x, y });
-        }
-      }
-    }
-
-    setChatPosition();
-    return () => {
-      if (timeoutId) clearTimeout(timeoutId);
-    };
+    const gapFromRight = 56; // px from right edge (matching your reference image)
+    const gapFromTop = 64; // px from top edge
+    const x = window.innerWidth - CHAT_W - gapFromRight;
+    const y = gapFromTop;
+    setDefaultPosition({ x: Math.max(8, x), y: Math.max(8, y) });
   }, []);
 
   const handleSendMessage = async (messageText?: string) => {
@@ -173,18 +138,6 @@ const ChatAssistant = () => {
     setDragPos({x: data.x, y: data.y});
   };
 
-  // Always snap chat to top-right of viewport (like the reference image)
-  useEffect(() => {
-    // Calculate right/top position
-    const gapFromRight = 56; // px from right edge (visual spacing from image reference)
-    const gapFromTop = 64; // px from top edge
-    const x = window.innerWidth - CHAT_W - gapFromRight;
-    const y = gapFromTop;
-    setDefaultPosition({ x: Math.max(8, x), y: Math.max(8, y) });
-    // On main page navigation, always snap Ollie to this position
-    // No dragPos is restored except when minimized
-  }, []);
-
   // Render minimized view with draggable OctopusAvatar
   if (minimized) {
     return (
@@ -224,14 +177,14 @@ const ChatAssistant = () => {
     <Draggable
       handle=".chat-header-drag-handle"
       defaultPosition={defaultPosition}
-      position={undefined} // no lock to dragPos; each open is default
+      position={undefined}
       onDrag={onDrag}
       bounds="body"
     >
       <div
         className="z-50 w-96 h-[600px] bg-ocean-800 border-2 border-cyan-500 rounded-2xl shadow-2xl flex flex-col overflow-hidden"
         style={{
-          position: 'absolute', // use absolute so Draggable can control position
+          position: 'absolute',
           bottom: undefined,
           right: undefined,
         }}
