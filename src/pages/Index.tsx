@@ -8,15 +8,14 @@ import DiveConditionsCard from '@/components/DiveConditionsCard';
 // import { Card, CardContent } from '@/components/ui/card'; // Not used directly
 import ChatAssistant from '@/components/ChatAssistant';
 
-
 const Index = () => {
   return (
     <> {/* Wrap in a fragment to accommodate ChatAssistant correctly */}
       <div className="flex flex-col w-full">
         {/* Hero Section */}
         <section className="relative h-[80vh] min-h-[600px] bg-ocean-900 overflow-hidden">
-          <div className="absolute inset-0 bg-hero-pattern bg-cover bg-center opacity-50" />
-          <div className="absolute inset-0 bg-gradient-to-r from-ocean-900/90 to-ocean-900/50" />
+          <div className="absolute inset-0 bg-hero-pattern bg-cover bg-center opacity-50 pointer-events-none" />
+          <div className="absolute inset-0 bg-gradient-to-r from-ocean-900/90 to-ocean-900/50 pointer-events-none" />
           
           <div className="relative container mx-auto flex flex-col justify-center h-full px-4 space-y-8">
             <div className="max-w-3xl">
