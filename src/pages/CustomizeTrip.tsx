@@ -48,7 +48,10 @@ const marineLifeWishlist = [
 const formSchema = z.object({
   schedule: z
     .object({
-      from: z.date(),
+      from: z.date({
+        required_error: "Please select a start date.",
+        invalid_type_error: "Invalid date.",
+      }),
       to: z.date().optional(),
     })
     .optional(),
@@ -120,7 +123,12 @@ const CustomizeTrip = () => {
                         <FormItem className="flex flex-col">
                           <FormLabel>Dive Schedule</FormLabel>
                           <DateRangePicker
-                            date={field.value}
+                            date={
+                              // Only pass if from is present, else undefined
+                              field.value && field.value.from
+                                ? field.value
+                                : undefined
+                            }
                             onSelect={field.onChange}
                           />
                           <FormMessage />
