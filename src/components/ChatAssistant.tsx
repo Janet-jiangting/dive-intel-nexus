@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import Draggable from 'react-draggable';
 import { Button } from '@/components/ui/button';
@@ -31,10 +32,8 @@ const ChatAssistant = () => {
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const [chatPosition, setChatPosition] = useState<{x: number; y: number}>({x: 0, y: 120});
   const [minimized, setMinimized] = useState(false);
-  const [dragPos, setDragPos] = useState<{x: number, y: number} | null>(null);
-  const [resetKey, setResetKey] = useState(0);
+  const [dragPosition, setDragPosition] = useState<{x: number, y: number} | null>(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -42,32 +41,17 @@ const ChatAssistant = () => {
 
   useEffect(scrollToBottom, [messages]);
 
-  // Calculate proper position to match reference image
-  const calculateChatPosition = () => {
-    const gapFromRight = 80; // Increased to 80px to match reference spacing
-    const gapFromTop = 100; // Adjusted to 100px to match reference positioning
+  // Calculate initial position to match reference image
+  const calculateInitialPosition = () => {
+    const gapFromRight = 120; // Adjusted to match reference image positioning
+    const gapFromTop = 80; // Adjusted for proper top spacing
     const x = window.innerWidth - CHAT_W - gapFromRight;
     const y = gapFromTop;
     return { x: Math.max(8, x), y: Math.max(8, y) };
   };
 
-  // Set chat position to top-right with proper spacing
-  useEffect(() => {
-    const updatePosition = () => {
-      const newPosition = calculateChatPosition();
-      setChatPosition(newPosition);
-      setResetKey(prev => prev + 1); // Force reset of draggable position
-    };
-
-    updatePosition();
-
-    // Add window resize listener to maintain proper positioning
-    window.addEventListener('resize', updatePosition);
-    
-    return () => {
-      window.removeEventListener('resize', updatePosition);
-    };
-  }, []);
+  // Get initial position only once
+  const [initialPosition] = useState(() => calculateInitialPosition());
 
   const handleSendMessage = async (messageText?: string) => {
     const textToSend = messageText || inputValue.trim();
@@ -147,20 +131,14 @@ const ChatAssistant = () => {
     setMinimized(true);
   };
 
-  // When minimized Ollie is clicked, restore to proper position
+  // When minimized Ollie is clicked, restore to last position or initial position
   const handleRestore = () => {
     setMinimized(false);
-    const newPosition = calculateChatPosition();
-    setChatPosition(newPosition);
-    setDragPos(null); // Reset drag position
-    setResetKey(prev => prev + 1); // Force reset to calculated position
   };
 
-  // Track drag position only for minimized state
+  // Track drag position for both states
   const onDrag = (_: any, data: {x:number, y:number}) => {
-    if (minimized) {
-      setDragPos({x: data.x, y: data.y});
-    }
+    setDragPosition({x: data.x, y: data.y});
   };
 
   // Render minimized view with draggable OctopusAvatar
@@ -168,7 +146,7 @@ const ChatAssistant = () => {
     return (
       <Draggable
         handle=".minimize-ollie-handle"
-        position={dragPos || chatPosition}
+        defaultPosition={dragPosition || initialPosition}
         onDrag={onDrag}
         bounds="body"
       >
@@ -199,9 +177,8 @@ const ChatAssistant = () => {
 
   return (
     <Draggable
-      key={resetKey}
       handle=".chat-header-drag-handle"
-      position={chatPosition}
+      defaultPosition={dragPosition || initialPosition}
       onDrag={onDrag}
       bounds="body"
     >
