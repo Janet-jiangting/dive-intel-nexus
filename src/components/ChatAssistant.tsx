@@ -27,6 +27,7 @@ const sampleQuestions = [
 ];
 
 const CHAT_W = 384 + 32; // w-96 = 384px + 32px gap for safety
+const CHAT_H = 600; // from className="h-[600px]"
 
 const ChatAssistant = () => {
   const location = useLocation();
@@ -46,6 +47,7 @@ const ChatAssistant = () => {
   // Calculate position based on actual content container
   const calculateIdealPosition = () => {
     const windowWidth = window.innerWidth;
+    const windowHeight = window.innerHeight;
     
     // Use Tailwind's container responsive breakpoints
     let containerMaxWidth = windowWidth;
@@ -61,24 +63,24 @@ const ChatAssistant = () => {
     const containerLeft = (windowWidth - actualContainerWidth) / 2;
     const containerRight = containerLeft + actualContainerWidth;
     
-    // Position close to content, aligned with title area
-    const gapFromContainer = 16; // Smaller gap to be closer to content
-    const gapFromTop = 100; // Align with hero title area
-    
+    // Position close to content on the right
+    const gapFromContainer = 16;
     const x = containerRight + gapFromContainer;
-    const y = gapFromTop;
+    
+    // Vertically center in the viewport to align with the "middle" of the page content
+    const y = (windowHeight - CHAT_H) / 2;
     
     // Ensure it doesn't go off screen
     const maxX = windowWidth - CHAT_W - 16;
     const finalX = Math.min(x, maxX);
     const finalY = Math.max(16, y);
     
-    console.log('Position calculation:', {
+    console.log('Position calculation (right, middle-aligned):', {
       windowWidth,
-      containerMaxWidth,
-      actualContainerWidth,
+      windowHeight,
       containerRight,
       calculatedX: x,
+      calculatedY: y,
       finalX,
       finalY
     });
