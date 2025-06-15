@@ -31,7 +31,7 @@ const ChatAssistant = () => {
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const [defaultPosition, setDefaultPosition] = useState<{x: number; y: number}>({x: 0, y: 100});
+  const [defaultPosition, setDefaultPosition] = useState<{x: number; y: number}>({x: 0, y: 64}); // move up a bit by default
   const [minimized, setMinimized] = useState(false);
   const [dragPos, setDragPos] = useState<{x: number, y: number} | null>(null);
   const RETRY_LIMIT = 8; // number of times to retry finding the title
@@ -173,6 +173,18 @@ const ChatAssistant = () => {
     setDragPos({x: data.x, y: data.y});
   };
 
+  // Always snap chat to top-right of viewport (like the reference image)
+  useEffect(() => {
+    // Calculate right/top position
+    const gapFromRight = 56; // px from right edge (visual spacing from image reference)
+    const gapFromTop = 64; // px from top edge
+    const x = window.innerWidth - CHAT_W - gapFromRight;
+    const y = gapFromTop;
+    setDefaultPosition({ x: Math.max(8, x), y: Math.max(8, y) });
+    // On main page navigation, always snap Ollie to this position
+    // No dragPos is restored except when minimized
+  }, []);
+
   // Render minimized view with draggable OctopusAvatar
   if (minimized) {
     return (
@@ -211,8 +223,8 @@ const ChatAssistant = () => {
   return (
     <Draggable
       handle=".chat-header-drag-handle"
-      defaultPosition={dragPos || defaultPosition}
-      position={dragPos || undefined}
+      defaultPosition={defaultPosition}
+      position={undefined} // no lock to dragPos; each open is default
       onDrag={onDrag}
       bounds="body"
     >
