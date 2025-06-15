@@ -46,12 +46,12 @@ const marineLifeWishlist = [
 ];
 
 const formSchema = z.object({
-  schedule: z.object({
-    from: z.date({ required_error: "A start date is required." }),
-    to: z.date().optional(),
-  }).refine((data) => !!data.to, {
-    message: "An end date is required.",
-  }),
+  schedule: z
+    .object({
+      from: z.date(),
+      to: z.date().optional(),
+    })
+    .optional(),
   budget: z.array(z.number()).default([1500]),
   diveActivities: z.array(z.string()).refine((value) => value.some((item) => item), {
     message: "You have to select at least one activity.",
@@ -83,7 +83,8 @@ const CustomizeTrip = () => {
     console.log(values);
     toast({
       title: "Generating Your Dream Dive Trip... ✨",
-      description: "Our AI is analyzing your preferences. This is a simulation, but soon it will create a real itinerary!",
+      description:
+        "Our AI is analyzing your preferences. This is a simulation, but soon it will create a real itinerary!",
     });
   }
 
@@ -107,7 +108,9 @@ const CustomizeTrip = () => {
                 <Card className="bg-ocean-800 border-ocean-700">
                   <CardHeader>
                     <CardTitle>Trip Details</CardTitle>
-                    <CardDescription>When are you going and what's your budget?</CardDescription>
+                    <CardDescription>
+                      When are you going and what's your budget?
+                    </CardDescription>
                   </CardHeader>
                   <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <FormField
@@ -116,7 +119,10 @@ const CustomizeTrip = () => {
                       render={({ field }) => (
                         <FormItem className="flex flex-col">
                           <FormLabel>Dive Schedule</FormLabel>
-                          <DateRangePicker date={field.value} onSelect={field.onChange} />
+                          <DateRangePicker
+                            date={field.value}
+                            onSelect={field.onChange}
+                          />
                           <FormMessage />
                         </FormItem>
                       )}
@@ -129,7 +135,7 @@ const CustomizeTrip = () => {
                           <FormLabel>Max Budget (per person, in USD)</FormLabel>
                           <FormControl>
                             <div>
-                               <Slider
+                              <Slider
                                 min={100}
                                 max={10000}
                                 step={100}
@@ -137,7 +143,9 @@ const CustomizeTrip = () => {
                                 defaultValue={field.value}
                                 className="my-4"
                               />
-                              <div className="text-center font-bold text-ocean-300 text-lg">${field.value?.[0] || 1500}</div>
+                              <div className="text-center font-bold text-ocean-300 text-lg">
+                                ${field.value?.[0] || 1500}
+                              </div>
                             </div>
                           </FormControl>
                           <FormMessage />
