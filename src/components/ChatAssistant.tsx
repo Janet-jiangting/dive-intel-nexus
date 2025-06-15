@@ -149,13 +149,15 @@ const ChatAssistant = () => {
   }, [messages.length]);
 
   return (
-    <div className="fixed bottom-6 right-6 w-96 h-[600px] bg-ocean-900 border-2 border-cyan-500 rounded-2xl shadow-2xl flex flex-col overflow-hidden z-50">
+    <div className="fixed bottom-6 right-6 w-96 h-[600px] bg-ocean-800 border-2 border-cyan-500 rounded-2xl shadow-2xl flex flex-col overflow-hidden z-50">
       {/* Header */}
-      <div className="bg-gradient-to-r from-cyan-600 to-ocean-700 p-4 border-b border-cyan-500">
+      <div className="bg-gradient-to-r from-ocean-600 to-ocean-700 p-4 border-b border-cyan-500">
         <div className="flex items-center space-x-3">
-          <OctopusAvatar />
+          <div className="w-12 h-12 flex items-center justify-center rounded-full bg-white/30">
+            <span className="text-[2rem]">🧑‍🔬</span>
+          </div>
           <div>
-            <h3 className="text-white font-semibold text-lg">Ollie Assistant</h3>
+            <h3 className="text-white font-semibold text-lg">Ollie</h3>
             <p className="text-cyan-200 text-sm">Your diving companion</p>
           </div>
         </div>
@@ -255,7 +257,7 @@ const ChatAssistant = () => {
       </ScrollArea>
 
       {/* Input Area */}
-      <div className="p-4 border-t border-ocean-700 bg-ocean-800/50">
+      <div className="p-4 border-t border-ocean-700 bg-ocean-700/60">
         <form
           onSubmit={(e) => {
             e.preventDefault();
