@@ -13,9 +13,9 @@ interface Message {
 }
 
 const OctopusAvatar = () => (
-  <div className="w-12 h-12 bg-gradient-to-br from-cyan-400 to-cyan-600 rounded-full flex items-center justify-center shadow-lg animate-float border-2 border-cyan-700 relative">
+  <div className="w-12 h-12 bg-gradient-to-br from-blue-800 to-blue-900 rounded-full flex items-center justify-center shadow-lg animate-float border-2 border-blue-700 relative">
     {/* Octopus Head */}
-    <div className="absolute inset-0 bg-gradient-to-br from-cyan-300 to-cyan-500 rounded-full">
+    <div className="absolute inset-0 bg-gradient-to-br from-blue-700 to-blue-800 rounded-full">
       {/* Eyes */}
       <div className="absolute top-3 left-2.5">
         <div className="w-1.5 h-1.5 bg-slate-800 rounded-full">
@@ -29,10 +29,10 @@ const OctopusAvatar = () => (
       </div>
       {/* Tentacles (simplified as small dots at bottom) */}
       <div className="absolute bottom-1 left-1/2 transform -translate-x-1/2 flex gap-0.5">
-        <div className="w-1 h-2 bg-gradient-to-b from-cyan-400 to-cyan-600 rounded-full"></div>
-        <div className="w-1 h-1.5 bg-gradient-to-b from-cyan-400 to-cyan-600 rounded-full"></div>
-        <div className="w-1 h-2 bg-gradient-to-b from-cyan-400 to-cyan-600 rounded-full"></div>
-        <div className="w-1 h-1.5 bg-gradient-to-b from-cyan-400 to-cyan-600 rounded-full"></div>
+        <div className="w-1 h-2 bg-gradient-to-b from-blue-700 to-blue-800 rounded-full"></div>
+        <div className="w-1 h-1.5 bg-gradient-to-b from-blue-700 to-blue-800 rounded-full"></div>
+        <div className="w-1 h-2 bg-gradient-to-b from-blue-700 to-blue-800 rounded-full"></div>
+        <div className="w-1 h-1.5 bg-gradient-to-b from-blue-700 to-blue-800 rounded-full"></div>
       </div>
     </div>
   </div>
@@ -158,8 +158,8 @@ const ChatAssistant = () => {
               className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
             >
               {msg.sender === 'ai' && (
-                <div className="w-8 h-8 bg-gradient-to-br from-cyan-400 to-cyan-600 rounded-full flex items-center justify-center mr-2 mt-1 flex-shrink-0 border border-cyan-700 relative">
-                  <div className="absolute inset-0 bg-gradient-to-br from-cyan-300 to-cyan-500 rounded-full">
+                <div className="w-8 h-8 bg-gradient-to-br from-blue-800 to-blue-900 rounded-full flex items-center justify-center mr-2 mt-1 flex-shrink-0 border border-blue-700 relative">
+                  <div className="absolute inset-0 bg-gradient-to-br from-blue-700 to-blue-800 rounded-full">
                     {/* Small eyes for message avatar */}
                     <div className="absolute top-1.5 left-1.5">
                       <div className="w-1 h-1 bg-slate-800 rounded-full">
@@ -188,8 +188,8 @@ const ChatAssistant = () => {
           
           {isLoading && (
             <div className="flex justify-start">
-              <div className="w-8 h-8 bg-gradient-to-br from-cyan-400 to-cyan-600 rounded-full flex items-center justify-center mr-2 mt-1 border border-cyan-700 relative">
-                <div className="absolute inset-0 bg-gradient-to-br from-cyan-300 to-cyan-500 rounded-full">
+              <div className="w-8 h-8 bg-gradient-to-br from-blue-800 to-blue-900 rounded-full flex items-center justify-center mr-2 mt-1 border border-blue-700 relative">
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-700 to-blue-800 rounded-full">
                   <div className="absolute top-1.5 left-1.5">
                     <div className="w-1 h-1 bg-slate-800 rounded-full">
                       <div className="w-0.5 h-0.5 bg-white rounded-full"></div>
