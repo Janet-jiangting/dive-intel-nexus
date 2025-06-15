@@ -1,4 +1,3 @@
-
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
@@ -73,8 +72,10 @@ const CustomizeTrip = () => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      schedule: undefined,
       diveActivities: ["leisure"],
       marineLife: [],
+      budget: [1500],
     },
   });
 
