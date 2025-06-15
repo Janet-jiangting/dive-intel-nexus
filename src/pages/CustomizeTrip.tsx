@@ -75,7 +75,7 @@ const CustomizeTrip = () => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      schedule: undefined,
+      schedule: undefined, // Always undefined so DateRangePicker gets 'undefined' or a {from: Date}
       diveActivities: ["leisure"],
       marineLife: [],
       budget: [1500],
@@ -124,9 +124,8 @@ const CustomizeTrip = () => {
                           <FormLabel>Dive Schedule</FormLabel>
                           <DateRangePicker
                             date={
-                              // Only pass if from is present, else undefined
                               field.value && field.value.from
-                                ? field.value
+                                ? field.value as { from: Date; to?: Date }
                                 : undefined
                             }
                             onSelect={field.onChange}
