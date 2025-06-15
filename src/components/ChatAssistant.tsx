@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -13,27 +12,40 @@ interface Message {
 }
 
 const OctopusAvatar = () => (
-  <div className="w-12 h-12 bg-gradient-to-br from-blue-800 to-blue-900 rounded-full flex items-center justify-center shadow-lg animate-float border-2 border-blue-700 relative">
-    {/* Octopus Head */}
-    <div className="absolute inset-0 bg-gradient-to-br from-blue-700 to-blue-800 rounded-full">
+  <div className="w-12 h-12 relative flex items-center justify-center">
+    {/* Octopus Head - larger and more prominent */}
+    <div className="w-10 h-8 bg-gradient-to-br from-blue-600 to-blue-800 rounded-full relative shadow-lg border-2 border-blue-700">
       {/* Eyes */}
-      <div className="absolute top-3 left-2.5">
-        <div className="w-1.5 h-1.5 bg-slate-800 rounded-full">
-          <div className="w-0.5 h-0.5 bg-white rounded-full ml-0.5 mt-0.5"></div>
+      <div className="absolute top-1.5 left-2">
+        <div className="w-2 h-2 bg-white rounded-full flex items-center justify-center">
+          <div className="w-1 h-1 bg-slate-800 rounded-full"></div>
         </div>
       </div>
-      <div className="absolute top-3 right-2.5">
-        <div className="w-1.5 h-1.5 bg-slate-800 rounded-full">
-          <div className="w-0.5 h-0.5 bg-white rounded-full ml-0.5 mt-0.5"></div>
+      <div className="absolute top-1.5 right-2">
+        <div className="w-2 h-2 bg-white rounded-full flex items-center justify-center">
+          <div className="w-1 h-1 bg-slate-800 rounded-full"></div>
         </div>
       </div>
-      {/* Tentacles (simplified as small dots at bottom) */}
-      <div className="absolute bottom-1 left-1/2 transform -translate-x-1/2 flex gap-0.5">
-        <div className="w-1 h-2 bg-gradient-to-b from-blue-700 to-blue-800 rounded-full"></div>
-        <div className="w-1 h-1.5 bg-gradient-to-b from-blue-700 to-blue-800 rounded-full"></div>
-        <div className="w-1 h-2 bg-gradient-to-b from-blue-700 to-blue-800 rounded-full"></div>
-        <div className="w-1 h-1.5 bg-gradient-to-b from-blue-700 to-blue-800 rounded-full"></div>
+      
+      {/* Small smile */}
+      <div className="absolute bottom-1.5 left-1/2 transform -translate-x-1/2">
+        <div className="w-2 h-1 border-b-2 border-slate-700 rounded-full"></div>
       </div>
+    </div>
+    
+    {/* Tentacles extending from bottom */}
+    <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 flex gap-0.5">
+      <div className="w-1 h-4 bg-gradient-to-b from-blue-600 to-blue-800 rounded-full transform -rotate-12"></div>
+      <div className="w-1 h-3 bg-gradient-to-b from-blue-600 to-blue-800 rounded-full"></div>
+      <div className="w-1 h-4 bg-gradient-to-b from-blue-600 to-blue-800 rounded-full transform rotate-12"></div>
+    </div>
+    
+    {/* Side tentacles */}
+    <div className="absolute bottom-1 left-0">
+      <div className="w-1 h-3 bg-gradient-to-b from-blue-600 to-blue-800 rounded-full transform -rotate-45"></div>
+    </div>
+    <div className="absolute bottom-1 right-0">
+      <div className="w-1 h-3 bg-gradient-to-b from-blue-600 to-blue-800 rounded-full transform rotate-45"></div>
     </div>
   </div>
 );
@@ -158,19 +170,24 @@ const ChatAssistant = () => {
               className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
             >
               {msg.sender === 'ai' && (
-                <div className="w-8 h-8 bg-gradient-to-br from-blue-800 to-blue-900 rounded-full flex items-center justify-center mr-2 mt-1 flex-shrink-0 border border-blue-700 relative">
-                  <div className="absolute inset-0 bg-gradient-to-br from-blue-700 to-blue-800 rounded-full">
-                    {/* Small eyes for message avatar */}
-                    <div className="absolute top-1.5 left-1.5">
-                      <div className="w-1 h-1 bg-slate-800 rounded-full">
-                        <div className="w-0.5 h-0.5 bg-white rounded-full"></div>
+                <div className="w-8 h-8 relative flex items-center justify-center mr-2 mt-1 flex-shrink-0">
+                  {/* Smaller version of octopus for messages */}
+                  <div className="w-6 h-5 bg-gradient-to-br from-blue-600 to-blue-800 rounded-full relative border border-blue-700">
+                    <div className="absolute top-1 left-1">
+                      <div className="w-1 h-1 bg-white rounded-full">
+                        <div className="w-0.5 h-0.5 bg-slate-800 rounded-full"></div>
                       </div>
                     </div>
-                    <div className="absolute top-1.5 right-1.5">
-                      <div className="w-1 h-1 bg-slate-800 rounded-full">
-                        <div className="w-0.5 h-0.5 bg-white rounded-full"></div>
+                    <div className="absolute top-1 right-1">
+                      <div className="w-1 h-1 bg-white rounded-full">
+                        <div className="w-0.5 h-0.5 bg-slate-800 rounded-full"></div>
                       </div>
                     </div>
+                  </div>
+                  <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 flex gap-0.5">
+                    <div className="w-0.5 h-2 bg-gradient-to-b from-blue-600 to-blue-800 rounded-full"></div>
+                    <div className="w-0.5 h-1.5 bg-gradient-to-b from-blue-600 to-blue-800 rounded-full"></div>
+                    <div className="w-0.5 h-2 bg-gradient-to-b from-blue-600 to-blue-800 rounded-full"></div>
                   </div>
                 </div>
               )}
@@ -188,18 +205,23 @@ const ChatAssistant = () => {
           
           {isLoading && (
             <div className="flex justify-start">
-              <div className="w-8 h-8 bg-gradient-to-br from-blue-800 to-blue-900 rounded-full flex items-center justify-center mr-2 mt-1 border border-blue-700 relative">
-                <div className="absolute inset-0 bg-gradient-to-br from-blue-700 to-blue-800 rounded-full">
-                  <div className="absolute top-1.5 left-1.5">
-                    <div className="w-1 h-1 bg-slate-800 rounded-full">
-                      <div className="w-0.5 h-0.5 bg-white rounded-full"></div>
+              <div className="w-8 h-8 relative flex items-center justify-center mr-2 mt-1">
+                <div className="w-6 h-5 bg-gradient-to-br from-blue-600 to-blue-800 rounded-full relative border border-blue-700">
+                  <div className="absolute top-1 left-1">
+                    <div className="w-1 h-1 bg-white rounded-full">
+                      <div className="w-0.5 h-0.5 bg-slate-800 rounded-full"></div>
                     </div>
                   </div>
-                  <div className="absolute top-1.5 right-1.5">
-                    <div className="w-1 h-1 bg-slate-800 rounded-full">
-                      <div className="w-0.5 h-0.5 bg-white rounded-full"></div>
+                  <div className="absolute top-1 right-1">
+                    <div className="w-1 h-1 bg-white rounded-full">
+                      <div className="w-0.5 h-0.5 bg-slate-800 rounded-full"></div>
                     </div>
                   </div>
+                </div>
+                <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 flex gap-0.5">
+                  <div className="w-0.5 h-2 bg-gradient-to-b from-blue-600 to-blue-800 rounded-full"></div>
+                  <div className="w-0.5 h-1.5 bg-gradient-to-b from-blue-600 to-blue-800 rounded-full"></div>
+                  <div className="w-0.5 h-2 bg-gradient-to-b from-blue-600 to-blue-800 rounded-full"></div>
                 </div>
               </div>
               <div className="max-w-[80%] rounded-2xl px-4 py-3 text-sm shadow-lg bg-ocean-800 text-ocean-100 border border-ocean-700 flex items-center">
