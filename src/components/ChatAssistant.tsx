@@ -154,7 +154,7 @@ const ChatAssistant = () => {
       <div className="bg-gradient-to-r from-ocean-600 to-ocean-700 p-4 border-b border-cyan-500">
         <div className="flex items-center space-x-3">
           <div className="w-12 h-12 flex items-center justify-center rounded-full bg-white/30">
-            <span className="text-[2rem]">🧑‍🔬</span>
+            <OctopusAvatar />
           </div>
           <div>
             <h3 className="text-white font-semibold text-lg">Ollie</h3>
