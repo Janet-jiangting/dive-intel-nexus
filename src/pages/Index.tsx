@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
@@ -9,6 +10,10 @@ import DiveConditionsCard from '@/components/DiveConditionsCard';
 import ChatAssistant from '@/components/ChatAssistant';
 
 const Index = () => {
+  const handleButtonClick = (buttonName: string) => {
+    console.log(`Button clicked: ${buttonName}`);
+  };
+
   return (
     <> {/* Wrap in a fragment to accommodate ChatAssistant correctly */}
       <div className="flex flex-col w-full">
@@ -17,7 +22,7 @@ const Index = () => {
           <div className="absolute inset-0 bg-hero-pattern bg-cover bg-center opacity-50 pointer-events-none" />
           <div className="absolute inset-0 bg-gradient-to-r from-ocean-900/90 to-ocean-900/50 pointer-events-none" />
           
-          <div className="relative container mx-auto flex flex-col justify-center h-full px-4 space-y-8">
+          <div className="relative container mx-auto flex flex-col justify-center h-full px-4 space-y-8 z-10">
             <div className="max-w-3xl">
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4 animate-fade-in">
                 Explore the Depths of Our <span className="text-ocean-300">Underwater World</span>
@@ -26,15 +31,26 @@ const Index = () => {
                 Discover incredible dive sites, learn about marine species, and connect with the global diving community through our comprehensive platform.
               </p>
               
-              <div className="flex flex-col sm:flex-row gap-4">
-                <Button asChild size="lg" className="bg-seagreen-600 hover:bg-seagreen-700 text-white">
-                  <Link to="/dive-sites">
+              <div className="flex flex-col sm:flex-row gap-4 relative z-20">
+                <Button 
+                  asChild 
+                  size="lg" 
+                  className="bg-seagreen-600 hover:bg-seagreen-700 text-white relative z-30 cursor-pointer"
+                  onClick={() => handleButtonClick('Find Dive Sites')}
+                >
+                  <Link to="/dive-sites" className="flex items-center justify-center">
                     <MapPin className="mr-2 h-5 w-5" />
                     Find Dive Sites
                   </Link>
                 </Button>
-                <Button asChild size="lg" variant="outline" className="bg-ocean-800/60 text-white border-ocean-600 hover:bg-ocean-700">
-                  <Link to="/marine-life">
+                <Button 
+                  asChild 
+                  size="lg" 
+                  variant="outline" 
+                  className="bg-ocean-800/60 text-white border-ocean-600 hover:bg-ocean-700 relative z-30 cursor-pointer"
+                  onClick={() => handleButtonClick('Explore Marine Life')}
+                >
+                  <Link to="/marine-life" className="flex items-center justify-center">
                     <Fish className="mr-2 h-5 w-5" />
                     Explore Marine Life
                   </Link>
@@ -43,7 +59,7 @@ const Index = () => {
             </div>
           </div>
           
-          <div className="absolute bottom-0 left-0 right-0">
+          <div className="absolute bottom-0 left-0 right-0 pointer-events-none">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320" className="w-full h-auto">
               <path fill="#0c4a6e" fillOpacity="1" d="M0,288L48,272C96,256,192,224,288,229.3C384,235,480,277,576,277.3C672,277,768,235,864,224C960,213,1056,235,1152,229.3C1248,224,1344,192,1392,176L1440,160L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
             </svg>
@@ -67,7 +83,6 @@ const Index = () => {
           </div>
         </section>
 
-        {/* Marine Life Gallery Section */}
         <section className="py-16 bg-gradient-to-b from-ocean-800 to-ocean-900">
           <div className="container mx-auto px-4">
             <div className="flex justify-between items-end mb-8">
@@ -84,7 +99,6 @@ const Index = () => {
           </div>
         </section>
 
-        {/* Dive Conditions Section */}
         <section className="py-16 bg-ocean-900">
           <div className="container mx-auto px-4">
             <h2 className="text-3xl font-bold text-white mb-2">Current Dive Conditions</h2>
@@ -124,7 +138,6 @@ const Index = () => {
           </div>
         </section>
 
-        {/* CTA Section */}
         <section className="py-16 bg-gradient-to-r from-seagreen-900 to-ocean-900">
           <div className="container mx-auto px-4">
             <div className="bg-ocean-800/50 border border-ocean-700 rounded-xl p-8 md:p-12">
@@ -148,7 +161,7 @@ const Index = () => {
           </div>
         </section>
       </div>
-      <ChatAssistant /> {/* Added ChatAssistant component here */}
+      <ChatAssistant />
     </>
   );
 };

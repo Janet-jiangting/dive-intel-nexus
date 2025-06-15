@@ -145,7 +145,7 @@ export default {
 			},
       backgroundImage: {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
-        'hero-pattern': "url('/hero-bg.jpg')",
+        'hero-pattern': "linear-gradient(135deg, rgba(13, 71, 161, 0.1) 0%, rgba(13, 71, 161, 0.3) 100%)",
       }
 		}
 	},
