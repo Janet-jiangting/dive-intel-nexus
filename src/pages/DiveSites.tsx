@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { 
   Search, Filter, MapPin, Waves, User, Clock, ChevronDown, 
@@ -166,20 +167,20 @@ const DiveSites = () => {
   });
 
   return (
-    <div className="min-h-screen bg-ocean-900">
-      <div className="bg-ocean-800 py-12 px-4">
-        <div className="container mx-auto">
+    <div className="min-h-screen bg-ocean-900 w-full">
+      <div className="bg-ocean-800 py-12 px-4 w-full">
+        <div className="max-w-7xl mx-auto w-full">
           <h1 className="text-3xl font-bold text-white mb-2">Dive Sites</h1>
           <p className="text-ocean-200 mb-8">
             Explore and discover dive sites around the world
           </p>
           
-          <div className="flex flex-col md:flex-row gap-4">
+          <div className="flex flex-col md:flex-row gap-4 w-full">
             <div className="flex-1 relative">
               <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Search for dive sites by name or location..."
-                className="pl-9 bg-ocean-700/50 border-ocean-600 text-white"
+                className="pl-9 bg-ocean-700/50 border-ocean-600 text-white w-full"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
@@ -208,7 +209,7 @@ const DiveSites = () => {
           </div>
           
           {showFilters && (
-            <Card className="mt-4 bg-ocean-800 border-ocean-700">
+            <Card className="mt-4 bg-ocean-800 border-ocean-700 w-full">
               <CardContent className="pt-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                   <div>
@@ -290,7 +291,7 @@ const DiveSites = () => {
         </div>
       </div>
       
-      <div className="container mx-auto py-8 px-4">
+      <div className="max-w-7xl mx-auto py-8 px-4 w-full">
         <div className="flex justify-between items-center mb-6">
           <div>
             <span className="text-ocean-200">{filteredSites.length} dive sites found</span>
@@ -308,13 +309,13 @@ const DiveSites = () => {
         </div>
         
         {view === 'list' ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 w-full">
             {filteredSites.map((site) => (
               <DiveSiteCard key={site.id} site={site} />
             ))}
           </div>
         ) : (
-          <div className="h-[600px] rounded-lg overflow-hidden border border-ocean-700">
+          <div className="h-[600px] rounded-lg overflow-hidden border border-ocean-700 w-full">
             <DiveMap sites={filteredSites} />
           </div>
         )}
