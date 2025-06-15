@@ -34,6 +34,8 @@ const ChatAssistant = () => {
   const [defaultPosition, setDefaultPosition] = useState<{x: number; y: number}>({x: 0, y: 100});
   const [minimized, setMinimized] = useState(false);
   const [dragPos, setDragPos] = useState<{x: number, y: number} | null>(null);
+  const RETRY_LIMIT = 8; // number of times to retry finding the title
+  const RETRY_DELAY = 150; // ms between tries
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -42,35 +44,45 @@ const ChatAssistant = () => {
   useEffect(scrollToBottom, [messages]);
 
   useEffect(() => {
-    // Reference the main title
-    const titleEl = document.querySelector('.animate-fade-in');
-    let x = 0;
-    let y = 120; // fallback Y
+    let tries = 0;
+    let timeoutId: ReturnType<typeof setTimeout>;
 
-    if (titleEl) {
-      const rect = titleEl.getBoundingClientRect();
-      // Snap chatbox just to the right of the main title (with visual gap)
-      // - Want some padding after title (e.g., 48px)
-      // - Limit so it doesn’t overflow screen
-      const visualGap = 48; // pixels of space between title and chat
-      x = rect.right + visualGap;
-      // If the calculated x + chat width is out of view, snap to reasonable right margin
-      if (x + CHAT_W > window.innerWidth - 32) {
-        x = window.innerWidth - CHAT_W - 32;
+    function setChatPosition() {
+      const titleEl = document.querySelector('.animate-fade-in');
+      let x = 0;
+      let y = 120; // fallback Y
+
+      if (titleEl) {
+        const rect = titleEl.getBoundingClientRect();
+        const visualGap = 48;
+        x = rect.right + visualGap;
+        if (x + CHAT_W > window.innerWidth - 32) {
+          x = window.innerWidth - CHAT_W - 32;
+        }
+        y = rect.top + window.scrollY;
+        y = Math.max(24, Math.min(y, window.innerHeight - 340));
+        x = Math.max(16, x);
+        y = Math.max(16, y);
+        setDefaultPosition({ x, y });
+      } else {
+        if (tries < RETRY_LIMIT) {
+          tries++;
+          timeoutId = setTimeout(setChatPosition, RETRY_DELAY);
+        } else {
+          // fallback, align bottom right
+          x = window.innerWidth - CHAT_W - 32;
+          y = 120;
+          x = Math.max(16, x);
+          y = Math.max(16, y);
+          setDefaultPosition({ x, y });
+        }
       }
-      // Align vertically with the top of the title
-      y = rect.top + window.scrollY;
-      // Prevent chat from going off top
-      y = Math.max(24, Math.min(y, window.innerHeight - 340));
-    } else {
-      // fallback for no title detected, stick to right with decent top margin
-      x = window.innerWidth - CHAT_W - 32;
-      y = 120;
     }
-    // Minimum constraint for very small screens
-    x = Math.max(16, x);
-    y = Math.max(16, y);
-    setDefaultPosition({ x, y });
+
+    setChatPosition();
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId);
+    };
   }, []);
 
   const handleSendMessage = async (messageText?: string) => {
