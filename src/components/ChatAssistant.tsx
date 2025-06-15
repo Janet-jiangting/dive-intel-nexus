@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import Draggable from 'react-draggable';
 import { Button } from '@/components/ui/button';
@@ -29,12 +28,35 @@ const ChatAssistant = () => {
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [defaultPosition, setDefaultPosition] = useState<{x: number; y: number}>({x: 0, y: 100});
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
   useEffect(scrollToBottom, [messages]);
+
+  useEffect(() => {
+    // Try to align the ChatAssistant's top with the h1 main title in the hero section
+    // Main title selector: .animate-fade-in (from the Hero section)
+    const titleEl = document.querySelector('.animate-fade-in');
+    let x = window.innerWidth - 440 - 40; // 440 = chat width (w-96), 40px margin to the right
+    let y = 120; // default fallback Y value
+
+    if (titleEl) {
+      const rect = titleEl.getBoundingClientRect();
+      // rect.top is relative to viewport, window.scrollY adjusts for scroll
+      y = rect.top + window.scrollY;
+    } else {
+      // fallback, e.g. on missing selector
+      y = 120;
+    }
+
+    // Avoid placing off screen if viewport is too narrow/tall
+    x = Math.max(16, Math.min(x, window.innerWidth - 340));
+    y = Math.max(16, Math.min(y, window.innerHeight - 300));
+    setDefaultPosition({ x, y });
+  }, []);
 
   const handleSendMessage = async (messageText?: string) => {
     const textToSend = messageText || inputValue.trim();
@@ -107,9 +129,6 @@ const ChatAssistant = () => {
   const handleSampleQuestionClick = (question: string) => {
     handleSendMessage(question);
   };
-
-  // Set a default position for the draggable chat (bottom right, as before)
-  const defaultPosition = { x: window.innerWidth - 440, y: window.innerHeight - 650 };
 
   return (
     <Draggable
@@ -196,4 +215,3 @@ const ChatAssistant = () => {
 };
 
 export default ChatAssistant;
-
