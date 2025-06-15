@@ -1,13 +1,15 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import Draggable from 'react-draggable';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Send, Loader2 } from 'lucide-react';
+import { Send, Loader2, Minimize } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import ChatHeader from './ChatHeader';
 import { MessageBubble } from './MessageBubble';
 import SampleQuestions from './SampleQuestions';
+import OctopusAvatar from './OctopusAvatar';
 
 interface Message {
   id: string;
@@ -23,12 +25,16 @@ const sampleQuestions = [
   "How deep can I dive with Open Water certification?",
 ];
 
+const CHAT_W = 384 + 32; // w-96 = 384px + 32px gap for safety
+
 const ChatAssistant = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [defaultPosition, setDefaultPosition] = useState<{x: number; y: number}>({x: 0, y: 100});
+  const [minimized, setMinimized] = useState(false);
+  const [dragPos, setDragPos] = useState<{x: number, y: number} | null>(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -40,18 +46,15 @@ const ChatAssistant = () => {
     // Try to align the ChatAssistant's top with the h1 main title in the hero section
     // Main title selector: .animate-fade-in (from the Hero section)
     const titleEl = document.querySelector('.animate-fade-in');
-    let x = window.innerWidth - 440 - 40; // 440 = chat width (w-96), 40px margin to the right
-    let y = 120; // default fallback Y value
+    let x = window.innerWidth - CHAT_W - 40; // Chat width + right margin
+    let y = 120; // fallback Y
 
     if (titleEl) {
       const rect = titleEl.getBoundingClientRect();
-      // rect.top is relative to viewport, window.scrollY adjusts for scroll
       y = rect.top + window.scrollY;
     } else {
-      // fallback, e.g. on missing selector
       y = 120;
     }
-
     // Avoid placing off screen if viewport is too narrow/tall
     x = Math.max(16, Math.min(x, window.innerWidth - 340));
     y = Math.max(16, Math.min(y, window.innerHeight - 300));
@@ -130,10 +133,63 @@ const ChatAssistant = () => {
     handleSendMessage(question);
   };
 
+  // Handler for minimize button in header
+  const handleMinimize = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setMinimized(true);
+  };
+
+  // When minimized Ollie is clicked, restore
+  const handleRestore = () => {
+    setMinimized(false);
+  };
+
+  // Track drag position to remember where Ollie is minimized
+  const onDrag = (_: any, data: {x:number, y:number}) => {
+    setDragPos({x: data.x, y: data.y});
+  };
+
+  // Render minimized view with draggable OctopusAvatar
+  if (minimized) {
+    return (
+      <Draggable
+        handle=".minimize-ollie-handle"
+        defaultPosition={dragPos || defaultPosition}
+        position={dragPos || undefined}
+        onDrag={onDrag}
+        bounds="body"
+      >
+        <div
+          style={{
+            position: "absolute",
+            zIndex: 50,
+            cursor: "pointer",
+            width: 56,
+            height: 56,
+            background: "rgba(21, 101, 192, 0.94)", // ocean-800 with opacity
+            borderRadius: "9999px",
+            boxShadow: "0 6px 32px 0 rgba(0,0,0,0.19)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            border: "2px solid #22d3ee", // cyan-400
+          }}
+          className="minimize-ollie-handle select-none"
+          onClick={handleRestore}
+          title="Open Ollie"
+        >
+          <OctopusAvatar size={38} />
+        </div>
+      </Draggable>
+    );
+  }
+
   return (
     <Draggable
       handle=".chat-header-drag-handle"
-      defaultPosition={defaultPosition}
+      defaultPosition={dragPos || defaultPosition}
+      position={dragPos || undefined}
+      onDrag={onDrag}
       bounds="body"
     >
       <div
@@ -144,9 +200,21 @@ const ChatAssistant = () => {
           right: undefined,
         }}
       >
-        {/* Add drag handle class to ChatHeader */}
-        <div className="chat-header-drag-handle cursor-move select-none">
+        {/* Add drag handle and Minimize button */}
+        <div className="chat-header-drag-handle cursor-move select-none relative">
+          {/* Main Header */}
           <ChatHeader />
+          {/* Minimize button in top-right corner of header */}
+          <button
+            type="button"
+            aria-label="Minimize"
+            className="absolute right-3 top-3 bg-ocean-700/80 rounded-full p-1.5 text-ocean-100 hover:bg-cyan-600 hover:text-white transition-all"
+            onClick={handleMinimize}
+            tabIndex={0}
+            style={{ zIndex: 10 }}
+          >
+            <Minimize size={18} />
+          </button>
         </div>
         {/* Messages Area */}
         <ScrollArea className="flex-1 p-4">
@@ -215,3 +283,4 @@ const ChatAssistant = () => {
 };
 
 export default ChatAssistant;
+
