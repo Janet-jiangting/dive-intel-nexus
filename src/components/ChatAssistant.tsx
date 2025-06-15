@@ -1,18 +1,9 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { 
-  Sheet,
-  SheetTrigger,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetFooter,
-  SheetClose
-} from '@/components/ui/sheet';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { MessageSquare, Send, Bot, User, X, Loader2 } from 'lucide-react';
+import { Send, Loader2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 
 interface Message {
@@ -21,8 +12,21 @@ interface Message {
   text: string;
 }
 
+const OctopusAvatar = () => (
+  <div className="w-12 h-12 bg-gradient-to-br from-seagreen-400 to-seagreen-600 rounded-full flex items-center justify-center shadow-lg animate-float">
+    <div className="text-2xl">🐙</div>
+  </div>
+);
+
+const sampleQuestions = [
+  "What are the best diving spots for beginners?",
+  "Tell me about marine life in the Great Barrier Reef",
+  "What diving certification do I need?",
+  "Best time to dive in the Maldives?",
+  "How deep can I dive with Open Water certification?"
+];
+
 const ChatAssistant = () => {
-  const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -34,19 +38,24 @@ const ChatAssistant = () => {
 
   useEffect(scrollToBottom, [messages]);
 
-  const handleSendMessage = async () => {
-    if (inputValue.trim() === '' || isLoading) return;
+  const handleSendMessage = async (messageText?: string) => {
+    const textToSend = messageText || inputValue.trim();
+    if (textToSend === '' || isLoading) return;
 
-    const userMessage: Message = { id: Date.now().toString() + '_user', sender: 'user', text: inputValue.trim() };
+    const userMessage: Message = { 
+      id: Date.now().toString() + '_user', 
+      sender: 'user', 
+      text: textToSend 
+    };
+    
     setMessages((prevMessages) => [...prevMessages, userMessage]);
-    const currentInput = inputValue;
-    setInputValue('');
+    if (!messageText) setInputValue('');
     setIsLoading(true);
 
     try {
-      console.log('Invoking chat-assistant function with prompt:', currentInput);
+      console.log('Invoking chat-assistant function with prompt:', textToSend);
       const { data, error } = await supabase.functions.invoke('chat-assistant', {
-        body: { prompt: currentInput },
+        body: { prompt: textToSend },
       });
       console.log('Function response data:', data);
       console.log('Function response error:', error);
@@ -56,117 +65,158 @@ const ChatAssistant = () => {
       }
 
       if (data && data.response) {
-        const aiMessage: Message = { id: Date.now().toString() + '_ai', sender: 'ai', text: data.response };
+        const aiMessage: Message = { 
+          id: Date.now().toString() + '_ai', 
+          sender: 'ai', 
+          text: data.response 
+        };
         setMessages((prevMessages) => [...prevMessages, aiMessage]);
       } else if (data && data.error) {
-        const aiErrorMessage: Message = { id: Date.now().toString() + '_ai_error', sender: 'ai', text: `Assistant Error: ${data.error}` };
+        const aiErrorMessage: Message = { 
+          id: Date.now().toString() + '_ai_error', 
+          sender: 'ai', 
+          text: `Assistant Error: ${data.error}` 
+        };
         setMessages((prevMessages) => [...prevMessages, aiErrorMessage]);
       } else {
-         const aiErrorMessage: Message = { id: Date.now().toString() + '_ai_unknown', sender: 'ai', text: "Sorry, I received an unexpected response. Please try again." };
+        const aiErrorMessage: Message = { 
+          id: Date.now().toString() + '_ai_unknown', 
+          sender: 'ai', 
+          text: "Sorry, I received an unexpected response. Please try again." 
+        };
         setMessages((prevMessages) => [...prevMessages, aiErrorMessage]);
       }
     } catch (err: any) {
       console.error('Failed to send message to Supabase function:', err);
-      const aiErrorMessage: Message = { id: Date.now().toString() + '_ai_catch', sender: 'ai', text: `Connection Error: ${err.message || 'Could not connect to the assistant.'}` };
+      const aiErrorMessage: Message = { 
+        id: Date.now().toString() + '_ai_catch', 
+        sender: 'ai', 
+        text: `Connection Error: ${err.message || 'Could not connect to the assistant.'}` 
+      };
       setMessages((prevMessages) => [...prevMessages, aiErrorMessage]);
     } finally {
       setIsLoading(false);
     }
   };
-  
+
+  const handleSampleQuestionClick = (question: string) => {
+    handleSendMessage(question);
+  };
+
+  // Initialize with welcome message and sample questions
   useEffect(() => {
-    if (isOpen && messages.length === 0) {
-      setMessages([{ id: 'initial_greeting', sender: 'ai', text: "Hello! I'm DiveAtlas assistant. How can I help you explore the underwater world today?" }]);
+    if (messages.length === 0) {
+      setMessages([
+        { 
+          id: 'welcome', 
+          sender: 'ai', 
+          text: "🌊 Hello! I'm Ollie, your DiveAtlas assistant! I'm here to help you explore the underwater world. Feel free to ask me anything about diving, marine life, or dive sites!" 
+        }
+      ]);
     }
-  }, [isOpen, messages.length]);
+  }, [messages.length]);
 
   return (
-    <>
-      <Sheet open={isOpen} onOpenChange={setIsOpen}>
-        <SheetTrigger asChild>
-          <Button
-            variant="outline"
-            size="lg"
-            className="fixed top-1/2 right-6 transform -translate-y-1/2 h-16 w-16 rounded-full bg-seagreen-600 hover:bg-seagreen-700 text-white shadow-xl z-[100] border-none animate-pulse hover:animate-none transition-all duration-300 hover:scale-110"
-            aria-label="Open Chat Assistant"
-            onClick={() => setIsOpen(true)}
-          >
-            <MessageSquare className="h-8 w-8" />
-          </Button>
-        </SheetTrigger>
-        <SheetContent side="right" className="w-[400px] sm:w-[500px] bg-ocean-900 border-ocean-700 text-white p-0 flex flex-col">
-          <SheetHeader className="p-4 border-b border-ocean-700 bg-ocean-800">
-            <div className="flex justify-between items-center">
-              <SheetTitle className="text-lg font-semibold text-white flex items-center">
-                <Bot className="mr-2 h-5 w-5 text-seagreen-400" /> DiveAtlas Assistant
-              </SheetTitle>
-              <SheetClose asChild>
-                <Button variant="ghost" size="icon" className="text-ocean-300 hover:text-white h-8 w-8">
-                  <X className="h-4 w-4" />
-                  <span className="sr-only">Close</span>
-                </Button>
-              </SheetClose>
-            </div>
-          </SheetHeader>
-          
-          <ScrollArea className="flex-1 p-4">
-            <div className="space-y-4">
-              {messages.map((msg) => (
-                <div
-                  key={msg.id}
-                  className={`flex mb-2 ${
-                    msg.sender === 'user' ? 'justify-end' : 'justify-start'
-                  }`}
-                >
-                  <div
-                    className={`max-w-[80%] rounded-lg px-3 py-2 text-sm shadow ${
-                      msg.sender === 'user'
-                        ? 'bg-seagreen-600 text-white ml-auto'
-                        : 'bg-ocean-800 text-ocean-100 mr-auto'
-                    }`}
-                  >
-                    {msg.text}
-                  </div>
-                </div>
-              ))}
-              {isLoading && (
-                <div className="flex justify-start mb-2">
-                  <div className="max-w-[80%] rounded-lg px-3 py-2 text-sm shadow bg-ocean-800 text-ocean-100 mr-auto flex items-center">
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Thinking...
-                  </div>
+    <div className="fixed bottom-6 right-6 w-96 h-[600px] bg-ocean-900 border-2 border-seagreen-500 rounded-2xl shadow-2xl flex flex-col overflow-hidden z-50">
+      {/* Header */}
+      <div className="bg-gradient-to-r from-seagreen-600 to-ocean-700 p-4 border-b border-seagreen-500">
+        <div className="flex items-center space-x-3">
+          <OctopusAvatar />
+          <div>
+            <h3 className="text-white font-semibold text-lg">Ollie Assistant</h3>
+            <p className="text-seagreen-200 text-sm">Your diving companion</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Messages Area */}
+      <ScrollArea className="flex-1 p-4">
+        <div className="space-y-4">
+          {messages.map((msg) => (
+            <div
+              key={msg.id}
+              className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
+            >
+              {msg.sender === 'ai' && (
+                <div className="w-8 h-8 bg-gradient-to-br from-seagreen-400 to-seagreen-600 rounded-full flex items-center justify-center mr-2 mt-1 flex-shrink-0">
+                  <span className="text-sm">🐙</span>
                 </div>
               )}
-              <div ref={messagesEndRef} />
+              <div
+                className={`max-w-[80%] rounded-2xl px-4 py-3 text-sm shadow-lg ${
+                  msg.sender === 'user'
+                    ? 'bg-seagreen-600 text-white'
+                    : 'bg-ocean-800 text-ocean-100 border border-ocean-700'
+                }`}
+              >
+                {msg.text}
+              </div>
             </div>
-          </ScrollArea>
+          ))}
           
-          <SheetFooter className="p-4 border-t border-ocean-700 bg-ocean-900">
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                handleSendMessage();
-              }}
-              className="flex gap-2 w-full"
-            >
-              <Input
-                type="text"
-                value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
-                placeholder="Ask about diving..."
-                className="flex-grow bg-ocean-800 border-ocean-600 text-white placeholder-ocean-400 focus:ring-seagreen-500 focus:border-seagreen-500"
-                disabled={isLoading}
-                autoComplete="off"
-              />
-              <Button type="submit" className="bg-seagreen-600 hover:bg-seagreen-700 text-white" disabled={isLoading || inputValue.trim() === ''}>
-                {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Send className="h-5 w-5" />}
-                <span className="sr-only">Send</span>
-              </Button>
-            </form>
-          </SheetFooter>
-        </SheetContent>
-      </Sheet>
-    </>
+          {isLoading && (
+            <div className="flex justify-start">
+              <div className="w-8 h-8 bg-gradient-to-br from-seagreen-400 to-seagreen-600 rounded-full flex items-center justify-center mr-2 mt-1">
+                <span className="text-sm">🐙</span>
+              </div>
+              <div className="max-w-[80%] rounded-2xl px-4 py-3 text-sm shadow-lg bg-ocean-800 text-ocean-100 border border-ocean-700 flex items-center">
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Ollie is thinking...
+              </div>
+            </div>
+          )}
+
+          {/* Sample Questions - Show only when no user messages yet */}
+          {messages.length === 1 && messages[0].id === 'welcome' && (
+            <div className="mt-4">
+              <p className="text-ocean-300 text-sm mb-3 text-center">Try asking me about:</p>
+              <div className="space-y-2">
+                {sampleQuestions.map((question, index) => (
+                  <button
+                    key={index}
+                    onClick={() => handleSampleQuestionClick(question)}
+                    className="w-full text-left p-3 rounded-xl bg-ocean-800/50 border border-ocean-700 text-ocean-200 hover:bg-ocean-700/50 hover:border-seagreen-600 transition-all duration-200 text-sm"
+                    disabled={isLoading}
+                  >
+                    💭 {question}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+          
+          <div ref={messagesEndRef} />
+        </div>
+      </ScrollArea>
+
+      {/* Input Area */}
+      <div className="p-4 border-t border-ocean-700 bg-ocean-800/50">
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleSendMessage();
+          }}
+          className="flex gap-2"
+        >
+          <Input
+            type="text"
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+            placeholder="Ask Ollie about diving..."
+            className="flex-grow bg-ocean-700/50 border-ocean-600 text-white placeholder-ocean-400 focus:ring-seagreen-500 focus:border-seagreen-500 rounded-xl"
+            disabled={isLoading}
+            autoComplete="off"
+          />
+          <Button 
+            type="submit" 
+            className="bg-seagreen-600 hover:bg-seagreen-700 text-white rounded-xl px-4" 
+            disabled={isLoading || inputValue.trim() === ''}
+          >
+            {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Send className="h-5 w-5" />}
+          </Button>
+        </form>
+      </div>
+    </div>
   );
 };
 
