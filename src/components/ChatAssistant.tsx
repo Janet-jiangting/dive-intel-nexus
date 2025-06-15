@@ -114,13 +114,19 @@ const ChatAssistant = () => {
   if (isMinimized) {
     return (
       <div className="fixed bottom-6 right-6 z-50">
-        <Button
-          onClick={toggleMinimize}
-          className="rounded-full w-20 h-20 bg-cyan-600 hover:bg-cyan-700 p-0 flex items-center justify-center shadow-2xl animate-float"
-          aria-label="Open chat"
-        >
-          <OctopusAvatar size={64} />
-        </Button>
+        <div className="relative animate-float">
+          <div className="absolute bottom-full right-0 mb-4 w-52 bg-white p-3 rounded-lg shadow-lg text-center text-sm text-ocean-800 -mr-2">
+            <p className="font-semibold">Hi, I am Ollie, ask me about the ocean</p>
+            <div className="absolute -bottom-2 right-8 w-4 h-4 bg-white transform rotate-45 -z-10"></div>
+          </div>
+          <Button
+            onClick={toggleMinimize}
+            className="rounded-full w-20 h-20 bg-cyan-600 hover:bg-cyan-700 p-0 flex items-center justify-center shadow-2xl"
+            aria-label="Open chat"
+          >
+            <OctopusAvatar size={64} />
+          </Button>
+        </div>
       </div>
     );
   }
