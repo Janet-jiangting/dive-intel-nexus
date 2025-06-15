@@ -1,5 +1,6 @@
 
 import React, { useState, useRef, useEffect } from 'react';
+import Draggable from 'react-draggable';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -107,74 +108,92 @@ const ChatAssistant = () => {
     handleSendMessage(question);
   };
 
+  // Set a default position for the draggable chat (bottom right, as before)
+  const defaultPosition = { x: window.innerWidth - 440, y: window.innerHeight - 650 };
+
   return (
-    <div className="fixed bottom-6 right-6 w-96 h-[600px] bg-ocean-800 border-2 border-cyan-500 rounded-2xl shadow-2xl flex flex-col overflow-hidden z-50">
-      <ChatHeader />
-
-      {/* Messages Area */}
-      <ScrollArea className="flex-1 p-4">
-        <div className="space-y-4">
-          {messages.map((msg) => (
-            <MessageBubble key={msg.id} msg={msg} />
-          ))}
-          {isLoading && (
-            <div className="flex justify-start">
-              <div className="w-8 h-8 flex items-center justify-center mr-2 mt-1">
-                {/* Show octopus for typing - reuse octopus avatar */}
-                <img
-                  src="/lovable-uploads/37109d82-72ca-42ab-82e2-b91042823a05.png"
-                  alt="Cute Octopus"
-                  className="w-7 h-7 object-contain rounded-full bg-transparent"
-                  draggable={false}
-                />
-              </div>
-              <div className="max-w-[80%] rounded-2xl px-4 py-3 text-sm shadow-lg bg-ocean-800 text-ocean-100 border border-ocean-700 flex items-center">
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Ollie is thinking...
-              </div>
-            </div>
-          )}
-          {/* Sample Questions - Show only when no user messages yet */}
-          {messages.length === 1 && messages[0].id === 'welcome' && (
-            <SampleQuestions
-              questions={sampleQuestions}
-              onSelect={handleSampleQuestionClick}
-              isLoading={isLoading}
-            />
-          )}
-          <div ref={messagesEndRef} />
+    <Draggable
+      handle=".chat-header-drag-handle"
+      defaultPosition={defaultPosition}
+      bounds="body"
+    >
+      <div
+        className="z-50 w-96 h-[600px] bg-ocean-800 border-2 border-cyan-500 rounded-2xl shadow-2xl flex flex-col overflow-hidden"
+        style={{
+          position: 'absolute', // use absolute so Draggable can control position
+          bottom: undefined,
+          right: undefined,
+        }}
+      >
+        {/* Add drag handle class to ChatHeader */}
+        <div className="chat-header-drag-handle cursor-move select-none">
+          <ChatHeader />
         </div>
-      </ScrollArea>
+        {/* Messages Area */}
+        <ScrollArea className="flex-1 p-4">
+          <div className="space-y-4">
+            {messages.map((msg) => (
+              <MessageBubble key={msg.id} msg={msg} />
+            ))}
+            {isLoading && (
+              <div className="flex justify-start">
+                <div className="w-8 h-8 flex items-center justify-center mr-2 mt-1">
+                  <img
+                    src="/lovable-uploads/37109d82-72ca-42ab-82e2-b91042823a05.png"
+                    alt="Cute Octopus"
+                    className="w-7 h-7 object-contain rounded-full bg-transparent"
+                    draggable={false}
+                  />
+                </div>
+                <div className="max-w-[80%] rounded-2xl px-4 py-3 text-sm shadow-lg bg-ocean-800 text-ocean-100 border border-ocean-700 flex items-center">
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Ollie is thinking...
+                </div>
+              </div>
+            )}
+            {/* Sample Questions - Show only when no user messages yet */}
+            {messages.length === 1 && messages[0].id === 'welcome' && (
+              <SampleQuestions
+                questions={sampleQuestions}
+                onSelect={handleSampleQuestionClick}
+                isLoading={isLoading}
+              />
+            )}
+            <div ref={messagesEndRef} />
+          </div>
+        </ScrollArea>
 
-      {/* Input Area */}
-      <div className="p-4 border-t border-ocean-700 bg-ocean-700/60">
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            handleSendMessage();
-          }}
-          className="flex gap-2"
-        >
-          <Input
-            type="text"
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-            placeholder="Ask Ollie about diving..."
-            className="flex-grow bg-ocean-700/50 border-ocean-600 text-white placeholder-ocean-400 focus:ring-cyan-500 focus:border-cyan-500 rounded-xl"
-            disabled={isLoading}
-            autoComplete="off"
-          />
-          <Button 
-            type="submit" 
-            className="bg-cyan-600 hover:bg-cyan-700 text-white rounded-xl px-4" 
-            disabled={isLoading || inputValue.trim() === ''}
+        {/* Input Area */}
+        <div className="p-4 border-t border-ocean-700 bg-ocean-700/60">
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleSendMessage();
+            }}
+            className="flex gap-2"
           >
-            {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Send className="h-5 w-5" />}
-          </Button>
-        </form>
+            <Input
+              type="text"
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+              placeholder="Ask Ollie about diving..."
+              className="flex-grow bg-ocean-700/50 border-ocean-600 text-white placeholder-ocean-400 focus:ring-cyan-500 focus:border-cyan-500 rounded-xl"
+              disabled={isLoading}
+              autoComplete="off"
+            />
+            <Button 
+              type="submit" 
+              className="bg-cyan-600 hover:bg-cyan-700 text-white rounded-xl px-4" 
+              disabled={isLoading || inputValue.trim() === ''}
+            >
+              {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Send className="h-5 w-5" />}
+            </Button>
+          </form>
+        </div>
       </div>
-    </div>
+    </Draggable>
   );
 };
 
 export default ChatAssistant;
+
