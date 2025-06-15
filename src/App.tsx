@@ -14,6 +14,7 @@ import Layout from "./components/Layout";
 import ManageData from "./pages/ManageData";
 import MyOcean from "./pages/MyOcean";
 import { MarineLifeDataProvider } from "./contexts/MarineLifeDataContext"; // Added import
+import ChatAssistant from "./components/ChatAssistant";
 
 const queryClient = new QueryClient();
 
@@ -34,6 +35,7 @@ const App = () => (
             <Route path="/my-ocean" element={<Layout><MyOcean /></Layout>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
+          <ChatAssistant />
         </BrowserRouter>
       </MarineLifeDataProvider> {/* Closed Provider */}
     </TooltipProvider>
@@ -41,4 +43,3 @@ const App = () => (
 );
 
 export default App;
-
