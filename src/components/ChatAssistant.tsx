@@ -13,8 +13,28 @@ interface Message {
 }
 
 const OctopusAvatar = () => (
-  <div className="w-12 h-12 bg-gradient-to-br from-seagreen-400 to-seagreen-600 rounded-full flex items-center justify-center shadow-lg animate-float">
-    <div className="text-2xl">🐙</div>
+  <div className="w-12 h-12 bg-gradient-to-br from-cyan-400 to-cyan-600 rounded-full flex items-center justify-center shadow-lg animate-float border-2 border-cyan-700 relative">
+    {/* Octopus Head */}
+    <div className="absolute inset-0 bg-gradient-to-br from-cyan-300 to-cyan-500 rounded-full">
+      {/* Eyes */}
+      <div className="absolute top-3 left-2.5">
+        <div className="w-1.5 h-1.5 bg-slate-800 rounded-full">
+          <div className="w-0.5 h-0.5 bg-white rounded-full ml-0.5 mt-0.5"></div>
+        </div>
+      </div>
+      <div className="absolute top-3 right-2.5">
+        <div className="w-1.5 h-1.5 bg-slate-800 rounded-full">
+          <div className="w-0.5 h-0.5 bg-white rounded-full ml-0.5 mt-0.5"></div>
+        </div>
+      </div>
+      {/* Tentacles (simplified as small dots at bottom) */}
+      <div className="absolute bottom-1 left-1/2 transform -translate-x-1/2 flex gap-0.5">
+        <div className="w-1 h-2 bg-gradient-to-b from-cyan-400 to-cyan-600 rounded-full"></div>
+        <div className="w-1 h-1.5 bg-gradient-to-b from-cyan-400 to-cyan-600 rounded-full"></div>
+        <div className="w-1 h-2 bg-gradient-to-b from-cyan-400 to-cyan-600 rounded-full"></div>
+        <div className="w-1 h-1.5 bg-gradient-to-b from-cyan-400 to-cyan-600 rounded-full"></div>
+      </div>
+    </div>
   </div>
 );
 
@@ -117,14 +137,14 @@ const ChatAssistant = () => {
   }, [messages.length]);
 
   return (
-    <div className="fixed bottom-6 right-6 w-96 h-[600px] bg-ocean-900 border-2 border-seagreen-500 rounded-2xl shadow-2xl flex flex-col overflow-hidden z-50">
+    <div className="fixed bottom-6 right-6 w-96 h-[600px] bg-ocean-900 border-2 border-cyan-500 rounded-2xl shadow-2xl flex flex-col overflow-hidden z-50">
       {/* Header */}
-      <div className="bg-gradient-to-r from-seagreen-600 to-ocean-700 p-4 border-b border-seagreen-500">
+      <div className="bg-gradient-to-r from-cyan-600 to-ocean-700 p-4 border-b border-cyan-500">
         <div className="flex items-center space-x-3">
           <OctopusAvatar />
           <div>
             <h3 className="text-white font-semibold text-lg">Ollie Assistant</h3>
-            <p className="text-seagreen-200 text-sm">Your diving companion</p>
+            <p className="text-cyan-200 text-sm">Your diving companion</p>
           </div>
         </div>
       </div>
@@ -138,14 +158,26 @@ const ChatAssistant = () => {
               className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
             >
               {msg.sender === 'ai' && (
-                <div className="w-8 h-8 bg-gradient-to-br from-seagreen-400 to-seagreen-600 rounded-full flex items-center justify-center mr-2 mt-1 flex-shrink-0">
-                  <span className="text-sm">🐙</span>
+                <div className="w-8 h-8 bg-gradient-to-br from-cyan-400 to-cyan-600 rounded-full flex items-center justify-center mr-2 mt-1 flex-shrink-0 border border-cyan-700 relative">
+                  <div className="absolute inset-0 bg-gradient-to-br from-cyan-300 to-cyan-500 rounded-full">
+                    {/* Small eyes for message avatar */}
+                    <div className="absolute top-1.5 left-1.5">
+                      <div className="w-1 h-1 bg-slate-800 rounded-full">
+                        <div className="w-0.5 h-0.5 bg-white rounded-full"></div>
+                      </div>
+                    </div>
+                    <div className="absolute top-1.5 right-1.5">
+                      <div className="w-1 h-1 bg-slate-800 rounded-full">
+                        <div className="w-0.5 h-0.5 bg-white rounded-full"></div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               )}
               <div
                 className={`max-w-[80%] rounded-2xl px-4 py-3 text-sm shadow-lg ${
                   msg.sender === 'user'
-                    ? 'bg-seagreen-600 text-white'
+                    ? 'bg-cyan-600 text-white'
                     : 'bg-ocean-800 text-ocean-100 border border-ocean-700'
                 }`}
               >
@@ -156,8 +188,19 @@ const ChatAssistant = () => {
           
           {isLoading && (
             <div className="flex justify-start">
-              <div className="w-8 h-8 bg-gradient-to-br from-seagreen-400 to-seagreen-600 rounded-full flex items-center justify-center mr-2 mt-1">
-                <span className="text-sm">🐙</span>
+              <div className="w-8 h-8 bg-gradient-to-br from-cyan-400 to-cyan-600 rounded-full flex items-center justify-center mr-2 mt-1 border border-cyan-700 relative">
+                <div className="absolute inset-0 bg-gradient-to-br from-cyan-300 to-cyan-500 rounded-full">
+                  <div className="absolute top-1.5 left-1.5">
+                    <div className="w-1 h-1 bg-slate-800 rounded-full">
+                      <div className="w-0.5 h-0.5 bg-white rounded-full"></div>
+                    </div>
+                  </div>
+                  <div className="absolute top-1.5 right-1.5">
+                    <div className="w-1 h-1 bg-slate-800 rounded-full">
+                      <div className="w-0.5 h-0.5 bg-white rounded-full"></div>
+                    </div>
+                  </div>
+                </div>
               </div>
               <div className="max-w-[80%] rounded-2xl px-4 py-3 text-sm shadow-lg bg-ocean-800 text-ocean-100 border border-ocean-700 flex items-center">
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -175,7 +218,7 @@ const ChatAssistant = () => {
                   <button
                     key={index}
                     onClick={() => handleSampleQuestionClick(question)}
-                    className="w-full text-left p-3 rounded-xl bg-ocean-800/50 border border-ocean-700 text-ocean-200 hover:bg-ocean-700/50 hover:border-seagreen-600 transition-all duration-200 text-sm"
+                    className="w-full text-left p-3 rounded-xl bg-ocean-800/50 border border-ocean-700 text-ocean-200 hover:bg-ocean-700/50 hover:border-cyan-600 transition-all duration-200 text-sm"
                     disabled={isLoading}
                   >
                     💭 {question}
@@ -203,13 +246,13 @@ const ChatAssistant = () => {
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             placeholder="Ask Ollie about diving..."
-            className="flex-grow bg-ocean-700/50 border-ocean-600 text-white placeholder-ocean-400 focus:ring-seagreen-500 focus:border-seagreen-500 rounded-xl"
+            className="flex-grow bg-ocean-700/50 border-ocean-600 text-white placeholder-ocean-400 focus:ring-cyan-500 focus:border-cyan-500 rounded-xl"
             disabled={isLoading}
             autoComplete="off"
           />
           <Button 
             type="submit" 
-            className="bg-seagreen-600 hover:bg-seagreen-700 text-white rounded-xl px-4" 
+            className="bg-cyan-600 hover:bg-cyan-700 text-white rounded-xl px-4" 
             disabled={isLoading || inputValue.trim() === ''}
           >
             {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Send className="h-5 w-5" />}
