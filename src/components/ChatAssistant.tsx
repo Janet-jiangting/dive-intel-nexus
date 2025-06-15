@@ -12,41 +12,13 @@ interface Message {
 }
 
 const OctopusAvatar = () => (
-  <div className="w-12 h-12 relative flex items-center justify-center">
-    {/* Octopus Head - larger and more prominent */}
-    <div className="w-10 h-8 bg-gradient-to-br from-blue-600 to-blue-800 rounded-full relative shadow-lg border-2 border-blue-700">
-      {/* Eyes */}
-      <div className="absolute top-1.5 left-2">
-        <div className="w-2 h-2 bg-white rounded-full flex items-center justify-center">
-          <div className="w-1 h-1 bg-slate-800 rounded-full"></div>
-        </div>
-      </div>
-      <div className="absolute top-1.5 right-2">
-        <div className="w-2 h-2 bg-white rounded-full flex items-center justify-center">
-          <div className="w-1 h-1 bg-slate-800 rounded-full"></div>
-        </div>
-      </div>
-      
-      {/* Small smile */}
-      <div className="absolute bottom-1.5 left-1/2 transform -translate-x-1/2">
-        <div className="w-2 h-1 border-b-2 border-slate-700 rounded-full"></div>
-      </div>
-    </div>
-    
-    {/* Tentacles extending from bottom */}
-    <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 flex gap-0.5">
-      <div className="w-1 h-4 bg-gradient-to-b from-blue-600 to-blue-800 rounded-full transform -rotate-12"></div>
-      <div className="w-1 h-3 bg-gradient-to-b from-blue-600 to-blue-800 rounded-full"></div>
-      <div className="w-1 h-4 bg-gradient-to-b from-blue-600 to-blue-800 rounded-full transform rotate-12"></div>
-    </div>
-    
-    {/* Side tentacles */}
-    <div className="absolute bottom-1 left-0">
-      <div className="w-1 h-3 bg-gradient-to-b from-blue-600 to-blue-800 rounded-full transform -rotate-45"></div>
-    </div>
-    <div className="absolute bottom-1 right-0">
-      <div className="w-1 h-3 bg-gradient-to-b from-blue-600 to-blue-800 rounded-full transform rotate-45"></div>
-    </div>
+  <div className="w-12 h-12 flex items-center justify-center">
+    <img
+      src="/lovable-uploads/37109d82-72ca-42ab-82e2-b91042823a05.png"
+      alt="Cute Octopus"
+      className="w-11 h-11 object-contain rounded-full bg-transparent"
+      draggable={false}
+    />
   </div>
 );
 
