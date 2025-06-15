@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import Draggable from 'react-draggable';
 import { Button } from '@/components/ui/button';
@@ -31,9 +32,10 @@ const ChatAssistant = () => {
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const [defaultPosition, setDefaultPosition] = useState<{x: number; y: number}>({x: 0, y: 64});
+  const [chatPosition, setChatPosition] = useState<{x: number; y: number}>({x: 0, y: 64});
   const [minimized, setMinimized] = useState(false);
   const [dragPos, setDragPos] = useState<{x: number, y: number} | null>(null);
+  const [resetKey, setResetKey] = useState(0);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -47,7 +49,8 @@ const ChatAssistant = () => {
     const gapFromTop = 64; // px from top edge
     const x = window.innerWidth - CHAT_W - gapFromRight;
     const y = gapFromTop;
-    setDefaultPosition({ x: Math.max(8, x), y: Math.max(8, y) });
+    setChatPosition({ x: Math.max(8, x), y: Math.max(8, y) });
+    setResetKey(prev => prev + 1); // Force reset of draggable position
   }, []);
 
   const handleSendMessage = async (messageText?: string) => {
@@ -131,11 +134,14 @@ const ChatAssistant = () => {
   // When minimized Ollie is clicked, restore
   const handleRestore = () => {
     setMinimized(false);
+    setResetKey(prev => prev + 1); // Force reset to original position
   };
 
-  // Track drag position to remember where Ollie is minimized
+  // Track drag position only for minimized state
   const onDrag = (_: any, data: {x:number, y:number}) => {
-    setDragPos({x: data.x, y: data.y});
+    if (minimized) {
+      setDragPos({x: data.x, y: data.y});
+    }
   };
 
   // Render minimized view with draggable OctopusAvatar
@@ -143,8 +149,7 @@ const ChatAssistant = () => {
     return (
       <Draggable
         handle=".minimize-ollie-handle"
-        defaultPosition={dragPos || defaultPosition}
-        position={dragPos || undefined}
+        position={dragPos || chatPosition}
         onDrag={onDrag}
         bounds="body"
       >
@@ -175,9 +180,9 @@ const ChatAssistant = () => {
 
   return (
     <Draggable
+      key={resetKey}
       handle=".chat-header-drag-handle"
-      defaultPosition={defaultPosition}
-      position={undefined}
+      position={chatPosition}
       onDrag={onDrag}
       bounds="body"
     >
