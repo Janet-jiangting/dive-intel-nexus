@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import Draggable from 'react-draggable';
 import { Button } from '@/components/ui/button';
@@ -43,10 +42,10 @@ const ChatAssistant = () => {
 
   useEffect(scrollToBottom, [messages]);
 
-  // Calculate proper position with better spacing
+  // Calculate proper position to match reference image
   const calculateChatPosition = () => {
-    const gapFromRight = 48; // Increased from 24px to 48px for better spacing
-    const gapFromTop = 120; // Increased to 120px to clear navigation bar properly
+    const gapFromRight = 80; // Increased to 80px to match reference spacing
+    const gapFromTop = 100; // Adjusted to 100px to match reference positioning
     const x = window.innerWidth - CHAT_W - gapFromRight;
     const y = gapFromTop;
     return { x: Math.max(8, x), y: Math.max(8, y) };
