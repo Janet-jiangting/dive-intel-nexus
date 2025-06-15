@@ -116,7 +116,7 @@ const ChatAssistant = () => {
       <div className="fixed bottom-6 right-6 z-50">
         <div className="relative animate-float">
           <div className="absolute bottom-full right-0 mb-4 w-52 bg-white p-3 rounded-lg shadow-lg text-center text-sm text-ocean-800 -mr-2">
-            <p className="font-semibold">Hi, I am Ollie, ask me about the ocean</p>
+            <p className="font-semibold">Ask Octopus Ollie anything about the ocean！ 🌊</p>
             <div className="absolute -bottom-2 right-8 w-4 h-4 bg-white transform rotate-45 -z-10"></div>
           </div>
           <Button
