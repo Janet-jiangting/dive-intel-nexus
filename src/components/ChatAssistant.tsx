@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import Draggable from 'react-draggable';
 import { Button } from '@/components/ui/button';
@@ -31,7 +32,7 @@ const ChatAssistant = () => {
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const [chatPosition, setChatPosition] = useState<{x: number; y: number}>({x: 0, y: 64});
+  const [chatPosition, setChatPosition] = useState<{x: number; y: number}>({x: 0, y: 120});
   const [minimized, setMinimized] = useState(false);
   const [dragPos, setDragPos] = useState<{x: number, y: number} | null>(null);
   const [resetKey, setResetKey] = useState(0);
@@ -42,14 +43,31 @@ const ChatAssistant = () => {
 
   useEffect(scrollToBottom, [messages]);
 
-  // Set chat position to top-right consistently
-  useEffect(() => {
-    const gapFromRight = 24; // px from right edge
-    const gapFromTop = 80; // px from top edge
+  // Calculate proper position with better spacing
+  const calculateChatPosition = () => {
+    const gapFromRight = 48; // Increased from 24px to 48px for better spacing
+    const gapFromTop = 120; // Increased to 120px to clear navigation bar properly
     const x = window.innerWidth - CHAT_W - gapFromRight;
     const y = gapFromTop;
-    setChatPosition({ x: Math.max(8, x), y: Math.max(8, y) });
-    setResetKey(prev => prev + 1); // Force reset of draggable position
+    return { x: Math.max(8, x), y: Math.max(8, y) };
+  };
+
+  // Set chat position to top-right with proper spacing
+  useEffect(() => {
+    const updatePosition = () => {
+      const newPosition = calculateChatPosition();
+      setChatPosition(newPosition);
+      setResetKey(prev => prev + 1); // Force reset of draggable position
+    };
+
+    updatePosition();
+
+    // Add window resize listener to maintain proper positioning
+    window.addEventListener('resize', updatePosition);
+    
+    return () => {
+      window.removeEventListener('resize', updatePosition);
+    };
   }, []);
 
   const handleSendMessage = async (messageText?: string) => {
@@ -130,10 +148,13 @@ const ChatAssistant = () => {
     setMinimized(true);
   };
 
-  // When minimized Ollie is clicked, restore
+  // When minimized Ollie is clicked, restore to proper position
   const handleRestore = () => {
     setMinimized(false);
-    setResetKey(prev => prev + 1); // Force reset to original position
+    const newPosition = calculateChatPosition();
+    setChatPosition(newPosition);
+    setDragPos(null); // Reset drag position
+    setResetKey(prev => prev + 1); // Force reset to calculated position
   };
 
   // Track drag position only for minimized state
