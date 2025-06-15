@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import Draggable from 'react-draggable';
 import { Button } from '@/components/ui/button';
@@ -41,13 +40,28 @@ const ChatAssistant = () => {
 
   useEffect(scrollToBottom, [messages]);
 
-  // Calculate initial position to match reference image
+  // Calculate initial position aligned with content container
   const calculateInitialPosition = () => {
-    const gapFromRight = 120; // Adjusted to match reference image positioning
-    const gapFromTop = 80; // Adjusted for proper top spacing
-    const x = window.innerWidth - CHAT_W - gapFromRight;
+    // Get the typical container width (matching the content area)
+    const containerMaxWidth = 1400; // matches 2xl:1400px from container config
+    const windowWidth = window.innerWidth;
+    
+    // Calculate container boundaries (centered with padding)
+    const containerPadding = 32; // 2rem = 32px
+    const actualContainerWidth = Math.min(containerMaxWidth, windowWidth - containerPadding * 2);
+    const containerLeft = (windowWidth - actualContainerWidth) / 2;
+    const containerRight = containerLeft + actualContainerWidth;
+    
+    // Position chatbot just outside the content container on the right
+    const gapFromContainer = 24; // 24px gap from container edge
+    const gapFromTop = 120; // Align with title area
+    
+    const x = containerRight + gapFromContainer;
     const y = gapFromTop;
-    return { x: Math.max(8, x), y: Math.max(8, y) };
+    
+    // Ensure it doesn't go off screen
+    const maxX = windowWidth - CHAT_W - 16;
+    return { x: Math.min(x, maxX), y: Math.max(16, y) };
   };
 
   // Get initial position only once
