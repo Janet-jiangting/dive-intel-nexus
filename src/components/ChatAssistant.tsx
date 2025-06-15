@@ -1,4 +1,6 @@
+
 import React, { useState, useRef, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import Draggable from 'react-draggable';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -27,6 +29,7 @@ const sampleQuestions = [
 const CHAT_W = 384 + 32; // w-96 = 384px + 32px gap for safety
 
 const ChatAssistant = () => {
+  const location = useLocation();
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -40,32 +43,89 @@ const ChatAssistant = () => {
 
   useEffect(scrollToBottom, [messages]);
 
-  // Calculate initial position aligned with content container
-  const calculateInitialPosition = () => {
-    // Get the typical container width (matching the content area)
-    const containerMaxWidth = 1400; // matches 2xl:1400px from container config
+  // Calculate position based on actual content container
+  const calculateIdealPosition = () => {
     const windowWidth = window.innerWidth;
     
-    // Calculate container boundaries (centered with padding)
-    const containerPadding = 32; // 2rem = 32px
+    // Use Tailwind's container responsive breakpoints
+    let containerMaxWidth = windowWidth;
+    if (windowWidth >= 640) containerMaxWidth = 640; // sm
+    if (windowWidth >= 768) containerMaxWidth = 768; // md
+    if (windowWidth >= 1024) containerMaxWidth = 1024; // lg
+    if (windowWidth >= 1280) containerMaxWidth = 1280; // xl
+    if (windowWidth >= 1536) containerMaxWidth = 1400; // 2xl (custom max-width)
+    
+    // Container padding matches the px-4 class (16px on each side)
+    const containerPadding = 16;
     const actualContainerWidth = Math.min(containerMaxWidth, windowWidth - containerPadding * 2);
     const containerLeft = (windowWidth - actualContainerWidth) / 2;
     const containerRight = containerLeft + actualContainerWidth;
     
-    // Position chatbot just outside the content container on the right
-    const gapFromContainer = 24; // 24px gap from container edge
-    const gapFromTop = 120; // Align with title area
+    // Position close to content, aligned with title area
+    const gapFromContainer = 16; // Smaller gap to be closer to content
+    const gapFromTop = 100; // Align with hero title area
     
     const x = containerRight + gapFromContainer;
     const y = gapFromTop;
     
     // Ensure it doesn't go off screen
     const maxX = windowWidth - CHAT_W - 16;
-    return { x: Math.min(x, maxX), y: Math.max(16, y) };
+    const finalX = Math.min(x, maxX);
+    const finalY = Math.max(16, y);
+    
+    console.log('Position calculation:', {
+      windowWidth,
+      containerMaxWidth,
+      actualContainerWidth,
+      containerRight,
+      calculatedX: x,
+      finalX,
+      finalY
+    });
+    
+    return { x: finalX, y: finalY };
   };
 
-  // Get initial position only once
-  const [initialPosition] = useState(() => calculateInitialPosition());
+  // Determine if we should use ideal positioning
+  const shouldUseIdealPosition = () => {
+    return location.pathname === '/';
+  };
+
+  // Get position based on current route and state
+  const getCurrentPosition = () => {
+    if (shouldUseIdealPosition()) {
+      return calculateIdealPosition();
+    }
+    return dragPosition || calculateIdealPosition();
+  };
+
+  // Reset position when navigating to main page
+  useEffect(() => {
+    if (shouldUseIdealPosition()) {
+      // Small delay to ensure DOM is rendered
+      const timer = setTimeout(() => {
+        setDragPosition(null); // Reset drag position to trigger recalculation
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [location.pathname]);
+
+  // Handle window resize for responsive positioning
+  useEffect(() => {
+    const handleResize = () => {
+      if (shouldUseIdealPosition()) {
+        setDragPosition(null); // Reset to trigger recalculation
+      }
+    };
+
+    const debouncedResize = setTimeout(handleResize, 150);
+    window.addEventListener('resize', handleResize);
+    
+    return () => {
+      clearTimeout(debouncedResize);
+      window.removeEventListener('resize', handleResize);
+    };
+  }, [location.pathname]);
 
   const handleSendMessage = async (messageText?: string) => {
     const textToSend = messageText || inputValue.trim();
@@ -145,22 +205,25 @@ const ChatAssistant = () => {
     setMinimized(true);
   };
 
-  // When minimized Ollie is clicked, restore to last position or initial position
+  // When minimized Ollie is clicked, restore to last position or ideal position
   const handleRestore = () => {
     setMinimized(false);
   };
 
-  // Track drag position for both states
+  // Track drag position but respect ideal positioning on main page
   const onDrag = (_: any, data: {x:number, y:number}) => {
     setDragPosition({x: data.x, y: data.y});
   };
+
+  // Get the current position to use
+  const currentPosition = getCurrentPosition();
 
   // Render minimized view with draggable OctopusAvatar
   if (minimized) {
     return (
       <Draggable
         handle=".minimize-ollie-handle"
-        defaultPosition={dragPosition || initialPosition}
+        position={dragPosition || currentPosition}
         onDrag={onDrag}
         bounds="body"
       >
@@ -192,7 +255,7 @@ const ChatAssistant = () => {
   return (
     <Draggable
       handle=".chat-header-drag-handle"
-      defaultPosition={dragPosition || initialPosition}
+      position={dragPosition || currentPosition}
       onDrag={onDrag}
       bounds="body"
     >
