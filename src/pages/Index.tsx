@@ -29,7 +29,6 @@ const Index = () => {
             <p className="text-xl text-ocean-100 mb-8 max-w-2xl">
               Discover incredible dive sites, learn about marine species, and connect with the global diving community through our comprehensive platform.
             </p>
-
             <div className="flex flex-col sm:flex-row gap-4 relative z-20">
               <Button 
                 asChild 
@@ -61,7 +60,9 @@ const Index = () => {
           <div className="w-full md:w-[390px] flex-shrink-0">
             <div className="bg-blue-800 bg-opacity-90 rounded-xl shadow-lg p-8 border border-cyan-600 ring-1 ring-cyan-600/25 relative"
                  style={{ boxShadow: '0px 0px 25px 0px #22d3ee33' }}>
-              <h2 className="text-2xl font-bold text-white mb-3 text-center">Can't Decide? Let Us Help!</h2>
+              <h2 className="text-2xl font-bold text-white mb-3 text-center">
+                Let AI help you create a perfect dive trip!
+              </h2>
               <p className="text-base text-blue-100 mb-6 text-center">
                 Use our AI-powered trip planner to customize your next underwater adventure. Tell us your preferences, and we'll craft the perfect itinerary for you.
               </p>
@@ -186,7 +187,9 @@ const Index = () => {
           <div className="relative inline-block group">
             <div className="absolute -inset-1 bg-gradient-to-r from-cyan-400 to-emerald-600 rounded-lg blur opacity-75 group-hover:opacity-100 transition duration-1000 group-hover:duration-200 animate-tilt"></div>
             <div className="relative bg-ocean-800 border border-ocean-700 rounded-xl p-8 md:p-12">
-              <h2 className="text-3xl font-bold text-white mb-4">Can't Decide? Let Us Help!</h2>
+              <h2 className="text-3xl font-bold text-white mb-4">
+                Let AI help you create a perfect dive trip!
+              </h2>
               <p className="text-ocean-100 max-w-2xl mx-auto mb-8">
                 Use our AI-powered trip planner to customize your next underwater adventure. Tell us your preferences, and we'll craft the perfect itinerary for you.
               </p>
