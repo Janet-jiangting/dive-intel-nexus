@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import Draggable from 'react-draggable';
 import { Button } from '@/components/ui/button';
@@ -45,8 +44,8 @@ const ChatAssistant = () => {
 
   // Set chat position to top-right consistently
   useEffect(() => {
-    const gapFromRight = 56; // px from right edge (matching your reference image)
-    const gapFromTop = 64; // px from top edge
+    const gapFromRight = 24; // px from right edge
+    const gapFromTop = 80; // px from top edge
     const x = window.innerWidth - CHAT_W - gapFromRight;
     const y = gapFromTop;
     setChatPosition({ x: Math.max(8, x), y: Math.max(8, y) });
@@ -190,8 +189,8 @@ const ChatAssistant = () => {
         className="z-50 w-96 h-[600px] bg-ocean-800 border-2 border-cyan-500 rounded-2xl shadow-2xl flex flex-col overflow-hidden"
         style={{
           position: 'absolute',
-          bottom: undefined,
-          right: undefined,
+          top: 0,
+          left: 0,
         }}
       >
         {/* Add drag handle and Minimize button */}
