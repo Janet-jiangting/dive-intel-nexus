@@ -49,7 +49,9 @@ const marineLifeWishlist = [
 const formSchema = z.object({
   schedule: z.object({
     from: z.date({ required_error: "A start date is required." }),
-    to: z.date({ required_error: "An end date is required." }),
+    to: z.date().optional(),
+  }).refine((data) => !!data.to, {
+    message: "An end date is required.",
   }),
   budget: z.array(z.number()).default([1500]),
   diveActivities: z.array(z.string()).refine((value) => value.some((item) => item), {
