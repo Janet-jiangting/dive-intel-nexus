@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import Draggable from 'react-draggable';
 import { Button } from '@/components/ui/button';
@@ -43,21 +42,34 @@ const ChatAssistant = () => {
   useEffect(scrollToBottom, [messages]);
 
   useEffect(() => {
-    // Try to align the ChatAssistant's top with the h1 main title in the hero section
-    // Main title selector: .animate-fade-in (from the Hero section)
+    // Reference the main title
     const titleEl = document.querySelector('.animate-fade-in');
-    let x = window.innerWidth - CHAT_W - 40; // Chat width + right margin
+    let x = 0;
     let y = 120; // fallback Y
 
     if (titleEl) {
       const rect = titleEl.getBoundingClientRect();
+      // Snap chatbox just to the right of the main title (with visual gap)
+      // - Want some padding after title (e.g., 48px)
+      // - Limit so it doesn’t overflow screen
+      const visualGap = 48; // pixels of space between title and chat
+      x = rect.right + visualGap;
+      // If the calculated x + chat width is out of view, snap to reasonable right margin
+      if (x + CHAT_W > window.innerWidth - 32) {
+        x = window.innerWidth - CHAT_W - 32;
+      }
+      // Align vertically with the top of the title
       y = rect.top + window.scrollY;
+      // Prevent chat from going off top
+      y = Math.max(24, Math.min(y, window.innerHeight - 340));
     } else {
+      // fallback for no title detected, stick to right with decent top margin
+      x = window.innerWidth - CHAT_W - 32;
       y = 120;
     }
-    // Avoid placing off screen if viewport is too narrow/tall
-    x = Math.max(16, Math.min(x, window.innerWidth - 340));
-    y = Math.max(16, Math.min(y, window.innerHeight - 300));
+    // Minimum constraint for very small screens
+    x = Math.max(16, x);
+    y = Math.max(16, y);
     setDefaultPosition({ x, y });
   }, []);
 
@@ -283,4 +295,3 @@ const ChatAssistant = () => {
 };
 
 export default ChatAssistant;
-
