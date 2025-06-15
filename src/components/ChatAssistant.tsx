@@ -8,6 +8,7 @@ import { supabase } from '@/integrations/supabase/client';
 import ChatHeader from './ChatHeader';
 import { MessageBubble } from './MessageBubble';
 import SampleQuestions from './SampleQuestions';
+import OctopusAvatar from './OctopusAvatar';
 
 interface Message {
   id: string;
@@ -27,7 +28,10 @@ const ChatAssistant = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isMinimized, setIsMinimized] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const toggleMinimize = () => setIsMinimized((prev) => !prev);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -107,9 +111,23 @@ const ChatAssistant = () => {
     handleSendMessage(question);
   };
 
+  if (isMinimized) {
+    return (
+      <div className="fixed bottom-6 right-6 z-50">
+        <Button
+          onClick={toggleMinimize}
+          className="rounded-full w-20 h-20 bg-cyan-600 hover:bg-cyan-700 p-0 flex items-center justify-center shadow-2xl animate-float"
+          aria-label="Open chat"
+        >
+          <OctopusAvatar size={64} />
+        </Button>
+      </div>
+    );
+  }
+
   return (
     <div className="fixed bottom-6 right-6 w-96 h-[600px] bg-ocean-800 border-2 border-cyan-500 rounded-2xl shadow-2xl flex flex-col overflow-hidden z-50">
-      <ChatHeader />
+      <ChatHeader onMinimize={toggleMinimize} />
 
       {/* Messages Area */}
       <ScrollArea className="flex-1 p-4">
