@@ -15,6 +15,7 @@ import ManageData from "./pages/ManageData";
 import MyOcean from "./pages/MyOcean";
 import { MarineLifeDataProvider } from "./contexts/MarineLifeDataContext"; // Added import
 import ChatAssistant from "./components/ChatAssistant";
+import CustomizeTrip from "./pages/CustomizeTrip";
 
 const queryClient = new QueryClient();
 
@@ -33,6 +34,7 @@ const App = () => (
             <Route path="/community" element={<Layout><Community /></Layout>} />
             <Route path="/manage-data" element={<Layout><ManageData /></Layout>} />
             <Route path="/my-ocean" element={<Layout><MyOcean /></Layout>} />
+            <Route path="/customize-trip" element={<Layout><CustomizeTrip /></Layout>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           <ChatAssistant />

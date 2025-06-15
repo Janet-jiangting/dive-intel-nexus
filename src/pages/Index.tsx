@@ -1,12 +1,12 @@
+
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
-import { MapPin, Fish } from 'lucide-react'; // Removed Search, AlertTriangle as they are not used
+import { MapPin, Fish, Wand2 } from 'lucide-react';
 import FeaturedSites from '@/components/FeaturedSites';
 import MarineLifeGallery from '@/components/MarineLifeGallery';
 import DiveConditionsCard from '@/components/DiveConditionsCard';
 // import { Card, CardContent } from '@/components/ui/card'; // Not used directly
-import ChatAssistant from '@/components/ChatAssistant';
 
 const Index = () => {
   const handleButtonClick = (buttonName: string) => {
@@ -154,6 +154,26 @@ const Index = () => {
                   Learn More
                 </Button>
               </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="py-16 bg-ocean-900">
+        <div className="container mx-auto px-4 text-center">
+          <div className="relative inline-block group">
+            <div className="absolute -inset-1 bg-gradient-to-r from-cyan-400 to-emerald-600 rounded-lg blur opacity-75 group-hover:opacity-100 transition duration-1000 group-hover:duration-200 animate-tilt"></div>
+            <div className="relative bg-ocean-800 border border-ocean-700 rounded-xl p-8 md:p-12">
+              <h2 className="text-3xl font-bold text-white mb-4">Can't Decide? Let Us Help!</h2>
+              <p className="text-ocean-100 max-w-2xl mx-auto mb-8">
+                Use our AI-powered trip planner to customize your next underwater adventure. Tell us your preferences, and we'll craft the perfect itinerary for you.
+              </p>
+              <Button asChild size="lg" className="bg-gradient-to-r from-cyan-500 to-emerald-500 hover:from-cyan-600 hover:to-emerald-600 text-white shadow-lg transform hover:scale-105 transition-transform">
+                <Link to="/customize-trip">
+                  <Wand2 className="mr-2 h-5 w-5" />
+                  Customize Your Dive Trip
+                </Link>
+              </Button>
             </div>
           </div>
         </div>
