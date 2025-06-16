@@ -1,4 +1,5 @@
 
+
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
@@ -22,7 +23,11 @@ const Index = () => {
           muted
           loop
           playsInline
+          preload="auto"
           className="absolute inset-0 w-full h-full object-cover opacity-60 pointer-events-none"
+          onError={(e) => console.error('Video failed to load:', e)}
+          onLoadStart={() => console.log('Video loading started')}
+          onCanPlay={() => console.log('Video can play')}
         >
           <source src="https://ioyfxcceheflwshhaqhk.supabase.co/storage/v1/object/public/video/57_1750059558.mp4" type="video/mp4" />
           Your browser does not support the video tag.
