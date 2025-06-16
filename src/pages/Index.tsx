@@ -5,7 +5,6 @@ import { MapPin, Fish, Wand2 } from 'lucide-react';
 import FeaturedSites from '@/components/FeaturedSites';
 import MarineLifeGallery from '@/components/MarineLifeGallery';
 import DiveConditionsCard from '@/components/DiveConditionsCard';
-// import { Card, CardContent } from '@/components/ui/card'; // Not used directly
 
 const Index = () => {
   const handleButtonClick = (buttonName: string) => {
@@ -16,8 +15,20 @@ const Index = () => {
     <div className="flex flex-col w-full">
       {/* Hero Section */}
       <section className="relative h-auto min-h-[580px] bg-ocean-900 overflow-hidden py-10 md:py-0 flex items-center">
-        <div className="absolute inset-0 bg-hero-pattern bg-cover bg-center opacity-50 pointer-events-none" />
-        <div className="absolute inset-0 bg-gradient-to-r from-ocean-900/90 to-ocean-900/50 pointer-events-none" />
+        {/* Background Video */}
+        <video
+          autoPlay
+          muted
+          loop
+          playsInline
+          className="absolute inset-0 w-full h-full object-cover opacity-60 pointer-events-none"
+        >
+          <source src="https://ioyfxcceheflwshhaqhk.supabase.co/storage/v1/object/public/video/background-video.mp4" type="video/mp4" />
+          Your browser does not support the video tag.
+        </video>
+        
+        {/* Overlay for better text readability */}
+        <div className="absolute inset-0 bg-gradient-to-r from-ocean-900/80 to-ocean-900/40 pointer-events-none" />
 
         <div className="relative container mx-auto flex flex-col md:flex-row justify-between items-center h-full px-4 z-10 gap-12 md:gap-8">
           {/* Left: Title, Subtitle, CTA */}
