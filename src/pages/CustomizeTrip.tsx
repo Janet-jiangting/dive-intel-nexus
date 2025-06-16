@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 
@@ -48,11 +49,15 @@ const CustomizeTrip = () => {
     setLoading(true);
 
     try {
-      const res = await fetch("/functions/v1/generate-trip-plan", {
+      const res = await fetch("https://ioyfxcceheflwshhaqhk.supabase.co/functions/v1/generate-trip-plan", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlveWZ4Y2NlaGVmbHdzaGhhcWhrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgxNzY2MDksImV4cCI6MjA2Mzc1MjYwOX0.me3szuBGo5DUtXcQZWCib5G1GNl4DhhGiwNUSoyVTKM`
+        },
         body: JSON.stringify({ trip: form }),
       });
+      
       const data = await res.json();
       if (res.ok && data.itinerary) {
         setAiPlan(data.itinerary);
