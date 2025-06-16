@@ -29,7 +29,7 @@ const Index = () => {
           onLoadStart={() => console.log('Video loading started')}
           onCanPlay={() => console.log('Video can play')}
         >
-          <source src="https://ioyfxcceheflwshhaqhk.supabase.co/storage/v1/object/public/video/57_1750059558.mp4" type="video/mp4" />
+          <source src="https://ioyfxcceheflwshhaqhk.supabase.co/storage/v1/object/public/video/60_1750060561.mp4" type="video/mp4" />
           Your browser does not support the video tag.
         </video>
         
