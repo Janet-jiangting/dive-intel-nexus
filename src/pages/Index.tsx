@@ -1,15 +1,14 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
-import { MapPin, Fish, Wand2 } from 'lucide-react';
+import { MapPin, Fish, Wand2, RefreshCw } from 'lucide-react';
 import FeaturedSites from '@/components/FeaturedSites';
 import MarineLifeGallery from '@/components/MarineLifeGallery';
 import DiveConditionsCard from '@/components/DiveConditionsCard';
 import { useVideoPlaylist } from '@/hooks/useVideoPlaylist';
 
 const Index = () => {
-  const { currentVideo, nextVideo, loading, error, totalVideos, currentVideoIndex } = useVideoPlaylist();
+  const { currentVideo, nextVideo, refreshPlaylist, loading, error, totalVideos, currentVideoIndex } = useVideoPlaylist();
 
   const handleButtonClick = (buttonName: string) => {
     console.log(`Button clicked: ${buttonName}`);
@@ -20,22 +19,34 @@ const Index = () => {
     nextVideo();
   };
 
+  const handleVideoError = (e: React.SyntheticEvent<HTMLVideoElement, Event>) => {
+    console.error('Video failed to load:', e);
+    console.log('Attempting to switch to next video...');
+    nextVideo();
+  };
+
+  const handleRefreshPlaylist = () => {
+    console.log('Refreshing video playlist...');
+    refreshPlaylist();
+  };
+
   return (
     <div className="flex flex-col w-full">
       {/* Hero Section */}
       <section className="relative h-auto min-h-[580px] bg-ocean-900 overflow-hidden py-10 md:py-0 flex items-center">
         {/* Background Video */}
-        {currentVideo && (
+        {currentVideo && !loading && (
           <video
             key={currentVideo} // Force re-render when video changes
             autoPlay
             muted
+            loop={totalVideos === 1} // Only loop if there's only one video
             playsInline
             preload="auto"
             className="absolute inset-0 w-full h-full object-cover opacity-60 pointer-events-none"
-            onError={(e) => console.error('Video failed to load:', e)}
-            onLoadStart={() => console.log('Video loading started')}
-            onCanPlay={() => console.log('Video can play')}
+            onError={handleVideoError}
+            onLoadStart={() => console.log('Video loading started:', currentVideo)}
+            onCanPlay={() => console.log('Video can play:', currentVideo)}
             onEnded={handleVideoEnded}
           >
             <source src={currentVideo} type="video/mp4" />
@@ -43,23 +54,45 @@ const Index = () => {
           </video>
         )}
 
-        {/* Loading/Error States */}
+        {/* Loading State */}
         {loading && (
           <div className="absolute inset-0 bg-ocean-900 flex items-center justify-center">
-            <div className="text-white text-lg">Loading videos...</div>
+            <div className="text-white text-lg flex items-center gap-2">
+              <RefreshCw className="w-5 h-5 animate-spin" />
+              Loading videos...
+            </div>
           </div>
         )}
 
+        {/* Error State */}
         {error && (
-          <div className="absolute inset-0 bg-ocean-900 flex items-center justify-center">
-            <div className="text-red-400 text-lg">Error loading videos: {error}</div>
+          <div className="absolute inset-0 bg-ocean-900 flex flex-col items-center justify-center gap-4">
+            <div className="text-red-400 text-lg text-center max-w-md">
+              Error loading videos: {error}
+            </div>
+            <Button 
+              onClick={handleRefreshPlaylist}
+              variant="outline"
+              className="text-white border-white hover:bg-white hover:text-ocean-900"
+            >
+              <RefreshCw className="w-4 h-4 mr-2" />
+              Retry Loading Videos
+            </Button>
           </div>
         )}
 
-        {/* Video Info Debug (remove in production) */}
+        {/* Video Info Debug */}
         {currentVideo && totalVideos > 0 && (
-          <div className="absolute top-4 right-4 bg-black/50 text-white px-3 py-1 rounded text-sm z-20">
+          <div className="absolute top-4 right-4 bg-black/50 text-white px-3 py-1 rounded text-sm z-20 flex items-center gap-2">
             Video {currentVideoIndex + 1} of {totalVideos}
+            <Button
+              onClick={handleRefreshPlaylist}
+              size="sm"
+              variant="ghost"
+              className="h-6 w-6 p-0 hover:bg-white/20"
+            >
+              <RefreshCw className="w-3 h-3" />
+            </Button>
           </div>
         )}
         
@@ -127,6 +160,7 @@ const Index = () => {
           </div>
         </div>
 
+        {/* Wave SVG */}
         <div className="absolute bottom-0 left-0 right-0 pointer-events-none">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320" className="w-full h-auto">
             <path fill="#0c4a6e" fillOpacity="1" d="M0,288L48,272C96,256,192,224,288,229.3C384,235,480,277,576,277.3C672,277,768,235,864,224C960,213,1056,235,1152,229.3C1248,224,1344,192,1392,176L1440,160L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>

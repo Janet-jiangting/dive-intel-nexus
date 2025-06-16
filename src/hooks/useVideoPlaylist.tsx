@@ -11,6 +11,8 @@ export const useVideoPlaylist = () => {
   const fetchVideos = useCallback(async () => {
     try {
       setLoading(true);
+      console.log('Fetching videos from Supabase storage...');
+      
       const { data, error } = await supabase.storage
         .from('video')
         .list('', {
@@ -24,19 +26,39 @@ export const useVideoPlaylist = () => {
         return;
       }
 
+      console.log('Raw storage data:', data);
+
       if (data) {
-        // Filter for video files and create full URLs
+        // Filter for video files with more flexible extensions and include files without extensions
         const videoFiles = data
-          .filter(file => file.name.match(/\.(mp4|webm|ogg)$/i))
-          .map(file => `https://ioyfxcceheflwshhaqhk.supabase.co/storage/v1/object/public/video/${file.name}`);
+          .filter(file => {
+            // Check if it's a file (not a folder)
+            if (!file.name || file.name.endsWith('/')) return false;
+            
+            // Accept common video formats or files without extensions (assuming they're videos)
+            const videoExtensions = /\.(mp4|webm|ogg|avi|mov|mkv|m4v)$/i;
+            const hasNoExtension = !file.name.includes('.');
+            
+            return videoExtensions.test(file.name) || hasNoExtension;
+          })
+          .map(file => {
+            const publicUrl = `https://ioyfxcceheflwshhaqhk.supabase.co/storage/v1/object/public/video/${file.name}`;
+            console.log('Adding video:', publicUrl);
+            return publicUrl;
+          });
         
-        console.log('Found videos:', videoFiles);
+        console.log('Filtered video files:', videoFiles);
         setVideos(videoFiles);
         setError(null);
+        
+        if (videoFiles.length === 0) {
+          console.warn('No video files found in the bucket. Make sure your videos have proper extensions (.mp4, .webm, .ogg, etc.) or upload them directly.');
+          setError('No video files found in the storage bucket');
+        }
       }
     } catch (err) {
       console.error('Error in fetchVideos:', err);
-      setError(err instanceof Error ? err.message : 'Unknown error');
+      setError(err instanceof Error ? err.message : 'Unknown error occurred while fetching videos');
     } finally {
       setLoading(false);
     }
@@ -48,9 +70,16 @@ export const useVideoPlaylist = () => {
 
   const nextVideo = useCallback(() => {
     if (videos.length > 0) {
-      setCurrentVideoIndex((prevIndex) => (prevIndex + 1) % videos.length);
+      const nextIndex = (currentVideoIndex + 1) % videos.length;
+      console.log(`Switching to next video: ${nextIndex + 1} of ${videos.length}`);
+      setCurrentVideoIndex(nextIndex);
     }
-  }, [videos.length]);
+  }, [videos.length, currentVideoIndex]);
+
+  const refreshPlaylist = useCallback(() => {
+    console.log('Refreshing video playlist...');
+    fetchVideos();
+  }, [fetchVideos]);
 
   const currentVideo = videos.length > 0 ? videos[currentVideoIndex] : null;
 
@@ -59,6 +88,7 @@ export const useVideoPlaylist = () => {
     currentVideo,
     currentVideoIndex,
     nextVideo,
+    refreshPlaylist,
     loading,
     error,
     totalVideos: videos.length
