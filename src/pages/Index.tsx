@@ -1,5 +1,4 @@
 
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
@@ -7,10 +6,18 @@ import { MapPin, Fish, Wand2 } from 'lucide-react';
 import FeaturedSites from '@/components/FeaturedSites';
 import MarineLifeGallery from '@/components/MarineLifeGallery';
 import DiveConditionsCard from '@/components/DiveConditionsCard';
+import { useVideoPlaylist } from '@/hooks/useVideoPlaylist';
 
 const Index = () => {
+  const { currentVideo, nextVideo, loading, error, totalVideos, currentVideoIndex } = useVideoPlaylist();
+
   const handleButtonClick = (buttonName: string) => {
     console.log(`Button clicked: ${buttonName}`);
+  };
+
+  const handleVideoEnded = () => {
+    console.log('Video ended, switching to next video');
+    nextVideo();
   };
 
   return (
@@ -18,20 +25,43 @@ const Index = () => {
       {/* Hero Section */}
       <section className="relative h-auto min-h-[580px] bg-ocean-900 overflow-hidden py-10 md:py-0 flex items-center">
         {/* Background Video */}
-        <video
-          autoPlay
-          muted
-          loop
-          playsInline
-          preload="auto"
-          className="absolute inset-0 w-full h-full object-cover opacity-60 pointer-events-none"
-          onError={(e) => console.error('Video failed to load:', e)}
-          onLoadStart={() => console.log('Video loading started')}
-          onCanPlay={() => console.log('Video can play')}
-        >
-          <source src="https://ioyfxcceheflwshhaqhk.supabase.co/storage/v1/object/public/video/60_1750060561.mp4" type="video/mp4" />
-          Your browser does not support the video tag.
-        </video>
+        {currentVideo && (
+          <video
+            key={currentVideo} // Force re-render when video changes
+            autoPlay
+            muted
+            playsInline
+            preload="auto"
+            className="absolute inset-0 w-full h-full object-cover opacity-60 pointer-events-none"
+            onError={(e) => console.error('Video failed to load:', e)}
+            onLoadStart={() => console.log('Video loading started')}
+            onCanPlay={() => console.log('Video can play')}
+            onEnded={handleVideoEnded}
+          >
+            <source src={currentVideo} type="video/mp4" />
+            Your browser does not support the video tag.
+          </video>
+        )}
+
+        {/* Loading/Error States */}
+        {loading && (
+          <div className="absolute inset-0 bg-ocean-900 flex items-center justify-center">
+            <div className="text-white text-lg">Loading videos...</div>
+          </div>
+        )}
+
+        {error && (
+          <div className="absolute inset-0 bg-ocean-900 flex items-center justify-center">
+            <div className="text-red-400 text-lg">Error loading videos: {error}</div>
+          </div>
+        )}
+
+        {/* Video Info Debug (remove in production) */}
+        {currentVideo && totalVideos > 0 && (
+          <div className="absolute top-4 right-4 bg-black/50 text-white px-3 py-1 rounded text-sm z-20">
+            Video {currentVideoIndex + 1} of {totalVideos}
+          </div>
+        )}
         
         {/* Overlay for better text readability */}
         <div className="absolute inset-0 bg-gradient-to-r from-ocean-900/80 to-ocean-900/40 pointer-events-none" />
