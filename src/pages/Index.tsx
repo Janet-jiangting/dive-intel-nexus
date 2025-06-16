@@ -6,9 +6,11 @@ import FeaturedSites from '@/components/FeaturedSites';
 import MarineLifeGallery from '@/components/MarineLifeGallery';
 import DiveConditionsCard from '@/components/DiveConditionsCard';
 import { useVideoPlaylist } from '@/hooks/useVideoPlaylist';
+import { useToast } from '@/hooks/use-toast';
 
 const Index = () => {
   const { currentVideo, nextVideo, refreshPlaylist, loading, error, totalVideos, currentVideoIndex } = useVideoPlaylist();
+  const { toast } = useToast();
 
   const handleButtonClick = (buttonName: string) => {
     console.log(`Button clicked: ${buttonName}`);
@@ -28,6 +30,10 @@ const Index = () => {
   const handleRefreshPlaylist = () => {
     console.log('Refreshing video playlist...');
     refreshPlaylist();
+    toast({
+      title: "Playlist Refreshed",
+      description: "Video playlist has been updated with latest files from storage.",
+    });
   };
 
   return (
@@ -50,6 +56,8 @@ const Index = () => {
             onEnded={handleVideoEnded}
           >
             <source src={currentVideo} type="video/mp4" />
+            <source src={currentVideo} type="video/mov" />
+            <source src={currentVideo} type="video/webm" />
             Your browser does not support the video tag.
           </video>
         )}
@@ -67,8 +75,8 @@ const Index = () => {
         {/* Error State */}
         {error && (
           <div className="absolute inset-0 bg-ocean-900 flex flex-col items-center justify-center gap-4">
-            <div className="text-red-400 text-lg text-center max-w-md">
-              Error loading videos: {error}
+            <div className="text-red-400 text-lg text-center max-w-md px-4">
+              {error}
             </div>
             <Button 
               onClick={handleRefreshPlaylist}
@@ -90,6 +98,7 @@ const Index = () => {
               size="sm"
               variant="ghost"
               className="h-6 w-6 p-0 hover:bg-white/20"
+              title="Refresh video playlist"
             >
               <RefreshCw className="w-3 h-3" />
             </Button>
