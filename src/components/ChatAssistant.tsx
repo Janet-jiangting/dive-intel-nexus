@@ -9,6 +9,7 @@ import ChatHeader from './ChatHeader';
 import { MessageBubble } from './MessageBubble';
 import SampleQuestions from './SampleQuestions';
 import OctopusAvatar from './OctopusAvatar';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface Message {
   id: string;
@@ -30,6 +31,7 @@ const ChatAssistant = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const isMobile = useIsMobile();
 
   const toggleMinimize = () => setIsMinimized((prev) => !prev);
 
@@ -113,18 +115,18 @@ const ChatAssistant = () => {
 
   if (isMinimized) {
     return (
-      <div className="fixed bottom-6 right-6 z-50">
+      <div className={`fixed z-50 ${isMobile ? 'bottom-4 right-4' : 'bottom-6 right-6'}`}>
         <div className="relative animate-float">
-          <div className="absolute bottom-full right-0 mb-4 w-52 bg-white p-3 rounded-lg shadow-lg text-center text-sm text-ocean-800 -mr-2">
+          <div className={`absolute bottom-full right-0 mb-4 bg-white p-3 rounded-lg shadow-lg text-center text-sm text-ocean-800 -mr-2 ${isMobile ? 'w-48' : 'w-52'}`}>
             <p className="font-semibold">Ask Octopus Ollie anything about the ocean！ 🌊</p>
             <div className="absolute -bottom-2 right-8 w-4 h-4 bg-white transform rotate-45 -z-10"></div>
           </div>
           <Button
             onClick={toggleMinimize}
-            className="rounded-full w-20 h-20 bg-cyan-600 hover:bg-cyan-700 p-0 flex items-center justify-center shadow-2xl"
+            className={`rounded-full bg-cyan-600 hover:bg-cyan-700 p-0 flex items-center justify-center shadow-2xl ${isMobile ? 'w-16 h-16' : 'w-20 h-20'}`}
             aria-label="Open chat"
           >
-            <OctopusAvatar size={64} />
+            <OctopusAvatar size={isMobile ? 48 : 64} />
           </Button>
         </div>
       </div>
@@ -132,7 +134,11 @@ const ChatAssistant = () => {
   }
 
   return (
-    <div className="fixed bottom-6 right-6 w-96 h-[600px] bg-ocean-800 border-2 border-cyan-500 rounded-2xl shadow-2xl flex flex-col overflow-hidden z-50">
+    <div className={`fixed bg-ocean-800 border-2 border-cyan-500 rounded-2xl shadow-2xl flex flex-col overflow-hidden z-50 ${
+      isMobile 
+        ? 'inset-4 max-w-none max-h-none' // Full screen on mobile with small margins
+        : 'bottom-6 right-6 w-96 h-[600px]' // Fixed position on desktop
+    }`}>
       <ChatHeader onMinimize={toggleMinimize} />
 
       {/* Messages Area */}
