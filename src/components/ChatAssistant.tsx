@@ -136,7 +136,7 @@ const ChatAssistant = () => {
   return (
     <div className={`fixed bg-ocean-800 border-2 border-cyan-500 rounded-2xl shadow-2xl flex flex-col overflow-hidden z-50 ${
       isMobile 
-        ? 'inset-4 max-w-none max-h-none' // Full screen on mobile with small margins
+        ? 'bottom-4 left-1/2 transform -translate-x-1/2 w-80 h-96 max-w-[calc(100vw-2rem)]' // Centered at bottom, smaller size
         : 'bottom-6 right-6 w-96 h-[600px]' // Fixed position on desktop
     }`}>
       <ChatHeader onMinimize={toggleMinimize} />
