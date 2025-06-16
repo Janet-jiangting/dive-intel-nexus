@@ -88,9 +88,6 @@ const Index = () => {
             </Button>
           </div>
         )}
-        
-        {/* Overlay for better text readability */}
-        <div className="absolute inset-0 bg-gradient-to-r from-ocean-900/80 to-ocean-900/40 pointer-events-none" />
 
         {/* Video Info Debug */}
         {currentVideo && totalVideos > 0 && (
@@ -108,6 +105,70 @@ const Index = () => {
           </div>
         )}
         
+        {/* Overlay for better text readability */}
+        <div className="absolute inset-0 bg-gradient-to-r from-ocean-900/80 to-ocean-900/40 pointer-events-none" />
+
+        <div className="relative container mx-auto flex flex-col md:flex-row justify-between items-center h-full px-4 z-10 gap-12 md:gap-8">
+          {/* Left: Title, Subtitle, CTA */}
+          <div className="flex-1 max-w-3xl md:pr-8">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4 animate-fade-in leading-tight">
+              Explore the Depths of Our{" "}
+              <span className="text-ocean-300">Underwater World</span>
+            </h1>
+            <p className="text-xl text-ocean-100 mb-8 max-w-2xl">
+              Discover incredible dive sites, learn about marine species, and connect with the global diving community through our comprehensive platform.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 relative z-20">
+              <Button 
+                asChild 
+                size="lg" 
+                className="bg-seagreen-600 hover:bg-seagreen-700 text-white relative z-30 cursor-pointer"
+                onClick={() => handleButtonClick('Find Dive Sites')}
+              >
+                <Link to="/dive-sites" className="flex items-center justify-center">
+                  <MapPin className="mr-2 h-5 w-5" />
+                  Find Dive Sites
+                </Link>
+              </Button>
+              <Button 
+                asChild 
+                size="lg" 
+                variant="outline" 
+                className="bg-ocean-800/60 text-white border-ocean-600 hover:bg-ocean-700 relative z-30 cursor-pointer"
+                onClick={() => handleButtonClick('Explore Marine Life')}
+              >
+                <Link to="/marine-life" className="flex items-center justify-center">
+                  <Fish className="mr-2 h-5 w-5" />
+                  Explore Marine Life
+                </Link>
+              </Button>
+            </div>
+          </div>
+
+          {/* Right: Suggestion Box */}
+          <div className="w-full md:w-[390px] flex-shrink-0">
+            <div className="bg-blue-800 bg-opacity-90 rounded-xl shadow-lg p-8 border border-cyan-600 ring-1 ring-cyan-600/25 relative"
+                 style={{ boxShadow: '0px 0px 25px 0px #22d3ee33' }}>
+              <h2 className="text-2xl font-bold text-white mb-3 text-center">
+                Let AI help you create a perfect dive trip!
+              </h2>
+              <p className="text-base text-blue-100 mb-6 text-center">
+                Use our AI-powered trip planner to customize your next underwater adventure. Tell us your preferences, and we'll craft the perfect itinerary for you.
+              </p>
+              <Button
+                asChild
+                size="lg"
+                className="w-full bg-gradient-to-r from-cyan-500 to-emerald-500 hover:from-cyan-600 hover:to-emerald-600 text-white font-semibold shadow-md"
+              >
+                <Link to="/customize-trip" className="flex items-center justify-center">
+                  <Wand2 className="mr-2 h-5 w-5" />
+                  Customize Your Dive Trip
+                </Link>
+              </Button>
+            </div>
+          </div>
+        </div>
+
         {/* Wave SVG */}
         <div className="absolute bottom-0 left-0 right-0 pointer-events-none">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320" className="w-full h-auto">
