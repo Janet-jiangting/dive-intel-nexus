@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
@@ -23,7 +24,7 @@ const Index = () => {
           playsInline
           className="absolute inset-0 w-full h-full object-cover opacity-60 pointer-events-none"
         >
-          <source src="https://ioyfxcceheflwshhaqhk.supabase.co/storage/v1/object/public/video/background-video.mp4" type="video/mp4" />
+          <source src="https://ioyfxcceheflwshhaqhk.supabase.co/storage/v1/object/public/video/57_1750059558.mp4" type="video/mp4" />
           Your browser does not support the video tag.
         </video>
         
