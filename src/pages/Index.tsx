@@ -88,26 +88,11 @@ const Index = () => {
             </Button>
           </div>
         )}
-
-        {/* Video Info Debug */}
-        {currentVideo && totalVideos > 0 && (
-          <div className="absolute top-4 right-4 bg-black/50 text-white px-3 py-1 rounded text-sm z-20 flex items-center gap-2">
-            Video {currentVideoIndex + 1} of {totalVideos}
-            <Button
-              onClick={handleRefreshPlaylist}
-              size="sm"
-              variant="ghost"
-              className="h-6 w-6 p-0 hover:bg-white/20"
-              title="Refresh video playlist"
-            >
-              <RefreshCw className="w-3 h-3" />
-            </Button>
-          </div>
-        )}
         
         {/* Overlay for better text readability */}
         <div className="absolute inset-0 bg-gradient-to-r from-ocean-900/80 to-ocean-900/40 pointer-events-none" />
 
+        {/* ... keep existing code (hero content and all sections below) */}
         <div className="relative container mx-auto flex flex-col md:flex-row justify-between items-center h-full px-4 z-10 gap-12 md:gap-8">
           {/* Left: Title, Subtitle, CTA */}
           <div className="flex-1 max-w-3xl md:pr-8">
